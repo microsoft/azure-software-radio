@@ -1,8 +1,8 @@
-# Welcome To Azure software radio development VM 
+# Welcome To Azure software radio developer VM 
 
-The Azure software radio development VM is the start of major investments by the Azure Spectrum Team to facilitate software defined radio development on Azure. This will accelerate development of SDR applications and harness the power of Azure to expand potential oppurtunities in this industry.
+The Azure software radio developer VM is the start of major investments by the Azure Spectrum Team to facilitate software defined radio development on Azure. This will accelerate development of SDR applications and harness the power of Azure to expand potential oppurtunities in this industry.
 
-To launch our first set of offerings we have built a development vm on Ubuntu 20.04 which is ready to go with the most common tools for developing SDR. These include
+To launch our first set of offerings we have built a developer vm on Ubuntu 20.04 which is ready to go with the most common tools for developing SDR. These include
 
 1. GNU Radio 
 2. Fosphor
@@ -19,18 +19,18 @@ You should take additional steps to secure the public ip address to only allow c
 If you have any feedback simply log an issue on this github repo or get in touch with the team via email at azuresoftwareradio@microsoft.com
 
 
-## Signing up for the Private Preview of the Azure software radio development VM
+## Signing up for the Private Preview of the Azure software radio developer VM
 
-Currently the Azure software radio development VM is in Private Preview and it requires for our team to authorize you to deploy the service. 
+Currently the Azure software radio developer VM is in Private Preview and it requires for our team to authorize you to deploy the service. 
 
-To sign up for the Development VM click [Here](https://forms.office.com/r/sbZqBUVUE0) 
+To sign up for the Developer VM click [Here](https://forms.office.com/r/sbZqBUVUE0) 
 
 Fill in the required details and our team will ensure you get authorized within 24 hours for the service.
 
-Follow the deployment instructions to validate access to the development vm and begin deployment
+Follow the deployment instructions to validate access to the developer vm and begin deployment
 
 
-## Validating Access to the Development VM
+## Validating Access to the Developer VM
 
 1. Open your browser and navigate to [AzurePortal](https://portal.azure.com) and sign-in 
 2. In the search bar type "MarketPlace" and Click MarketPlace 
@@ -46,7 +46,7 @@ Follow the deployment instructions to validate access to the development vm and 
    
    ![SDRDevVM](./../images/azuresoftwareradiodevvmoffer.jpg)
 
-   **if you dont see the offering listed and it is more than 48 hours since you filled in the form contact the Azure software radio development VM team via email azuresoftwareradio@microsoft.com**
+   **if you dont see the offering listed and it is more than 48 hours since you filled in the form contact the Azure software radio developer VM team via email azuresoftwareradio@microsoft.com**
 
 ## Validate Qouta Requirements
 
@@ -68,14 +68,14 @@ Follow the deployment instructions to validate access to the development vm and 
 
 5. if you do not have enough qouta, click the pencil (edit) icon and request more cores and ensure it is successful before attempting to deploy the development vm.
 
-## Deployment of the Azure software radio development VM
+## Deployment of the Azure software radio developer VM
 
-1. Navigate back to the Private Product Offering outlined in the *Validating Access to the Development VM* section
+1. Navigate back to the Private Product Offering outlined in the *Validating Access to the Developer VM* section
 2. Click Create to begin the VM creation
    
    ![PrivateProductVMCreation](./../images/vmcreation.jpg)
 
-3. On the Create VM Page 1, select the subscription which has been authorized for development vm and allow for a dynamic resource group to be created or select an existing one. Enter a Name for the virtual machine, select the same region to which you have applied and have available qouta, leave the remaining settings as is except for use Password or SSH Key. Select the appropraite one for your deployment and Click Next: Disks
+3. On the Create VM Page 1, select the subscription which has been authorized for developer vm and allow for a dynamic resource group to be created or select an existing one. Enter a Name for the virtual machine, select the same region to which you have applied and have available qouta, leave the remaining settings as is except for use Password or SSH Key. Select the appropraite one for your deployment and Click Next: Disks
    
    ![VMCreateP1](./../images/vmcreate1.jpg)
 
@@ -92,7 +92,7 @@ Follow the deployment instructions to validate access to the development vm and 
    
    ![VMCreateP3](./../images/vmcreate3.jpg)
 
-## Connect to the Development VM 
+## Connect to the Developer VM 
 
 1. On the VM resource page record the Public IP Address 
    

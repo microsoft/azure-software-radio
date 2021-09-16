@@ -4,7 +4,7 @@ Here we are sharing two assets we have developed todate click on either link to 
 
 
 1. GNURadio - Azure Out of Tree Module
-2. Azure software radio Development Virtual Machine [Here](./pages/devvm.md)
+2. Azure software radio Developer Virtual Machine [Here](./pages/devvm.md)
 
 
 ## Contributing
