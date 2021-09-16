@@ -35,16 +35,16 @@ Follow the deployment instructions to validate access to the development vm and 
 1. Open your browser and navigate to [AzurePortal](https://portal.azure.com) and sign-in 
 2. In the search bar type "MarketPlace" and Click MarketPlace 
    
-   ![Marketplace](./images/marketplace.jpg)
+   ![Marketplace](./../images/marketplace.jpg)
 
 3. Click Close and Click Private Products
    
-   ![PrivateProducts](./images/privateproducts.jpg)
+   ![PrivateProducts](./../images/privateproducts.jpg)
 
 4. If access has been approved the Marketplace offer will be listed as shown, you may have to use the search bar to find Azure software radio development VM if you have a large amount of private product offerings associated to your subscription. 
    **Do not select the offer marked preview**
    
-   ![SDRDevVM](./images/azuresoftwareradiodevvmoffer.jpg)
+   ![SDRDevVM](./../images/azuresoftwareradiodevvmoffer.jpg)
 
    **if you dont see the offering listed and it is more than 48 hours since you filled in the form contact the Azure software radio development VM team via email azuresoftwareradio@microsoft.com**
 
@@ -52,11 +52,11 @@ Follow the deployment instructions to validate access to the development vm and 
 
 1. From the Azure Portal Click Subscriptions
 
-   ![Subscriptions](./images/subscriptions.jpg)
+   ![Subscriptions](./../images/subscriptions.jpg)
 
 2. Locate and Click your subscription
 
-   ![SelectSubscription](../../images/selectsubscription.jpg)
+   ![SelectSubscription](./../images/selectsubscription.jpg)
 
 3. Click Usage & Qoutas
 
@@ -64,7 +64,7 @@ Follow the deployment instructions to validate access to the development vm and 
 
 4. Type NV in the search bar and verify as shown that you have sufficient qouta (at least 12 free cores) for the region you want to deploy into.
 
-   ![VerifyNVQouta](./images/verifyqouta.jpg)
+   ![VerifyNVQouta](./../images/verifyqouta.jpg)
 
 5. if you do not have enough qouta, click the pencil (edit) icon and request more cores and ensure it is successful before attempting to deploy the development vm.
 
@@ -73,29 +73,29 @@ Follow the deployment instructions to validate access to the development vm and 
 1. Navigate back to the Private Product Offering outlined in the *Validating Access to the Development VM* section
 2. Click Create to begin the VM creation
    
-   ![PrivateProductVMCreation](images/vmcreation.jpg)
+   ![PrivateProductVMCreation](./../images/vmcreation.jpg)
 
 3. On the Create VM Page 1, select the subscription which has been authorized for development vm and allow for a dynamic resource group to be created or select an existing one. Enter a Name for the virtual machine, select the same region to which you have applied and have available qouta, leave the remaining settings as is except for use Password or SSH Key. Select the appropraite one for your deployment and Click Next: Disks
    
-   ![VMCreateP1](images/vmcreate1.jpg)
+   ![VMCreateP1](./../images/vmcreate1.jpg)
 
 4. Click Next: Networking and Review Settings nothing needs to be changed
 5. Click Next: Management and Review Settings 
 6. Click the checkbox for System Managed Identity and Click Next: Advanced
    
-   ![VMCreateP2](images/vmcreate2.jpg)
+   ![VMCreateP2](./../images/vmcreate2.jpg)
 
     **The System Managed Identity can be assigned permissions to Azure Resources Post Deployment to allow the Azure Client and AzCopy to login to directly to Azure and access resources it has been authorized to**
     
 7. Click Review+Create and then Click Create
 8. Confirm the deployment is successful as shown and click Go To Resource
    
-   ![VMCreateP3](images/vmcreate3.jpg)
+   ![VMCreateP3](./../images/vmcreate3.jpg)
 
 ## Connect to the Development VM 
 
 1. On the VM resource page record the Public IP Address 
    
-   ![ObtainPublicIP](images/rdptovm.jpg)
+   ![ObtainPublicIP](./../images/rdptovm.jpg)
 
 2. Start your favourite RDP client enter the IP Address and logon with the credentials set during deployment
