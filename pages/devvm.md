@@ -56,11 +56,11 @@ Follow the deployment instructions to validate access to the development vm and 
 
 2. Locate and Click your subscription
 
-   ![SelectSubscription](./images/selectsubscription.jpg)
+   ![SelectSubscription](../../images/selectsubscription.jpg)
 
 3. Click Usage & Qoutas
 
-   ![Usage&Quotas](./images/usageqouta.jpg)
+   ![Usage&Quotas](./../images/usageqouta.jpg)
 
 4. Type NV in the search bar and verify as shown that you have sufficient qouta (at least 12 free cores) for the region you want to deploy into.
 
