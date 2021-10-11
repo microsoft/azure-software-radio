@@ -11,7 +11,10 @@ on:
       - main
 
 jobs:
-    build-and-publish:
+  scripts:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "This step runs in the default shell
+      - uses: actions/checkout@master
+      - run: echo "This step runs in the default shell"
+      - run: printenv
+        shell: bash
