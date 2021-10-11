@@ -9,20 +9,18 @@ on:
   pull_request:
     branches: 
       - main
+           
 jobs:
   scripts:
     runs-on: ubuntu-latest
     container:
       image: rfsxbuild.azurecr.io/gnuradiopipeline:3.9.2.0-2
       credentials:
-          username: ${{  secrets.ACR_PRINCIPAL_ID }}
-          password: ${{  secrets.ACR_PRINCIPAL_PWD }}
-          
-#jobs:
-#  scripts:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@master
-#      - run: echo "This step runs in the default shell"
-#      - run: printenv
-#        shell: bash
+        username: ${{  secrets.ACR_PRINCIPAL_ID }}
+        password: ${{  secrets.ACR_PRINCIPAL_PWD }}
+           
+    steps:
+      - uses: actions/checkout@master
+      - run: echo "This step runs in the default shell"
+      - run: printenv
+        shell: bash
