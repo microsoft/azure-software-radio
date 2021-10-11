@@ -21,9 +21,7 @@ jobs:
            
     steps:
       - uses: actions/checkout@master
-      - run: echo "This step runs in the default shell"
-        working-directory: gr-azure-software-radio
-      - run: pip install -r python/requirements.txt
+      - run: cd gr-azure-software-radio; pip install -r python/requirements.txt
       - run: mkdir build; cd build; cmake ..; cmake --build . -j --config Release
       - run: sudo make install -j
       - run: export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }}; ctest -V -T test
