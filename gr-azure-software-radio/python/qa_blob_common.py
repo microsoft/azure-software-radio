@@ -7,7 +7,7 @@
 #
 
 from gnuradio import gr_unittest
-import blob_common
+from .blob_common import get_blob_service_client,shutdown_blob_service_client
 import os
 
 
@@ -28,7 +28,7 @@ class qa_blob_common(gr_unittest.TestCase):
         '''
 
         blob_connection_string = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
-        blob_service_client = blob_common.get_blob_service_client(
+        blob_service_client = get_blob_service_client(
             authentication_method="connection_string",
             connection_str=blob_connection_string
         )
@@ -49,7 +49,7 @@ class qa_blob_common(gr_unittest.TestCase):
         url = os.getenv('AZURE_STORAGE_URL')
         sas = os.getenv('AZURE_STORAGE_SAS')
 
-        blob_service_client = blob_common.get_blob_service_client(
+        blob_service_client = get_blob_service_client(
             authentication_method="url_with_sas",
             url=url + '/' + sas
         )
@@ -69,7 +69,7 @@ class qa_blob_common(gr_unittest.TestCase):
         '''
 
         url = os.getenv('AZURE_STORAGE_URL')
-        blob_service_client = blob_common.get_blob_service_client(url=url)
+        blob_service_client = get_blob_service_client(url=url)
 
         svc_props = blob_service_client.get_service_properties()
 
