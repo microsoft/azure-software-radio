@@ -22,5 +22,5 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - run: echo "This step runs in the default shell"
-      - run: printenv
+      - run: ls -lrta
         shell: bash
