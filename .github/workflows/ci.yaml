@@ -21,8 +21,16 @@ jobs:
            
     steps:
       - uses: actions/checkout@master
-      - run: cd gr-azure-software-radio; pip install -r python/requirements.txt
-      - run: mkdir build; cd build; cmake ..; cmake --build . -j --config Release
-      - run: sudo make install -j
-      - run: export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }}; ctest -V -T test
+      - name: Build
+        run: |
+          cd gr-azure-software-radio; pip install -r python/requirements.txt
+          mkdir build; cd build; cmake ..; cmake --build . -j --config Release
+      - name: Install
+        run: |
+          cd gr-azure-software-radio/build
+          sudo make install -j
+      - name: Test
+        run: |
+          cd gr-azure-software-radio/build
+          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test
         shell: bash
