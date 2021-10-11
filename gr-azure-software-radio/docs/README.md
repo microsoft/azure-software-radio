@@ -30,8 +30,6 @@ It is expected that the user will setup a storage account and a container prior 
 
 	There are several ways to authenticate to the Azue blob backend, these blocks support authentication using a connection string, a URL with an embedded SAS token, or use credentials supported by the DefaultAzureCredential class.
 	
-	Note, this block will causes quantization error if using with gr_complex since it will convert from float 32 I and Q to the bit_depth I and Q.
-	
 	See the [Blob Examples](../examples/README.md).
 
 ## IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard (DIFI)
