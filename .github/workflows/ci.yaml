@@ -19,5 +19,5 @@ jobs:
           uses: Azure/pipelines@v1
           with:
             azure-devops-project-url: https://dev.azure.com/AG-ASCII/ASCII-RFSX/_git/az-rfsim-gr-public-mods
-            azure-pipeline-name: 'az-rfsim-gr-public-mods'
+            azure-pipeline-name: 'PR az-rfsim-gr-public-mods'
             azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
