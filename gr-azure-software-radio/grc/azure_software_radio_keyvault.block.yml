@@ -1,0 +1,118 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the GNU General Public License v3.0 or later.
+# See License.txt in the project root for license information.
+#
+  
+id: keyvault
+label: KeyVault Variables
+category: '[Azure software radio]'
+flags: [ show_id, python ]
+
+parameters:
+-   id: value
+    label: KeyVault Name
+    dtype: string
+    default: ''
+-   id: keys
+    label: keys
+    dtype: raw
+    default: '[]'
+value: ${ value }
+
+templates:
+    imports: import azure_software_radio.keyvault
+    var_make: |+
+        assert isinstance(${keys}, list)
+        vals = azure_software_radio.keyvault.pull_keys(${value}, ${keys})
+
+        <%
+        key_list = []
+        val = ''
+        in_brace = 0
+        end_brace = False
+        new_keys = keys.strip('][')
+        for i in new_keys:
+            if i == ',' and in_brace == 0:
+                if end_brace:
+                    val = tuple(val.strip(')(').split(','))
+                key_list.append(val)
+                val = ''
+                end_brace = False
+            else:
+                val += i
+            if i == "(":
+                in_brace += 1
+            elif i == ")":
+                in_brace -= 1
+                end_brace = True
+        if in_brace != 0: raise TypeError("tupple is not formatted correctly\n")
+        if end_brace:
+            val = tuple(val.strip(')(').split(','))
+        key_list.append(val)
+
+        %>
+        % for idx, key in enumerate(key_list):
+        % if isinstance(key, tuple):
+        ${key[-1].strip().strip('"').strip('\'')} = vals["${key[-1].strip().strip('"').strip('\'')}"]
+        % else:
+        ${key.strip().strip('"').strip('\'')} = vals["${key.strip().strip('"').strip('\'')}"]
+        % endif
+        % endfor
+        <%
+        def fake_draw(cr):
+            pass
+        import inspect
+        blocks = None
+        flowgraph = None
+        for i in inspect.stack():
+            if i.filename.endswith("FlowGraph.py"):
+                locs = i.frame.f_locals
+                flowgraph = locs.get('self')
+                if flowgraph is None: 
+                    return
+                blocks = flowgraph.blocks
+                blocks = {n.name: n for n in blocks}
+                break
+        if not blocks: 
+            return
+        true_keys = []
+        for key in key_list:
+            true_key = None
+            if isinstance(key, tuple):
+                true_key = key[-1].strip().strip('"').strip('\'')
+            else:
+                true_key = key.strip().strip('"').strip('\'')
+            true_keys.append(true_key)
+            if true_key not in blocks:
+                print("making block %s " % true_key)
+                block = flowgraph.new_block('variable')
+                block.draw = fake_draw
+                block.params['id'].set_value(true_key)
+                block.params['value'].set_value("\"0\"")
+                setattr(block, 'keyvaultvar', True)
+                block.coordinate = [10000,10000]
+        new_blocks = []
+        for i in flowgraph.blocks:
+            if (not hasattr(i, 'keyvaultvar') and i.coordinate != [10000, 10000.0]) or i.name in true_keys:
+                new_blocks.append(i)
+        flowgraph.blocks = new_blocks
+        %>
+documentation: |
+    
+    Pulls given keys from a Azure keyvault given the vault name. This method returns a dictionary
+    of he keys and values. 
+
+    Args:
+        KeyVault Name: The keyvault name
+        keys: A list of strings or tuples (inclusive). If a list element is a string, that string is the key 
+              that will be pulled and the key is also the name of the variable  set in GRC. If a list element is a tuple, the first
+              item of the tuple is the key that will be pulled and the second element is the name of variable in GRC.
+    
+    Example:
+        KeyVault Name: myvault
+        keys: [ ("SECRET-CRYPTO", "crypto"), "SEED"]
+        
+        The above would pull SECRET-CRYPTO and SEED secrets from myvaul. SECRET-CRYPTO would be set to the variable "crypto" in 
+        GRC and the secret SEED would be set to "SEED" in the flowgraph.
+    
+file_format: 1

@@ -1,0 +1,94 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the GNU General Public License v3.0 or later.
+# See License.txt in the project root for license information.
+#
+
+id: azure_software_radio_difi_sink_cpp
+label: DIFI Sink
+category: '[Azure software radio]'
+templates:
+  imports: import azure_software_radio
+  make: azure_software_radio.difi_sink_cpp_${type.fcn}(${reference_time_full}, ${reference_time_frac}, ${ip_addr}, ${port}, bool(${mode}), ${data_size}, ${stream_id}, int(${reference_point}), ${sample_rate}, int(${packet_class}), ${oui}, ${context_packet_send_count}, int(${context_pack_size}), int(${bit_depth}))
+
+parameters:
+- id: type
+  label: IO Type
+  dtype: enum
+  options: [complex, complex8]
+  option_attributes:
+      fcn: [fc32, sc8]
+- id: mode
+  label: Mode
+  dtype: enum
+  options: ['True', 'False']
+  option_labels: ['Paired', 'Standalone']
+- id: bit_depth
+  label: Bit Depth
+  dtype: enum
+  options: ['8', '16']
+  default: '8'
+- id: ip_addr
+  label: Forwarding IP Address
+  dtype: string
+  default: "127.0.0.1"
+- id: port
+  label: Port Number
+  dtype: int
+  default: 0
+- id: sample_rate
+  label: Sample Rate
+  dtype: int
+  default: 100000
+- id: reference_time_full
+  label: Reference Time Full
+  dtype: int
+  default: 0
+- id: reference_time_frac
+  label: Reference Time Frac
+  dtype: int
+  default: 0
+- id: data_size
+  label: Samples Per Packet
+  dtype: int
+  default: 128
+- id: stream_id
+  label: Stream ID
+  dtype: int
+  default: 0
+  hide: ${ ('all' if mode == 'True' else 'none') }
+- id: reference_point
+  label: Reference Point
+  dtype: enum
+  options: ['352', '101']
+  option_labels: ['ADC', 'DAC']
+  hide: ${ ('all' if mode == 'True' else 'none') }
+- id: packet_class
+  label: Packet Class
+  dtype: enum
+  options: ['0', '1', '2']
+  hide: ${ ('all' if mode == 'True' else 'none') }
+- id: oui
+  label: Orginization Unique ID
+  dtype: int
+  default: 0
+  hide: ${ ('all' if mode == 'True' else 'none') }
+- id: context_packet_send_count
+  label: Context packet interval
+  dtype: int
+  default: 1000
+  hide: ${ ('all' if mode == 'True' else 'none') }
+- id: context_pack_size
+  label: The context packet size in bytes
+  dtype: enum
+  options: ['72', '108']
+  default: '72'
+  hide: ${ ('all' if mode == 'True' else 'none') }
+inputs:
+- label: in
+  domain: stream
+  dtype: ${type.fcn}
+
+asserts:
+- ${ bit_depth == '8' if type.fcn == 'sc8' else True }
+
+file_format: 1

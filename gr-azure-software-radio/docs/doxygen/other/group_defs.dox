@@ -1,0 +1,12 @@
+/*!
+ * \defgroup GNU Radio Azure software radio Out of Tree Module
+ * \brief All blocks that can be used from the Azure software radio GNU Radio
+ *        module are listed here or in the subcategories below.
+ *
+ * @{
+ */
+
+ /** @defgroup azure_software_radio Azure software radio library */
+
+ /** @} */
+

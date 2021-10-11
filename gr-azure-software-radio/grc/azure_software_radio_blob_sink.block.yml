@@ -1,0 +1,50 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the GNU General Public License v3.0 or later.
+# See License.txt in the project root for license information.
+#
+
+id: azure_software_radio_blob_sink
+label: Blob Sink
+category: '[Azure software radio]'
+
+templates:
+  imports: import azure_software_radio
+  make: azure_software_radio.blob_sink(${authentication_method}, ${connection_str}, ${url}, ${container_name}, ${blob_name}, ${block_len})
+
+parameters:
+- id: authentication_method
+  label: Auth Method
+  dtype: string
+  default: 'default'
+  options: ['connection_string', 'url_with_sas', 'default']
+- id: connection_str
+  label: Connection String
+  dtype: string
+  default: ''
+  hide: ${'all' if authentication_method != 'connection_string' else 'part'}
+- id: url
+  label: URL
+  dtype: string
+  default: '' 
+  hide: ${'all' if authentication_method == 'connection_string' else 'part'}
+- id: container_name
+  label: Container Name
+  dtype: string
+  default: ''
+- id: blob_name
+  label: Blob Name
+  dtype: string
+  default: ''
+- id: block_len
+  label: Blob Block Length
+  dtype: int
+  default: 500000       
+
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+  vlen: 1
+
+
+file_format: 1
