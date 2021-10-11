@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - test_release_0.0.1
   pull_request:
     branches: 
       - main
