@@ -22,16 +22,13 @@ class qa_blob_source(gr_unittest.TestCase):
 
         Use this to set up a separate blob service client for testing. 
         """
-        print("TOP OF SETUP")
         self.blob_connection_string = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
         self.blob_service_client = BlobServiceClient.from_connection_string(
             self.blob_connection_string)
-        print(" Create a uniquP")
         # Create a unique name for the container
         self.test_blob_container_name = str(uuid.uuid4())
         self.container_client = self.blob_service_client.create_container(
             self.test_blob_container_name)
-        print(" Create a uniqu done")
         self.tb = gr.top_block()
 
     def tearDown(self):
@@ -53,14 +50,11 @@ class qa_blob_source(gr_unittest.TestCase):
 
         # set up a vector source with known complex data
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
-        print("56")
         # connect to the test blob container and upload our test data
         blob_client = self.blob_service_client.get_blob_client(
             container=self.test_blob_container_name,
             blob=blob_name)
-        print("61")
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
-        print("63")
         # set up a blob sink
         op = blob_source(authentication_method="connection_string",
                          connection_str=self.blob_connection_string,
@@ -68,18 +62,18 @@ class qa_blob_source(gr_unittest.TestCase):
                          blob_name=blob_name,
                          queue_size=4)
         dst = blocks.vector_sink_c()
-        print("71")
+
         self.tb.connect(op, dst)
         # set up fg
         self.tb.run()
         # check data
-        print("76")
+
         result_data = dst.data()
-        print("78")
+
         # check data
         self.assertTrue((src_data == result_data).all())
 
-    def atest_chunk_residue(self):
+    def test_chunk_residue(self):
         '''
         Test that we don't crash if we get back a non-integer number of samples from a blob chunk
         '''
@@ -116,7 +110,7 @@ class qa_blob_source(gr_unittest.TestCase):
 
         op.stop()
 
-    def atest_chunk_residue_merge(self):
+    def test_chunk_residue_merge(self):
         '''
         Test that we can glue samples back together if we get them in separate chunks
         '''
