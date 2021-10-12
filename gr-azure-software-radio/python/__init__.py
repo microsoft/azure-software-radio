@@ -29,6 +29,6 @@ except ModuleNotFoundError:
     pass
 
 # import any pure python here
-from .blob_sink import blob_sink
-from .blob_source import blob_source
-from . import blob_common
+from azure_software_radio import blob_sink
+from azure_software_radio import blob_source
+from azure_software_radio import blob_common
