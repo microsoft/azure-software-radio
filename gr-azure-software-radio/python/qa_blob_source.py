@@ -8,7 +8,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from .blob_source import blob_source
+from azure_software_radio import blob_source
 import numpy as np
 import os
 import uuid
