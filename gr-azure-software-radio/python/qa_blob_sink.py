@@ -12,7 +12,7 @@ import numpy as np
 import os
 import uuid
 from azure.storage.blob import BlobServiceClient
-from .blob_sink import blob_sink
+from azure_software_radio import blob_sink
 
 
 class qa_blob_sink(gr_unittest.TestCase):
