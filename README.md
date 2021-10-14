@@ -1,60 +1,17 @@
 # Welcome To Azure software radio Github!
 
-Here we are sharing two assets we have developed todate click on either link to dive in further!
+Here we are sharing two assets we have developed to-date. Click on either link to dive in further!
 
 
-1. [GNURadio - Azure Out of Tree Module](./gr-azure-software-radio/docs/README.md)
+1. [GNURadio - Azure Out of Tree Module](./gr-azure-software-radio/README.md)
 2. [Azure software radio Developer Virtual Machine](./pages/devvm.md)
 
-## Getting Started
-
-To get started, first please follow the install guides below. 
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-### Prerequisites
-
-What things you need to install the software and how to install them
-
-```
-GnuRadio 3.9.0 or Greater
-python 3.8 or greater
-```
-
-### Installing Azure software radio OOT
-
-    ```
-    pip install -r python/requirements.txt
-
-    mkdir build
-    cd build
-    cmake ..
-    make
-    sudo make install
-    ```
-
-### Running Test
-
-Tests can be run with any of the following methods:
- - From the build directory
-    ```
-    make test
-    ```
-
- - From the python directory
-    ```
-    python -m pytest qa_*
-    ```
-    
-    or
-
-    ```
-    python3 -m unittest qa_*
-    ```
 
 ## Support  
 
 This project uses [GitHub Issues](https://github.com/microsoft/azure-software-radio/issues) to track bugs and feature requests. Please refer to our [Support Guide](SUPPORT.md#how-to-file-issues-and-get-help) for more details.  
+
+Before filing a new issue, please check our [FAQ](./docs/FAQ.md) for potential solutions to common problems.
 
 Starting with [GNU Radio](https://github.com/gnuradio/gnuradio) maint-3.9, this project will support the same set of [maintenance branches](https://github.com/gnuradio/gnuradio/branches) tracked by GNU Radio.  
 
