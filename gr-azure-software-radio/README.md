@@ -30,7 +30,7 @@ You will need to install and configure the following before installing the Azure
 GnuRadio 3.9.0 or greater
 python 3.8 or greater
 ```
-
+NOTE: If you have installed the Azure CLI with the default apt package on Ubuntu 20, the install may fail or the module may crash at runtime. See [Ubuntu 20 CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)
 ### Installing Azure software radio OOT
 
     ```
