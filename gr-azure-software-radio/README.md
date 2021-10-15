@@ -12,7 +12,7 @@ The Azure software radio Out of Tree (OOT) Module allows users to leverage and e
     - [Key Vault Block](#key-vault-block)
     - [Blob Blocks](#blob-blocks)
         - [Blob Block Descriptions](#blob-block-descriptions)
-    - [IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard (DIFI)]    (#ieee-isto-std-4900-2021-digital-if-interoperability-standard-difi)
+    - [IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard (DIFI)](#ieee-isto-std-4900-2021-digital-if-interoperability-standard-difi)
         - [DIFI Block Descriptions](#difi-block-descriptions)
 
 
