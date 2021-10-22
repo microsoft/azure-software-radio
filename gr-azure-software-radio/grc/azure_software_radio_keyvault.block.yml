@@ -17,6 +17,10 @@ parameters:
     label: keys
     dtype: raw
     default: '[]'
+-  id: default_credential
+   label: Default Credential
+   dtype: raw
+   default:  '0'
 value: ${ value }
 
 templates:

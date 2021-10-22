@@ -55,6 +55,12 @@ GR_PYTHON_INSTALL(
     keyvault/keyvault.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio/keyvault
 )
 
+GR_PYTHON_INSTALL(
+    FILES
+    default_credentials/__init__.py
+    default_credentials/default_credentials.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio/default_credentials
+)
+
 ########################################################################
 # Handle the unit tests
 ########################################################################
@@ -66,3 +72,4 @@ GR_ADD_TEST(qa_difi_blocks_cpp ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/
 GR_ADD_TEST(qa_blob_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_blob_source.py)
 GR_ADD_TEST(qa_blob_common ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_blob_common.py)
 
+GR_ADD_TEST(qa_default_credentials ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_default_credentials.py)

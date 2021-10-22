@@ -7,7 +7,7 @@ from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
 
 
-def pull_keys(vault_name, keys):
+def pull_keys(vault_name, keys, default_credential):
     """
     Pulls given keys from a Azure keyvault given the vault name. This method returns a dictionary
     of the keys and values.
@@ -22,8 +22,12 @@ def pull_keys(vault_name, keys):
         A dictionary of the keys or the given varible name wanted for that key passed in 
         as tuple to the value of that key orvariable.   
     """
+    if default_credential is None or isinstance(default_credential,str) or isinstance(default_credential,int):
+        dc = DefaultAzureCredential()
+    else:
+        dc = default_credential
     client = SecretClient(
-        vault_url=f"https://{vault_name}.vault.azure.net", credential=DefaultAzureCredential())
+        vault_url=f"https://{vault_name}.vault.azure.net", credential=dc)
     return {key if not isinstance(key, tuple) else key[-1]:
             (client.get_secret(key).value if not isinstance(
                 key, tuple) else client.get_secret(key[0]).value) for key in keys}
