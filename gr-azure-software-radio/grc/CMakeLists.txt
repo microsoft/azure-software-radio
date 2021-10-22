@@ -11,5 +11,6 @@ install(FILES
     azure_software_radio_difi_source_cpp.block.yml
     azure_software_radio_difi_sink_cpp.block.yml 
     azure_software_radio_blob_sink.block.yml
-    azure_software_radio_blob_source.block.yml DESTINATION share/gnuradio/grc/blocks
+    azure_software_radio_blob_source.block.yml
+    azure_software_radio_default_credentials.block.yml DESTINATION share/gnuradio/grc/blocks
 )
