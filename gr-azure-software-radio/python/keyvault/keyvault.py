@@ -18,6 +18,8 @@ def pull_keys(vault_name, keys, default_credential):
               that will be pulled and the key in the returned dictionary. If a list element is a tuple, the first
               item of the tuple is the key that will pulled and the second element is 
               the key that will be used in the returned dictionary
+        default_credential: a DefaultAzureCredential object, if set to a string or integer, then the keyvault
+              block will instantiate its own credential object.
     Returns:
         A dictionary of the keys or the given varible name wanted for that key passed in 
         as tuple to the value of that key orvariable.   

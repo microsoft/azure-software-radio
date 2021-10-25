@@ -7,10 +7,11 @@
 from azure.identity import DefaultAzureCredential
 
 
-def get_default_creds(enable_cli_credential, enable_environment, enable_managed_identity, enable_powershell, enable_visual_studio_code,enable_shared_token_cache, enable_interactive_browser):
+def get_default_creds(cred_authority='login.microsoftonline.com',enable_cli_credential, enable_environment, enable_managed_identity, enable_powershell, enable_visual_studio_code,enable_shared_token_cache, enable_interactive_browser):
     """
     Returns DefaultAzureCredential 
     Args:
+        cred_authority : Authority to use, defaults to 'login.microsoftonline.com'
         enable_cli_credential: enable CLI authentication
         enable_environment: enable environment variable authentication
         enable_managed_identity: enable managed identity authentication
@@ -22,7 +23,7 @@ def get_default_creds(enable_cli_credential, enable_environment, enable_managed_
         A DefaultAzureCredential.   
     """
 
-    return DefaultAzureCredential(authority='login.microsoftonline.com',
+    return DefaultAzureCredential(authority=cred_authority,
                                     exclude_cli_credential=not enable_cli_credential,
                                     exclude_environment_credential=not enable_environment,
                                     exclude_managed_identity_credential= not enable_managed_identity,
