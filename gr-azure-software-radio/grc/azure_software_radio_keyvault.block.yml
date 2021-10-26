@@ -18,7 +18,7 @@ parameters:
     dtype: raw
     default: '[]'
 -  id: default_credential
-   label: Default Credential
+   label: DefaultAzureCredential
    dtype: raw
    default:  '0'
 value: ${ value }
@@ -111,6 +111,8 @@ documentation: |
         keys: A list of strings or tuples (inclusive). If a list element is a string, that string is the key 
               that will be pulled and the key is also the name of the variable  set in GRC. If a list element is a tuple, the first
               item of the tuple is the key that will be pulled and the second element is the name of variable in GRC.
+        DefaultAzureCredential: An optional DefaultAzureCredential() object which will be used for authentication.
+              If set to a string or int, ie. "0", then the keyvault block will instantiate its own DefaultAzureCredential().
     
     Example:
         KeyVault Name: myvault
