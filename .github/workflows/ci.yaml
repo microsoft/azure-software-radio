@@ -45,6 +45,7 @@ jobs:
       - name: pylint
         continue-on-error: true
         run: |
+          cd ..
           pylint azure-software-radio --rcfile azure-software-radio/.pylintrc
       - name: check step
         if: success()
