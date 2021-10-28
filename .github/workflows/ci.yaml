@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - add_pylint
   pull_request:
     branches: 
       - main
