@@ -20,15 +20,16 @@ fail-on=
 fail-under=10.0
 
 # Files or directories to be skipped. They should be base names, not paths.
-ignore=CVS
+ignore=CVS, docs
 
 # Add files or directories matching the regex patterns to the ignore-list. The
 # regex matches against paths.
-ignore-paths=^azure-software-radio\docs\doxygen\.*$,^azure-software-radio/gr-azure-software-radio/docs/doxygen/.*$,^src/tests/.*$, ^azure-software-radio/gr-azure-software-radio/python/bindings/.*$, ^azure-software-radio/gr-azure-software-radio/docs/doxygen/doxyxml/.*$
+ignore-paths=^azure-software-radio\docs\doxygen\.*$,^azure-software-radio/gr-azure-software-radio/docs/doxygen/.*$,^src/tests/.*$, 
+            ^azure-software-radio/gr-azure-software-radio/python/bindings/.*$, ^azure-software-radio/gr-azure-software-radio/docs/doxygen/doxyxml/.*$, ^azure-software-radio\docs.*$
 
 # Files or directories matching the regex patterns are skipped. The regex
 # matches against base names, not paths.
-ignore-patterns=qa_.*?py, __init__.*?py, azure-software-radio/gr-azure-software-radio/docs/.*$
+ignore-patterns=qa_.*?py, __init__.*?py, docs\.*$,  docs/.*$, doxygen\.*$
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
