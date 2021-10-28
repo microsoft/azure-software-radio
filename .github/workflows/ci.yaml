@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - add_pylint
   pull_request:
     branches: 
       - main
@@ -13,7 +14,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     container:
-      image: rfsxbuild.azurecr.io/gnuradiopipeline:3.9.2.0-2
+      image: rfsxbuild.azurecr.io/gnuradiopipeline:3.9.2.0-3
       credentials:
         username: ${{  secrets.ACR_PRINCIPAL_ID }}
         password: ${{  secrets.ACR_PRINCIPAL_PWD }}
@@ -41,3 +42,10 @@ jobs:
           cd gr-azure-software-radio/build
           export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test;
         shell: bash
+      - name: pylint
+        continue-on-error: true
+        run: |
+          pylint azure-software-radio --rcfile azure-software-radio/.pylintrc
+      - name: check step
+        if: success()
+        run: echo pylint has passed all checks
