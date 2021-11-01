@@ -9,7 +9,7 @@ category: '[Azure software radio]'
 
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${stream_num}, ${socket_buffer_size}, int(${bit_depth}))
+  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${protocol}, ${stream_num}, ${socket_buffer_size}, int(${bit_depth}))
 
 parameters:
 - id: type
@@ -31,6 +31,11 @@ parameters:
 - id: port
   label: Port
   dtype: int
+- id: protocol
+  label: Protocol
+  dtype: enum
+  options: ['1', '2']
+  option_labels: ['TCP', 'UDP']
 - id: socket_buffer_size
   label: Socket Buffer Size
   dtype: int

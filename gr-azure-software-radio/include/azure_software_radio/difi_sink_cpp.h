@@ -35,6 +35,7 @@ namespace gr {
                                    or a context packet tag. The time reference will never be updated if in standalone mode
         \param ip_addr The ip address for the socket that DIFI (VITA) packets will be forwared to
         \param port the port number for the socket on the host that the DIFI (VITA) packets will be forwared to
+        \param socket_type The socket type (TCP or UDP)
         \param mode Either standalone or paired. Paired mode is expected to have a DIFI (VITA) source block upstream in the flowgraph, standalone expects no such block, but context packet information must be given
         \param samples_per_packet The number of samples for DIFI (VITA) data packet (header included) that this block with send out via the udp socket (Cannot exceed the MTU size in bytes)
         \param stream_number The DIFI (VITA) stream number to expect for this stream.
@@ -47,7 +48,7 @@ namespace gr {
         \param bit_depth The bit depth
         
        */
-      static sptr make(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, uint32_t port, bool mode, uint32_t samples_per_packet, 
+      static sptr make(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, uint32_t port, uint8_t socket_type, bool mode, uint32_t samples_per_packet, 
                       int stream_number, int reference_point, u_int64_t samp_rate, int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth);
     };
     typedef difi_sink_cpp<gr_complex> difi_sink_cpp_fc32;

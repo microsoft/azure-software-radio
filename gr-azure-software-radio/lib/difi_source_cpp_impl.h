@@ -91,11 +91,13 @@ private:
       memcpy(&imag, start + 1, 1);
       return M(re, imag);
     }
-    std::string d_host_name;
+    std::string d_ip_addr;
     uint32_t d_port;
     int d_stream_number;
     uint32_t d_buffer_len;
     int d_socket;
+    int d_client_socket;
+    uint8_t d_socket_type;
     std::vector<int8_t> d_buffer;
     struct sockaddr_in d_servaddr;
     std::deque<char> d_deque;
@@ -116,8 +118,9 @@ private:
     int buffer_and_send(T* out, int noutput_items);
 
 public:
-    difi_source_cpp_impl(std::string host_name,
+    difi_source_cpp_impl(std::string ip_addr,
                     uint32_t port,
+                    uint8_t socket_type,
                     uint32_t stream_number,
                     uint32_t socket_buffer_size, 
                     int bit_depth);

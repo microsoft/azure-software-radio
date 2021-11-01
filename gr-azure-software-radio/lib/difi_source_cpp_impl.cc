@@ -10,18 +10,18 @@ namespace gr {
   namespace azure_software_radio {
 
     template <class T>
-    typename difi_source_cpp<T>::sptr difi_source_cpp<T>::make(std::string ip_addr, uint32_t port, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
+    typename difi_source_cpp<T>::sptr difi_source_cpp<T>::make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
     {
-      return gnuradio::make_block_sptr<difi_source_cpp_impl<T>>(ip_addr, port, stream_number, socket_buffer_size, bit_depth);
+      return gnuradio::make_block_sptr<difi_source_cpp_impl<T>>(ip_addr, port, socket_type, stream_number, socket_buffer_size, bit_depth);
     }
 
     template <class T>
-    difi_source_cpp_impl<T>::difi_source_cpp_impl(std::string ip_addr, uint32_t port, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
+    difi_source_cpp_impl<T>::difi_source_cpp_impl(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
         : gr::sync_block("source_cpp", gr::io_signature::make(0, 0, 0),
                          gr::io_signature::make(1 /* min outputs */,
                                                 1 /*max outputs */,
                                                 sizeof(T))),
-          d_host_name(ip_addr),
+          d_ip_addr(ip_addr),
           d_port(port),
           d_stream_number(stream_number),
           d_buffer_len(socket_buffer_size)
@@ -35,11 +35,24 @@ namespace gr {
       struct timeval tv;
       tv.tv_sec = 0;
       tv.tv_usec = 10000;
-      if ((d_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+      d_socket_type = 1 ? SOCK_DGRAM : SOCK_STREAM;
+
+      if(d_socket_type == SOCK_DGRAM)
       {
-        GR_LOG_ERROR(this->d_logger, "Could not make socket, socket may be in use.");
-        throw std::runtime_error("Could not make socket");
+        if ((d_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+        {
+          GR_LOG_ERROR(this->d_logger, "Could not make UDP socket, socket may be in use.");
+          throw std::runtime_error("Could not make UDP socket");
+        }
       }
+      else{
+        if ((d_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+        {
+          GR_LOG_ERROR(this->d_logger, "Could not make TCP socket, socket may be in use.");
+          throw std::runtime_error("Could not make TCP socket");
+        }
+      }
+
       int sock_b_size = 2000000;
       if(setsockopt(d_socket, SOL_SOCKET, SO_RCVBUF, &sock_b_size, sizeof(sock_b_size)) < 0)
       {
@@ -71,11 +84,33 @@ namespace gr {
       d_unpacker = unpack_16<T>;
       if(d_unpack_idx_size == 1)
           d_unpacker = &unpack_8<T>;
+
+      if(d_socket_type == SOCK_STREAM) // TCP
+      {
+        if(listen(d_socket, 1) < 0)
+        {
+          GR_LOG_ERROR(this->d_logger, "Error while listening to incoming connections");
+          throw std::runtime_error("Error while listening to incoming connections");
+        }
+
+        d_client_socket = accept(d_socket, (struct sockaddr*)NULL, NULL);
+        
+        if (d_client_socket < 0)
+        {
+          GR_LOG_ERROR(this->d_logger, "Could not accept incoming connection");
+          throw std::runtime_error("Could not accept incoming connection");
+        }
+      }
     }
 
     template <class T>
     difi_source_cpp_impl<T>::~difi_source_cpp_impl() 
     {
+      if(d_socket_type == SOCK_STREAM)
+      {
+        close(d_client_socket);
+      }
+
       close(d_socket);
     }
 
@@ -94,8 +129,16 @@ namespace gr {
     {
       boost::this_thread::disable_interruption disable_interrupt;
       socklen_t len = sizeof(d_servaddr);
-      int size_gotten = recvfrom(d_socket, &d_buffer[0], d_buffer.size(),
-                                 MSG_WAITALL, (struct sockaddr *)&d_servaddr, &len);
+      int size_gotten = -1;
+      if(d_socket_type == SOCK_DGRAM)
+      {
+        size_gotten = recvfrom(d_socket, &d_buffer[0], d_buffer.size(),
+                                  MSG_WAITALL, (struct sockaddr *)&d_servaddr, &len);
+      }
+      else
+      {
+        size_gotten = recv(d_client_socket, &d_buffer[0], d_buffer.size(), MSG_WAITALL);
+      }
 
 
       if (size_gotten < 0)
