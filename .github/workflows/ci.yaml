@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - dev
+      - pylint_fixes
   pull_request:
     branches: 
       - main
