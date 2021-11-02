@@ -1,3 +1,10 @@
+# pylint: disable=missing-function-docstring, missing-class-docstring
+#
+# Copyright 2008,2009 Free Software Foundation, Inc.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
 import os
 import uuid
 from gnuradio import gr
