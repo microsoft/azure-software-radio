@@ -6,12 +6,10 @@
 # See License.txt in the project root for license information.
 #
 
-
 import numpy as np
-from gnuradio import gr
 import queue
 import uuid
-
+from gnuradio import gr
 from azure_software_radio.blob_common import get_blob_service_client, shutdown_blob_service_client
 
 
@@ -129,7 +127,8 @@ class blob_sink(gr.sync_block):
         num_copy_items = min([self.block_len-self.num_buf_items,
                               len(in0)])
 
-        self.buf[self.num_buf_items:self.num_buf_items + num_copy_items] = in0[:num_copy_items]
+        self.buf[self.num_buf_items:self.num_buf_items +
+                 num_copy_items] = in0[:num_copy_items]
         self.num_buf_items = self.num_buf_items + num_copy_items
 
         if self.num_buf_items == self.block_len:
@@ -152,13 +151,15 @@ class blob_sink(gr.sync_block):
     def stop(self):
         """ Cleanly shut down everything
         """
-        self.log.info("Uploading the remaining items in the buffer and shutting down")
+        self.log.info(
+            "Uploading the remaining items in the buffer and shutting down")
 
         if self.num_buf_items > 0:
             self.q.put(self.buf[:self.num_buf_items], block=True)
         self.upload_queue_contents()
 
-        self.log.debug("Commiting {} block IDs".format(len(self.block_id_list)))
+        self.log.debug("Commiting {} block IDs".format(
+            len(self.block_id_list)))
 
         self.blob_client.commit_block_list(block_list=self.block_id_list)
         self.blob_service_client.close()

@@ -8,8 +8,8 @@
 
 
 import numpy as np
-from gnuradio import gr
 import queue
+from gnuradio import gr
 
 from azure_software_radio.blob_common import get_blob_service_client, shutdown_blob_service_client
 
@@ -94,7 +94,8 @@ class blob_source(gr.sync_block):
         chunk = chunk_residue + chunk
         num_data_items = int(np.floor(len(chunk)/self.itemsize))
 
-        data = np.frombuffer(buffer=chunk, count=num_data_items, dtype=np.complex64)
+        data = np.frombuffer(
+            buffer=chunk, count=num_data_items, dtype=np.complex64)
         chunk_residue = chunk[num_data_items*self.itemsize:]
 
         return data, chunk_residue
@@ -107,10 +108,13 @@ class blob_source(gr.sync_block):
         while not self.q.full() and not self.blob_complete:
 
             try:
-                self.log.debug("Retrieving next block of data from blob storage")
+                self.log.debug(
+                    "Retrieving next block of data from blob storage")
                 chunk = self.blob_iter.next()
-                self.log.debug("Retrieved {} bytes of data from blob storage".format(len(chunk)))
-                data, self.chunk_residue = self.chunk_to_array(chunk, self.chunk_residue)
+                self.log.debug(
+                    "Retrieved {} bytes of data from blob storage".format(len(chunk)))
+                data, self.chunk_residue = self.chunk_to_array(
+                    chunk, self.chunk_residue)
                 if len(data) > 0:
                     self.q.put(data)
             except StopIteration:

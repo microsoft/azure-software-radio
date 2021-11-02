@@ -6,11 +6,11 @@
 # See License.txt in the project root for license information.
 #
 
-from gnuradio import gr, gr_unittest
-from gnuradio import blocks
 import numpy as np
 import os
 import uuid
+from gnuradio import gr, gr_unittest
+from gnuradio import blocks
 from azure.storage.blob import BlobServiceClient
 from azure_software_radio import blob_sink
 
@@ -23,7 +23,8 @@ class qa_blob_sink(gr_unittest.TestCase):
         Use this to set up a separate blob service client for testing.
         """
 
-        self.blob_connection_string = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+        self.blob_connection_string = os.getenv(
+            'AZURE_STORAGE_CONNECTION_STRING')
         self.blob_service_client = BlobServiceClient.from_connection_string(
             self.blob_connection_string)
 
@@ -84,7 +85,8 @@ class qa_blob_sink(gr_unittest.TestCase):
             container=self.test_blob_container_name,
             blob=blob_name)
 
-        result_data = np.frombuffer(blob_client.download_blob().readall(), dtype=np.complex64)
+        result_data = np.frombuffer(
+            blob_client.download_blob().readall(), dtype=np.complex64)
 
         # check data
         self.assertTrue((src_data == result_data).all())

@@ -206,6 +206,9 @@ good-names=i,
            j,
            k,
            ex,
+           tb,
+           im,
+           re,
            Run,
            _
 

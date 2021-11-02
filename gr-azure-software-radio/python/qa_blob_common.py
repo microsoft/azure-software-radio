@@ -6,10 +6,9 @@
 # See License.txt in the project root for license information.
 #
 
+import os
 from gnuradio import gr_unittest
 from azure_software_radio import blob_common
-import os
-
 
 
 class qa_blob_common(gr_unittest.TestCase):
