@@ -15,12 +15,12 @@ def pull_key(vault_name, key):
     Args:
         KeyVault Name: The keyvault name
         key: A key string which maps to a secret stored in the keyvault.
-    
+
     Example:
         KeyVault Name: myvault
         key: "SEED"
-        
-        The above would pull the SEED secret from myvault and set the blockname equal to value stored for SEED.   
+
+        The above would pull the SEED secret from myvault and set the blockname equal to value stored for SEED.
     """
     client = SecretClient(
         vault_url=f"https://{vault_name}.vault.azure.net", credential=DefaultAzureCredential())
