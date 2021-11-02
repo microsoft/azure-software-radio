@@ -461,7 +461,6 @@ class qa_testcpp(gr_unittest.TestCase):
             tb_proc.kill()
             pytest.fail()
 
-# pylint: disable=consider-using-f-string
 def socket_rec_confirm_standalone_data(server, size):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(server)
@@ -469,7 +468,7 @@ def socket_rec_confirm_standalone_data(server, size):
     data = sock.recv(2048)
     sock.close()
     samples = struct.unpack_from(
-        '!%sb' % (len(data) - DIFI_HEADER_SIZE), data, offset=DIFI_HEADER_SIZE)
+        f'!{(len(data) - DIFI_HEADER_SIZE)}b' (len(data) - DIFI_HEADER_SIZE), data, offset=DIFI_HEADER_SIZE)
     expected = (1, 0) * size
     assert samples == expected
 
@@ -481,7 +480,7 @@ def socket_rec_confirm_standalone_data_16(server, size):
     data = sock.recv(4096)
     sock.close()
     samples = struct.unpack_from(
-        '!%sb' % (len(data) - DIFI_HEADER_SIZE), data, offset=DIFI_HEADER_SIZE)
+        f'!{(len(data) - DIFI_HEADER_SIZE)}b', data, offset=DIFI_HEADER_SIZE)
     expected = (1, 0, 0, 0) * size
     assert samples == expected
 
