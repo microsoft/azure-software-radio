@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, duplicate-code, R0801
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -7,31 +8,18 @@
 #
 
 import numpy as np
-import os
-import uuid
-from gnuradio import gr, gr_unittest
+from gnuradio import gr_unittest
 from gnuradio import blocks
 from azure_software_radio import blob_source
-from azure.storage.blob import BlobServiceClient
 
 
 class qa_blob_source(gr_unittest.TestCase):
 
+    # pylint: disable=invalid-name
     def setUp(self):
-        """ Pull a blob connection string from an environment variable. 
+        blob_teardown(self)
 
-        Use this to set up a separate blob service client for testing. 
-        """
-        self.blob_connection_string = os.getenv(
-            'AZURE_STORAGE_CONNECTION_STRING')
-        self.blob_service_client = BlobServiceClient.from_connection_string(
-            self.blob_connection_string)
-        # Create a unique name for the container
-        self.test_blob_container_name = str(uuid.uuid4())
-        self.container_client = self.blob_service_client.create_container(
-            self.test_blob_container_name)
-        self.tb = gr.top_block()
-
+    # pylint: disable=invalid-name
     def tearDown(self):
         self.tb = None
 
@@ -57,14 +45,14 @@ class qa_blob_source(gr_unittest.TestCase):
             blob=blob_name)
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
         # set up a blob sink
-        op = blob_source(authentication_method="connection_string",
+        source = blob_source(authentication_method="connection_string",
                          connection_str=self.blob_connection_string,
                          container_name=self.test_blob_container_name,
                          blob_name=blob_name,
                          queue_size=4)
         dst = blocks.vector_sink_c()
 
-        self.tb.connect(op, dst)
+        self.tb.connect(source, dst)
         # set up fg
         self.tb.run()
         # check data

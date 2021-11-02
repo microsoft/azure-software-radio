@@ -6,14 +6,13 @@
 # See License.txt in the project root for license information.
 #
 
-import numpy as np
 import queue
 import uuid
+import numpy as np
 from gnuradio import gr
-from azure_software_radio.blob_common import get_blob_service_client, shutdown_blob_service_client
+from azure_software_radio.blob_common import get_blob_service_client
 
-
-class blob_sink(gr.sync_block):
+class BlobSink(gr.sync_block):
     """ Write samples out to an Azure Blob.
 
     This block has multiple ways to authenticate to the Azure blob backend. Users can directly
@@ -37,9 +36,9 @@ class blob_sink(gr.sync_block):
     Blob Name: The name of the block blob to create.
     Blob Block Length: How many items to write out at once to a block in the blob. Note that
         block sizes where block_len*itemsize is greater than 4MiB will enable the use of
-        high throughput block transfers. Must be an integer number of items. 
+        high throughput block transfers. Must be an integer number of items.
     """
-
+    # pylint: disable=too-many-arguments, too-many-instance-attributes
     def __init__(self, authentication_method: str = "default", connection_str: str = None,
                  url: str = None, container_name: str = None, blob_name: str = None,
                  block_len: int = 500000, queue_size: int = 4):
@@ -62,7 +61,7 @@ class blob_sink(gr.sync_block):
 
         self.block_len = block_len
 
-        self.q = queue.Queue(maxsize=queue_size)
+        self.que = queue.Queue(maxsize=queue_size)
         self.buf = np.zeros((self.block_len, ), dtype=np.complex64)
         self.num_buf_items = 0
 
@@ -87,13 +86,13 @@ class blob_sink(gr.sync_block):
         current blob
         """
         # TODO: put this into a separate thread
-        while not self.q.empty():
+        while not self.que.empty():
 
-            data = self.q.get()
+            data = self.que.get()
             data_len = len(data)*gr.sizeof_gr_complex
 
             # TODO: Use structured logging
-            self.log.debug("Beginning upload of {} bytes".format(data_len))
+            self.log.debug(f"Beginning upload of {data_len} bytes")
 
             block_id = str(uuid.uuid4())
             self.blob_client.stage_block(block_id=block_id,
@@ -106,7 +105,7 @@ class blob_sink(gr.sync_block):
             # TODO: Use structured logging
             self.log.debug("Upload complete")
 
-    def work(self, input_items, output_items):
+    def work(self, input_items, _):
         """ Buffer up items for upload to blob storage.
 
         Buffer up items in self.block_len sized chunks. When the buffer is full, pass it over
@@ -133,7 +132,7 @@ class blob_sink(gr.sync_block):
 
         if self.num_buf_items == self.block_len:
             try:
-                self.q.put(self.buf, block=False)
+                self.que.put(self.buf, block=False)
 
                 # get fresh memory for the buffer so we don't corrupt the data we've put into the
                 # upload queue
@@ -155,12 +154,10 @@ class blob_sink(gr.sync_block):
             "Uploading the remaining items in the buffer and shutting down")
 
         if self.num_buf_items > 0:
-            self.q.put(self.buf[:self.num_buf_items], block=True)
+            self.que.put(self.buf[:self.num_buf_items], block=True)
         self.upload_queue_contents()
 
-        self.log.debug("Commiting {} block IDs".format(
-            len(self.block_id_list)))
-
+        self.log.debug(f"Commiting {len(self.block_id_list)} block IDs")
         self.blob_client.commit_block_list(block_list=self.block_id_list)
         self.blob_service_client.close()
 

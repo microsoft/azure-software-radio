@@ -6,15 +6,14 @@
 # See License.txt in the project root for license information.
 #
 
-
-import numpy as np
 import queue
+import numpy as np
 from gnuradio import gr
 
 from azure_software_radio.blob_common import get_blob_service_client, shutdown_blob_service_client
 
 
-class blob_source(gr.sync_block):
+class BlobSource(gr.sync_block):
     """ Read samples from an Azure Blob.
 
     This block has multiple ways to authenticate to the Azure blob backend. Users can directly
@@ -36,7 +35,7 @@ class blob_source(gr.sync_block):
     Container Name: Name of the container where the blob of interest is stored.
     Blob Name: The name of the block blob to read from.
     """
-
+    # pylint: disable=too-many-arguments, too-many-instance-attributes
     def __init__(self, authentication_method: str = "default", connection_str: str = None,
                  url: str = None, container_name: str = None, blob_name: str = None,
                  queue_size: int = 4):
@@ -56,7 +55,7 @@ class blob_source(gr.sync_block):
                                in_sig=None,
                                out_sig=[np.complex64])
 
-        self.q = queue.Queue(maxsize=queue_size)
+        self.que = queue.Queue(maxsize=queue_size)
         self.buf = np.zeros((0, ), dtype=np.complex64)
         self.num_buf_items_read = 0
 
@@ -74,7 +73,7 @@ class blob_source(gr.sync_block):
 
         self.blob_complete = False
 
-        self.itemsize = np.complex64().itemsize
+        self.itemsize = np.dtype(np.complex64).itemsize
         self.chunk_residue = b''
 
         self.log = gr.logger("log_debug")
@@ -105,23 +104,23 @@ class blob_source(gr.sync_block):
         Pull chunks from the blob, convert the bytes into a numpy array, and add to queue
         """
         # TODO: put this into a separate thread
-        while not self.q.full() and not self.blob_complete:
+        while not self.que.full() and not self.blob_complete:
 
             try:
                 self.log.debug(
                     "Retrieving next block of data from blob storage")
                 chunk = self.blob_iter.next()
                 self.log.debug(
-                    "Retrieved {} bytes of data from blob storage".format(len(chunk)))
+                    f"Retrieved {len(chunk)} bytes of data from blob storage")
                 data, self.chunk_residue = self.chunk_to_array(
                     chunk, self.chunk_residue)
                 if len(data) > 0:
-                    self.q.put(data)
+                    self.que.put(data)
             except StopIteration:
                 self.log.debug("Reached the end of the blob")
                 self.blob_complete = True
 
-    def work(self, input_items, output_items):
+    def work(self, _, output_items):
         """ Stream items from blob storage.
 
         Stream items out from an internal buffer. Once the internal buffer is exhausted,
@@ -141,7 +140,7 @@ class blob_source(gr.sync_block):
         num_remaining_items = len(self.buf) - self.num_buf_items_read
 
         # check if we're done
-        if self.q.empty() and num_remaining_items == 0 and self.blob_complete:
+        if self.que.empty() and num_remaining_items == 0 and self.blob_complete:
             shutdown_blob_service_client(self.blob_service_client)
             return -1
 
@@ -167,8 +166,8 @@ class blob_source(gr.sync_block):
                 self.download_chunk_to_queue()
 
             # if there's data to read, go get it
-            if not self.q.empty():
-                self.buf = self.q.get()
+            if not self.que.empty():
+                self.buf = self.que.get()
                 self.num_buf_items_read = 0
 
         return nitems_produced

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, duplicate-code
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) Microsoft Corporation.
@@ -9,15 +9,17 @@
 import os
 from gnuradio import gr_unittest
 from azure_software_radio import blob_common
-
+import azure_software_radio
 
 class qa_blob_common(gr_unittest.TestCase):
 
+    # pylint: disable=invalid-name
     def setUp(self):
-        pass
+        azure_software_radio.blob_setup(self)
 
+    # pylint: disable=invalid-name
     def tearDown(self):
-        pass
+        azure_software_radio.blob_teardown(self)
 
     def test_connection_string_auth(self):
         '''

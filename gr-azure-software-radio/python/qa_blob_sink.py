@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, duplicate-code
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -6,40 +7,22 @@
 # See License.txt in the project root for license information.
 #
 
-import numpy as np
-import os
-import uuid
-from gnuradio import gr, gr_unittest
-from gnuradio import blocks
-from azure.storage.blob import BlobServiceClient
-from azure_software_radio import blob_sink
 
+import numpy as np
+from gnuradio import gr_unittest
+from gnuradio import blocks
+from azure_software_radio import blob_sink
+import azure_software_radio
 
 class qa_blob_sink(gr_unittest.TestCase):
 
+    # pylint: disable=invalid-name
     def setUp(self):
-        """ Pull a blob connection string from an environment variable.
+        azure_software_radio.blob_setup(self)
 
-        Use this to set up a separate blob service client for testing.
-        """
-
-        self.blob_connection_string = os.getenv(
-            'AZURE_STORAGE_CONNECTION_STRING')
-        self.blob_service_client = BlobServiceClient.from_connection_string(
-            self.blob_connection_string)
-
-        # Create a unique name for the container
-        self.test_blob_container_name = str(uuid.uuid4())
-        self.container_client = self.blob_service_client.create_container(
-            self.test_blob_container_name)
-
-        self.tb = gr.top_block()
-
+    # pylint: disable=invalid-name
     def tearDown(self):
-        self.tb = None
-        # clean up after test
-        self.container_client.delete_container()
-        self.blob_service_client.close()
+        azure_software_radio.blob_teardown(self)
 
     def test_instance(self):
 
@@ -64,7 +47,7 @@ class qa_blob_sink(gr_unittest.TestCase):
         block_len = 500000
 
         # set up a vector source with known complex data
-        src_data = np.arange(0, 2*block_len, 1, dtype=np.complex64)
+        src_data = np.arange(0, 2 * block_len, 1, dtype=np.complex64)
         src = blocks.vector_source_c(src_data)
 
         # set up a blob sink

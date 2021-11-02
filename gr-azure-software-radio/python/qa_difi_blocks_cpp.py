@@ -1,3 +1,5 @@
+
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -16,7 +18,8 @@ import pytest
 import numpy as np
 from gnuradio import gr, gr_unittest, blocks
 from azure_software_radio import (difi_source_cpp_fc32, difi_source_cpp_sc8, difi_sink_cpp_fc32, difi_sink_cpp_sc8,
-                                  DATA_PACKET_METADATA_FORMAT, VITA_PKT_MOD, CONTEX_ALT_PACK_STRUCT_FORMAT, DIFI_HEADER_SIZE)
+                                  DATA_PACKET_METADATA_FORMAT, VITA_PKT_MOD,
+                                  CONTEX_ALT_PACK_STRUCT_FORMAT, DIFI_HEADER_SIZE)
 
 
 SAMPS_PER_PACKET = 1344 // 2
@@ -24,12 +27,18 @@ SAMPS_PER_PACKET = 1344 // 2
 
 class qa_testcpp(gr_unittest.TestCase):
 
+    # pylint: disable=invalid-name
     def setUp(self):
-        self.vita_data = b'\x18\xe6\x01W\x00\x00\x00\x00\x00|8l\x00\x00\x00\x00`X\xec\xac\x00\x00\x00\xe5\xd0\xda\xa1' \
-                         b'\xe0\xd0\xdc\xd5\xe1\xf6\x00\n*\xff@\x01)"\xfb\x1a\xdd\xdf\xe7\xd4\x12\x12,)\x08\x00\xd3\xf8\xe5 \x19+\x12' \
-                         b'\x16\xe1\x1c\xe2*\x1a\x14A\x00*\x05\xef\xfa\xd3\xd5\xee\xd8\x10\x10\x16-\x1e\x121\xf3!\xe5\xf1\xd6\xd3\xd6\xe1' \
-                         b'\xfb\x02$\x1a.\x16*\xfa(\xe0\x17\xdf\xef\xf7\xcb\x0c\xc8\x0c\xe0\xfc\xf8\xe4\xf9\xc9\xf6\xc8\x0c\xf4$\x1e\x12\r\xde' \
-                         b'\xe4\xc3\xe8\xd9\x0c\x04\x1a%\x171\x1d\x1e \x01!\x072\x13<\xf2\x16\xd3\xe6\xfa\xef)\x1c\x06' \
+        self.vita_data = b'\x18\xe6\x01W\x00\x00\x00\x00\x00|8l\x00\x00\x00\x00`X\xec\xac\x00\x00\x00\xe5\xd0\xda' \
+                         b'\xa1' \
+                         b'\xe0\xd0\xdc\xd5\xe1\xf6\x00\n*\xff@\x01)"\xfb\x1a\xdd\xdf\xe7\xd4\x12\x12,)\x08' \
+                         b'\x00\xd3\xf8\xe5 \x19+\x12' \
+                         b'\x16\xe1\x1c\xe2*\x1a\x14A\x00*\x05\xef\xfa\xd3\xd5\xee\xd8\x10\x10\x16-\x1e' \
+                         b'\x121\xf3!\xe5\xf1\xd6\xd3\xd6\xe1' \
+                         b'\xfb\x02$\x1a.\x16*\xfa(\xe0\x17\xdf\xef\xf7\xcb\x0c\xc8\x0c\xe0' \
+                         b'\xfc\xf8\xe4\xf9\xc9\xf6\xc8\x0c\xf4$\x1e\x12\r\xde' \
+                         b'\xe4\xc3\xe8\xd9\x0c\x04\x1a%\x171\x1d\x1e \x01!\x072\x13<\xf2\x16\xd3' \
+                         b'\xe6\xfa\xef)\x1c\x06' \
                          b'\x1f\xd1\x02\xec\xfe2\x00G\xf1#\xfd\x02*\x0b)"\xf1\x0c\xd7\xda\xf9\xdd\x17\x16\x181' \
                          b'\x1f\r/\xe3,\xe4 \x05$#\x1e(\xf9\x19\xd6\x05\xd1\xf4\xdc\xe3\xee\xcf\x15' \
                          b'\xd0/\xfe\r$\xdd\x04\xee\xde!\x05%2\xfe\n\xdf\xd6\xe5\xfa\xff:\xfb9\xd9\x08' \
@@ -43,11 +52,15 @@ class qa_testcpp(gr_unittest.TestCase):
                          b'\x18%!\x1e-\r,\xff&\xf5+\xfa;\t)\xfc\xef\xda\xd8\xec\xfe+\x0b$\xf2\xdc\x05\xd8-\x18' \
                          b'\x0b%\xce\x02\xe7\x08)!/\x11%\xf87\xfa+\xfd\xf0\xf0\xdc\xe2\x10\xe9?\n3%\x07\x0b\xe4' \
                          b'\xe4\xdc\xf4\xe3"\xe5\x1a\xdf\xe5\xe2\xc9\xfe\xd8#\xf3,\xfa\x10\xe7\xf3\xd0\xe6\xd3\xdb' \
-                         b'\xf7\xd8\x1c\xf9"\'\x08+\xe5\x02\xd6\xde\xe2\xd5\x02\xdd!\xe4$\xdd\x0e\xd1\x03\xd1\x0b\xd9' \
+                         b'\xf7\xd8\x1c\xf9"\'\x08+\xe5\x02\xd6\xde\xe2\xd5\x02\xdd!\xe4$\xdd\x0e' \
+                         b'\xd1\x03\xd1\x0b\xd9' \
                          b'\xff\xe8\xdc\n\xd8&\x05\x164\xec/\xdd\xfe\xf5\xd8\x17\xe4$\x19\x15>\x02+\x00\xf3\xfc' \
-                         b'\xd1\xe6\xda\xda\xe9\xe2\xe7\xdc\xe3\xd4\xe7\xf0\xe1\x19\xdb\x16\xef\xec\x1c\xcf9\xe1&\x0c' \
-                         b'\xf6\x1d\xde\xff\xfc\xdf*\xe14\xe6\x18\xd6\x04\xd5\x0e\xf8$\x19*&\x0f/\xe0\'\xd4\xfd\x06' \
-                         b'\xdf*\xfb\x00#\xd7"\xfb\x1e)0\x1f\x1c\x18\xe4-\xe8\x18\x1d\xe5\x11\xdf\xd5\x01\xdd\x06\x1a' \
+                         b'\xd1\xe6\xda\xda\xe9\xe2\xe7\xdc\xe3\xd4\xe7\xf0\xe1\x19\xdb\x16\xef\xec' \
+                         b'\x1c\xcf9\xe1&\x0c' \
+                         b'\xf6\x1d\xde\xff\xfc\xdf*\xe14\xe6\x18\xd6\x04\xd5' \
+                         b'\x0e\xf8$\x19*&\x0f/\xe0\'\xd4\xfd\x06' \
+                         b'\xdf*\xfb\x00#\xd7"\xfb\x1e)0\x1f\x1c\x18\xe4-\xe8\x18\x1d\xe5\x11' \
+                         b'\xdf\xd5\x01\xdd\x06\x1a' \
                          b'\xe6-\xc9\x1a\xd9\x10\x13\x053\xe9\x12\xd1\x00\xd1$\xec \x03\xde\xf3\xd5\xdd' \
                          b'\x17\xf9,)\x01 \xeb\xe7\xec\xcf\xd8\xf8\xcf+\xf7"!\xe6\x1c\xd3\xff\x0e' \
                          b'\xf22\x05\x06\x1f\xcc\x1f\xc8\x0b\xe9\x06\x01 \x02=\x015\x17\x0b.\xf9\x1e' \
@@ -87,6 +100,7 @@ class qa_testcpp(gr_unittest.TestCase):
                          b'\xe5\x02\xe2#\xdf\x02\xe3\xd5\xe4\xda\xdf\xe5\xe7\xd4\xff\xd2\x02\xe3\xea\xdb\xe1\xcd' \
                          b'\xfb\xeb\x17\x1c\x1c.\x0c \xe8\x07\xbf\xfb\xd2\x06\x1d\x06.\xf1\xec\x01\xd0,\x07\x14*'
 
+    # pylint: disable=invalid-name
     def tearDown(self):
         pass
 
@@ -164,10 +178,8 @@ class qa_testcpp(gr_unittest.TestCase):
         tb.connect(vita_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
         vita_data_time_change = bytearray(self.vita_data)
-        full = b'\x00\x00\x00\x00'
-        frac = full + full
-        vita_data_time_change[16:20] = bytearray(full)
-        vita_data_time_change[20:28] = bytearray(frac)
+        vita_data_time_change[16:20] = bytearray(b'\x00\x00\x00\x00')
+        vita_data_time_change[20:28] = bytearray(b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00')
         frac_base = 1344000000 // 2
         to_one = math.ceil(1e12 / frac_base)
         tb_proc.start()
@@ -177,12 +189,14 @@ class qa_testcpp(gr_unittest.TestCase):
             ('127.0.0.1', sink_p), to_one, frac_base))
         rec_proc.start()
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        for i in range(to_one + 1):
+        i = 0
+        while i < to_one + 1:
             vita_data_time_change[1] = (
                 vita_data_time_change[1] & 0xf0) | base_pkt_n
             time.sleep(.002)
             sock.sendto(vita_data_time_change, ('127.0.0.1', source_p))
             base_pkt_n = (base_pkt_n + 1) % VITA_PKT_MOD
+            i += 1
         rec_proc.join()
         sock.close()
         tb_proc.kill()
@@ -251,7 +265,8 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data = bytearray(self.vita_data)
         tb_proc.start()
         base_pkt_n = 6
-        for i in range(VITA_PKT_MOD + 1):
+        i = 0
+        while i < VITA_PKT_MOD + 1:
             vita_data[1] = (vita_data[1] & 0xf0) | base_pkt_n
             send_proc = Process(target=socket_send, args=(
                 ('127.0.0.1', source_p), vita_data))
@@ -268,6 +283,7 @@ class qa_testcpp(gr_unittest.TestCase):
             base_pkt_n = (base_pkt_n + 1) % VITA_PKT_MOD
             random.randint(29, 1371)
             vita_data[random.randint(29, 1371)] = random.randint(0, 255)
+            i += 1
         tb_proc.kill()
 
     def test_multi_packet_correct_sc8(self):
@@ -281,7 +297,8 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data = bytearray(self.vita_data)
         tb_proc.start()
         base_pkt_n = 6
-        for i in range(VITA_PKT_MOD + 1):
+        i = 0
+        while i < VITA_PKT_MOD + 1:
             vita_data[1] = (vita_data[1] & 0xf0) | base_pkt_n
             send_proc = Process(target=socket_send, args=(
                 ('127.0.0.1', source_p), vita_data))
@@ -298,11 +315,12 @@ class qa_testcpp(gr_unittest.TestCase):
             base_pkt_n = (base_pkt_n + 1) % VITA_PKT_MOD
             random.randint(29, 1371)
             vita_data[random.randint(29, 1371)] = random.randint(0, 255)
+            i += 1
         tb_proc.kill()
 
     # standalone mode tests
     def test_standalone_context(self):
-        source_p, sink_p = get_open_ports()
+        _, sink_p = get_open_ports()
         tb = gr.top_block()
         samp_rate = int(1e6)
         oui = 0xf
@@ -326,7 +344,6 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_standalone_data(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
-        samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
         add_const = blocks.add_const_cc(1)
@@ -371,7 +388,6 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_standalone_16_bit_data_basic(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
-        samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
         add_const = blocks.add_const_cc(1)
@@ -424,7 +440,7 @@ class qa_testcpp(gr_unittest.TestCase):
             pytest.fail()
 
     def test_standalone_context_16(self):
-        source_p, sink_p = get_open_ports()
+        _, sink_p = get_open_ports()
         tb = gr.top_block()
         samp_rate = int(1e6)
         oui = 0xf
@@ -445,7 +461,7 @@ class qa_testcpp(gr_unittest.TestCase):
             tb_proc.kill()
             pytest.fail()
 
-
+# pylint: disable=consider-using-f-string
 def socket_rec_confirm_standalone_data(server, size):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(server)
@@ -504,7 +520,7 @@ def socket_rec_pack_n(server, pkt_n, vita_source):
     sock.bind(server)
     data = sock.recv(2048)
     sock.close()
-    pack_type, r_pkt_n, stream_num, header, _, _ = vita_source.parse_header(
+    _, r_pkt_n, _, _, _, _ = vita_source.parse_header(
         data)
     assert r_pkt_n == pkt_n
 
@@ -557,10 +573,9 @@ def rec_socket_multi_packet(server, num_packets, frac_base):
             r_frac = payload[4]
             assert math.isclose(frac, r_frac, rel_tol=1e-11, abs_tol=2)
             assert full == r_full
-        except Exception as e:
+        except Exception as exe:
             sock.close()
-            raise e
-
+            raise exe
 
 def parse_vita_double(bits):
     int_part = bits >> 20

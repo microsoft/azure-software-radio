@@ -45,4 +45,12 @@ def get_blob_service_client(authentication_method: str = "default", connection_s
 
 
 def shutdown_blob_service_client(service_client: BlobServiceClient):
+    """Close the blob service client
+    Args:
+        service_cliient: The blob service client to close
+    Raises:
+        None
+    Returns:
+        None
+    """
     service_client.close()
