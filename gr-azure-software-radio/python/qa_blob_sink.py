@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, duplicate-code
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
