@@ -3,4 +3,4 @@
 # See License.txt in the project root for license information.
 #
 
-from .keyvault import pull_keys
+from .keyvault import pull_key

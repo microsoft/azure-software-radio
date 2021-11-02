@@ -37,13 +37,14 @@ blocks:
   parameters:
     alias: ''
     comment: ''
-    keys: '["secretconnectionstring", "seed", "scramble"]'
-    value: grvaulttest
+    key: three
+    keyvault_name: integkv
+    value: '0'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [416, 68.0]
+    coordinate: [456, 100.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -59,6 +60,18 @@ blocks:
     rotation: 0
     state: enabled
 - name: scramble
+  id: variable
+  parameters:
+    comment: ''
+    value: '"0"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [10000, 10000.0]
+    rotation: 0
+    state: true
+- name: sec
   id: variable
   parameters:
     comment: ''
@@ -94,116 +107,40 @@ blocks:
     coordinate: [10000, 10000.0]
     rotation: 0
     state: true
-- name: azure_software_radio_blob_sink_0
-  id: azure_software_radio_blob_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    authentication_method: connection_string
-    blob_name: stuff2
-    block_len: '500000'
-    comment: ''
-    connection_str: mysecretstring
-    container_name: demostore
-    url: ''
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1264, 420.0]
-    rotation: 0
-    state: disabled
-- name: blocks_char_to_float_0
-  id: blocks_char_to_float
+- name: analog_const_source_x_0
+  id: analog_const_source_x
   parameters:
     affinity: ''
     alias: ''
     comment: ''
+    const: int(keyvault_0)
     maxoutbuf: '0'
     minoutbuf: '0'
-    scale: '1'
-    vlen: '1'
+    type: complex
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [768, 364.0]
-    rotation: 0
-    state: enabled
-- name: blocks_float_to_complex_0
-  id: blocks_float_to_complex
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1064, 368.0]
-    rotation: 0
-    state: enabled
-- name: blocks_throttle_0
-  id: blocks_throttle
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    ignoretag: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    samples_per_second: samp_rate
-    type: byte
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [344, 364.0]
-    rotation: 0
-    state: enabled
-- name: blocks_vector_source_x_0
-  id: blocks_vector_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    repeat: 'True'
-    tags: '[]'
-    type: byte
-    vector: (1,0)
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [144, 348.0]
+    coordinate: [528, 300.0]
     rotation: 0
     state: true
-- name: digital_scrambler_bb_0
-  id: digital_scrambler_bb
+- name: blocks_complex_to_real_0
+  id: blocks_complex_to_real
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    len: '7'
-    mask: int(scramble)
     maxoutbuf: '0'
     minoutbuf: '0'
-    seed: int(seed)
+    vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 348.0]
+    coordinate: [792, 316.0]
     rotation: 0
-    state: enabled
-- name: qtgui_time_sink_x_1_0
+    state: true
+- name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
     affinity: ''
@@ -218,7 +155,7 @@ blocks:
     alpha7: '1.0'
     alpha8: '1.0'
     alpha9: '1.0'
-    autoscale: 'False'
+    autoscale: 'True'
     axislabels: 'True'
     color1: blue
     color10: dark blue
@@ -277,7 +214,7 @@ blocks:
     tr_mode: qtgui.TRIG_MODE_FREE
     tr_slope: qtgui.TRIG_SLOPE_POS
     tr_tag: '""'
-    type: complex
+    type: float
     update_time: '0.10'
     width1: '1'
     width10: '1'
@@ -297,17 +234,13 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1264, 300.0]
+    coordinate: [1056, 300.0]
     rotation: 0
-    state: enabled
+    state: true
 
 connections:
-- [blocks_char_to_float_0, '0', blocks_float_to_complex_0, '0']
-- [blocks_float_to_complex_0, '0', azure_software_radio_blob_sink_0, '0']
-- [blocks_float_to_complex_0, '0', qtgui_time_sink_x_1_0, '0']
-- [blocks_throttle_0, '0', digital_scrambler_bb_0, '0']
-- [blocks_vector_source_x_0, '0', blocks_throttle_0, '0']
-- [digital_scrambler_bb_0, '0', blocks_char_to_float_0, '0']
+- [analog_const_source_x_0, '0', blocks_complex_to_real_0, '0']
+- [blocks_complex_to_real_0, '0', qtgui_time_sink_x_0, '0']
 
 metadata:
   file_format: 1
