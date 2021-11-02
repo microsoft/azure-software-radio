@@ -11,21 +11,17 @@ import numpy as np
 from gnuradio import gr_unittest
 from gnuradio import blocks
 from azure_software_radio import blob_source
-
+import azure_software_radio
 
 class qa_blob_source(gr_unittest.TestCase):
 
     # pylint: disable=invalid-name
     def setUp(self):
-        blob_teardown(self)
+        azure_software_radio.blob_setup(self)
 
     # pylint: disable=invalid-name
     def tearDown(self):
-        self.tb = None
-
-        # clean up after test
-        self.container_client.delete_container()
-        self.blob_service_client.close()
+        azure_software_radio.blob_teardown(self)
 
     def test_round_trip_data_through_blob(self):
         """ Upload known data to a blob using the azure blob API.

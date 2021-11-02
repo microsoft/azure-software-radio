@@ -46,6 +46,7 @@ GR_PYTHON_INSTALL(
     __init__.py
     blob_sink.py
     blob_source.py
+    blob_qa_common.py
     blob_common.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
 )
 ########################################################################
