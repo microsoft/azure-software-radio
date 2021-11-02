@@ -1,5 +1,5 @@
 
-# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-name-in-module
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
