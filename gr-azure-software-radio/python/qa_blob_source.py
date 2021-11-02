@@ -10,10 +10,10 @@
 import numpy as np
 from gnuradio import gr_unittest
 from gnuradio import blocks
-from azure_software_radio import blob_source
+from azure_software_radio import BlobSource
 import azure_software_radio
 
-class qa_blob_source(gr_unittest.TestCase):
+class qa_BlobSource(gr_unittest.TestCase):
 
     # pylint: disable=invalid-name
     def setUp(self):
@@ -26,7 +26,7 @@ class qa_blob_source(gr_unittest.TestCase):
     def test_round_trip_data_through_blob(self):
         """ Upload known data to a blob using the azure blob API.
 
-        Read this data back into a GNU Radio vector sink using the blob_source
+        Read this data back into a GNU Radio vector sink using the BlobSource
         block and confirm that the data wasn't corrupted.
         """
 
@@ -41,7 +41,7 @@ class qa_blob_source(gr_unittest.TestCase):
             blob=blob_name)
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
         # set up a blob sink
-        source = blob_source(authentication_method="connection_string",
+        source = BlobSource(authentication_method="connection_string",
                          connection_str=self.blob_connection_string,
                          container_name=self.test_blob_container_name,
                          blob_name=blob_name,
@@ -77,7 +77,7 @@ class qa_blob_source(gr_unittest.TestCase):
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
 
         # set up a blob sink
-        op = blob_source(authentication_method="connection_string",
+        op = BlobSource(authentication_method="connection_string",
                          connection_str=self.blob_connection_string,
                          container_name=self.test_blob_container_name,
                          blob_name=blob_name,
@@ -114,7 +114,7 @@ class qa_blob_source(gr_unittest.TestCase):
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
 
         # set up a blob sink
-        op = blob_source(authentication_method="connection_string",
+        op = BlobSource(authentication_method="connection_string",
                          connection_str=self.blob_connection_string,
                          container_name=self.test_blob_container_name,
                          blob_name=blob_name,
@@ -137,4 +137,4 @@ class qa_blob_source(gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_blob_source)
+    gr_unittest.run(qa_BlobSource)

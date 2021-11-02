@@ -11,10 +11,10 @@
 import numpy as np
 from gnuradio import gr_unittest
 from gnuradio import blocks
-from azure_software_radio import blob_sink
+from azure_software_radio import BlobSink
 import azure_software_radio
 
-class qa_blob_sink(gr_unittest.TestCase):
+class qa_BlobSink(gr_unittest.TestCase):
 
     # pylint: disable=invalid-name
     def setUp(self):
@@ -26,7 +26,7 @@ class qa_blob_sink(gr_unittest.TestCase):
 
     def test_instance(self):
 
-        instance = blob_sink(authentication_method="connection_string",
+        instance = BlobSink(authentication_method="connection_string",
                              connection_str=self.blob_connection_string,
                              container_name=self.test_blob_container_name,
                              blob_name='test-instance',
@@ -51,7 +51,7 @@ class qa_blob_sink(gr_unittest.TestCase):
         src = blocks.vector_source_c(src_data)
 
         # set up a blob sink
-        op = blob_sink(authentication_method="connection_string",
+        op = BlobSink(authentication_method="connection_string",
                        connection_str=self.blob_connection_string,
                        container_name=self.test_blob_container_name,
                        blob_name=blob_name,
@@ -76,4 +76,4 @@ class qa_blob_sink(gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_blob_sink)
+    gr_unittest.run(qa_BlobSink)
