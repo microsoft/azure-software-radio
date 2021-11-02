@@ -468,7 +468,7 @@ def socket_rec_confirm_standalone_data(server, size):
     data = sock.recv(2048)
     sock.close()
     samples = struct.unpack_from(
-        f'!{(len(data) - DIFI_HEADER_SIZE)}b' (len(data) - DIFI_HEADER_SIZE), data, offset=DIFI_HEADER_SIZE)
+        f'!{(len(data) - DIFI_HEADER_SIZE)}b', data, offset=DIFI_HEADER_SIZE)
     expected = (1, 0) * size
     assert samples == expected
 
