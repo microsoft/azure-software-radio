@@ -29,6 +29,7 @@ def blob_setup(self):
 
     self.tb = gr.top_block()
 
+
 def blob_teardown(self):
     self.tb = None
     # clean up after test
