@@ -82,11 +82,12 @@ class BlobSink(gr.sync_block):
         self.log = gr.logger("log_debug")
 
     def upload_queue_contents(self):
+        # pylint: fixme
         """
         Pull all items out of the upload queue and stage each queue item as a block in the
         current blob
         """
-        # TODO: put this into a separate thread
+        # TODO: put this into a separate thread, see ADO #5897
         while not self.que.empty():
 
             data = self.que.get()
@@ -103,10 +104,11 @@ class BlobSink(gr.sync_block):
             # track block IDs so we can commit the list later
             self.block_id_list.append(block_id)
 
-            # TODO: Use structured logging
+            # TODO: Use structured logging, see ADO#7767
             self.log.debug("Upload complete")
 
     def work(self, input_items, _):
+        # pylint: fixme
         """ Buffer up items for upload to blob storage.
 
         Buffer up items in self.block_len sized chunks. When the buffer is full, pass it over
@@ -143,7 +145,7 @@ class BlobSink(gr.sync_block):
                 self.log.debug(
                     "The upload queue is full, will try to requeue in the next work call")
 
-            # TODO: Make this step multithreaded so uploads don't block the work call
+            # TODO: Make this step multithreaded so uploads don't block the work call, see ADO #5897
             self.upload_queue_contents()
 
         return num_copy_items

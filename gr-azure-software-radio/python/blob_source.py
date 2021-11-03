@@ -101,10 +101,11 @@ class BlobSource(gr.sync_block):
         return data, chunk_residue
 
     def download_chunk_to_queue(self):
+        # pylint: fixme
         """
         Pull chunks from the blob, convert the bytes into a numpy array, and add to queue
         """
-        # TODO: put this into a separate thread
+        # TODO: put this into a separate thread, see ADO #5897
         while not self.que.full() and not self.blob_complete:
 
             try:
@@ -122,6 +123,7 @@ class BlobSource(gr.sync_block):
                 self.blob_complete = True
 
     def work(self, _, output_items):
+        # pylint: fixme
         """ Stream items from blob storage.
 
         Stream items out from an internal buffer. Once the internal buffer is exhausted,
@@ -159,7 +161,7 @@ class BlobSource(gr.sync_block):
         # is it time to get more data from the queue?
         if len(self.buf) <= self.num_buf_items_read:
             # check for more chunks in the downloader
-            # TODO: Multithread this so downloads don't block the work thread
+            # TODO: Multithread this so downloads don't block the work thread, see ADO#5897
 
             # don't try to download from a blob that's complete or we'll get stuck waiting on
             # api call timeouts during shutdown
