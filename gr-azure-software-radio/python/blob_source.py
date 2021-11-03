@@ -39,7 +39,7 @@ class BlobSource(gr.sync_block):
     def __init__(self, authentication_method: str = "default", connection_str: str = None,
                  url: str = None, container_name: str = None, blob_name: str = None,
                  queue_size: int = 4):
-        # pylint: disable=no-member, duplicate-code, R0801
+        # pylint: disable=no-member
         """ Initialize the blob_source block
 
         Args:

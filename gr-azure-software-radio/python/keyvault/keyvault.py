@@ -6,7 +6,6 @@
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
-# pylint: disable=duplicate-code, R0801
 def pull_key(vault_name, key):
     """
     Pulls given key from a Azure keyvault given the vault name. This method returns a string corresponding to
