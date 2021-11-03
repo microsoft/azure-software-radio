@@ -14,6 +14,7 @@ from gnuradio import blocks
 from azure_software_radio import BlobSink
 import azure_software_radio
 
+
 class qa_BlobSink(gr_unittest.TestCase):
 
     # pylint: disable=invalid-name
@@ -27,11 +28,11 @@ class qa_BlobSink(gr_unittest.TestCase):
     def test_instance(self):
 
         instance = BlobSink(authentication_method="connection_string",
-                             connection_str=self.blob_connection_string,
-                             container_name=self.test_blob_container_name,
-                             blob_name='test-instance',
-                             block_len=500000,
-                             queue_size=4)
+                            connection_str=self.blob_connection_string,
+                            container_name=self.test_blob_container_name,
+                            blob_name='test-instance',
+                            block_len=500000,
+                            queue_size=4)
 
         # really only checking that the init didn't throw an exception above, but adding the check
         # below to keep flake8 happy
@@ -52,11 +53,11 @@ class qa_BlobSink(gr_unittest.TestCase):
 
         # set up a blob sink
         op = BlobSink(authentication_method="connection_string",
-                       connection_str=self.blob_connection_string,
-                       container_name=self.test_blob_container_name,
-                       blob_name=blob_name,
-                       block_len=block_len,
-                       queue_size=4)
+                      connection_str=self.blob_connection_string,
+                      container_name=self.test_blob_container_name,
+                      blob_name=blob_name,
+                      block_len=block_len,
+                      queue_size=4)
 
         self.tb.connect(src, op)
         # run the flowgraph

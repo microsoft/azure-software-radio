@@ -13,6 +13,7 @@ from gnuradio import blocks
 from azure_software_radio import BlobSource
 import azure_software_radio
 
+
 class qa_BlobSource(gr_unittest.TestCase):
 
     # pylint: disable=invalid-name
@@ -42,10 +43,10 @@ class qa_BlobSource(gr_unittest.TestCase):
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
         # set up a blob sink
         source = BlobSource(authentication_method="connection_string",
-                         connection_str=self.blob_connection_string,
-                         container_name=self.test_blob_container_name,
-                         blob_name=blob_name,
-                         queue_size=4)
+                            connection_str=self.blob_connection_string,
+                            container_name=self.test_blob_container_name,
+                            blob_name=blob_name,
+                            queue_size=4)
         dst = blocks.vector_sink_c()
 
         self.tb.connect(source, dst)
@@ -78,10 +79,10 @@ class qa_BlobSource(gr_unittest.TestCase):
 
         # set up a blob sink
         op = BlobSource(authentication_method="connection_string",
-                         connection_str=self.blob_connection_string,
-                         container_name=self.test_blob_container_name,
-                         blob_name=blob_name,
-                         queue_size=4)
+                        connection_str=self.blob_connection_string,
+                        container_name=self.test_blob_container_name,
+                        blob_name=blob_name,
+                        queue_size=4)
 
         src_data_bytes = src_data.tobytes()
         # don't send the last 2 bytes of the last sample
@@ -115,10 +116,10 @@ class qa_BlobSource(gr_unittest.TestCase):
 
         # set up a blob sink
         op = BlobSource(authentication_method="connection_string",
-                         connection_str=self.blob_connection_string,
-                         container_name=self.test_blob_container_name,
-                         blob_name=blob_name,
-                         queue_size=4)
+                        connection_str=self.blob_connection_string,
+                        container_name=self.test_blob_container_name,
+                        blob_name=blob_name,
+                        queue_size=4)
 
         src_data_bytes = src_data.tobytes()
         # don't send the first 2 bytes of the first sample
