@@ -32,8 +32,8 @@ jobs:
           sudo make install -j
       - name: Update GNURadio preferences
         run: |
-          mkdir -p ~/.gnuradio/prefs/
-          touch ~/.gnuradio/prefs/vmcircbuf_default_factory
+          mkdir -p "${HOME}/.gnuradio/prefs/""
+          touch "${HOME}/.gnuradio/prefs/vmcircbuf_default_factory"
       - name: Run Tests
         env:
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
