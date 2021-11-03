@@ -62,15 +62,16 @@ class BlobSink(gr.sync_block):
 
         self.block_len = block_len
 
-        self.que = queue.Queue(maxsize=queue_size)
-        self.buf = np.zeros((self.block_len, ), dtype=np.complex64)
-        self.num_buf_items = 0
 
         self.blob_service_client = get_blob_service_client(
             authentication_method=authentication_method,
             connection_str=connection_str,
             url=url
         )
+
+        self.que = queue.Queue(maxsize=queue_size)
+        self.buf = np.zeros((self.block_len, ), dtype=np.complex64)
+        self.num_buf_items = 0
 
         self.blob_client = self.blob_service_client.get_blob_client(container=container_name,
                                                                     blob=blob_name)
