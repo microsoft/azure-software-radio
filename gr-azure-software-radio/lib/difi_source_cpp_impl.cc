@@ -115,7 +115,6 @@ namespace gr {
       // check the file descriptor for incoming client connection
       if(d_socket_type == SOCK_STREAM)
       {
-        // GR_LOG_DEBUG(this->d_logger, "difi::source work");
         struct timeval tv;
         tv.tv_sec = 0;
         tv.tv_usec = 10000;
@@ -187,46 +186,14 @@ namespace gr {
             reset_tcp_connection();
             return 0;
           }
-          // check 
+          // check packet size
           auto header = unpack_u32(&d_packet_buffer[0]);
-          //GR_LOG_DEBUG(this->d_logger, "header[0]:" + std::to_string(d_packet_buffer[0]) + "header[1]:" + std::to_string(d_packet_buffer[1])
-          //+ "header[2]: " + std::to_string(d_packet_buffer[2]) + " header[3]: " + std::to_string(d_packet_buffer[3]));
           int32_t pkt_size = 4 * (header&0xffff) - 4;
           if(pkt_size>0)
           {
             int num_to_read = std::min(pkt_size,int(d_packet_buffer.size()-4));
             size_gotten+= recv(d_client_socket, &d_packet_buffer[4], num_to_read,MSG_WAITALL);
-            if(size_gotten != pkt_size+4)
-            {
-              GR_LOG_ERROR(this->d_logger,"Error: not enough bytes read!!!!!!");
-            }
           }
-
-        /*
-
-        if(d_num_pending_bytes == 0)
-        {
-          size_gotten = recv(d_client_socket, &d_packet_buffer[0], d_packet_buffer.size(),MSG_WAITALL);
-        }
-        else
-        {
-          // shift remaining bytes to front and append
-          memcpy(&d_packet_buffer[0], &d_remaining_bytes[0], d_num_pending_bytes);
-          d_remainint_bytes.clear();
-
-          size_gotten = recv(d_client_socket, &d_packet_buffer[d_num_pending_bytes-1], d_packet_buffer.size()-d_num_pending_bytes,MSG_WAITALL);
-
-        }
-
-          // compute the number of bytes per packet
-          // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
-          // Packet Size: Bits 0-15
-          size_gotten = d_packet_buffer[0] & 0xFFFF;
-
-          // update the number of pending bytes to process in the next read
-          d_num_pending_bytes =  d_packet_buffer.size() - size_gotten;
-          d_remaining_bytes.
-          */
       }
 
       if (size_gotten < 0)
@@ -490,7 +457,6 @@ namespace gr {
     template <class T>
     void difi_source_cpp_impl<T>::reset_tcp_connection()
     {
-      GR_LOG_DEBUG(this->d_logger, "resetting tcp connection");
       close(d_client_socket);
       FD_CLR(d_client_socket, &d_rset);
       d_fds.pop_back();

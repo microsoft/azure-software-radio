@@ -132,7 +132,6 @@ namespace gr {
     {
       if(d_socket_type == SOCK_STREAM)
       {
-        // GR_LOG_DEBUG(this->d_logger, "difi::sink work");
         socklen_t addr_len = sizeof(d_servaddr);
         if(getpeername(d_socket, (struct sockaddr*)&d_servaddr, &addr_len) < 0)
         {
@@ -180,12 +179,6 @@ namespace gr {
             GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
             throw std::runtime_error("Send failed to send msg on socket correctly");
           }
-        // GR_LOG_DEBUG(this->d_logger, "work: header[0]:" + std::to_string(to_send[0]) + "header[1]:" + std::to_string(to_send[1])
-        //   + "header[2]: " + std::to_string(to_send[2]) + " header[3]: " + std::to_string(to_send[3]));
-        if(to_send[3] != 71 and to_send[3] != 18)
-        {
-          GR_LOG_ERROR(this->d_logger, "work: data size is wrong!!:" + std::to_string(to_send[3]));
-        }
           if(d_socket_type == SOCK_STREAM and
               send(d_socket, &to_send[0], to_send.size(), 0) != to_send.size())
           {
@@ -221,8 +214,6 @@ namespace gr {
             GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
             throw std::runtime_error("Send failed to send msg on socket correctly");
           }
-          // GR_LOG_DEBUG(this->d_logger, "process_tags::context header[0]:" + std::to_string(to_send[0]) + "header[1]:" + std::to_string(to_send[1])
-          // + "header[2]: " + std::to_string(to_send[2]) + " header[3]: " + std::to_string(to_send[3]));
           if(d_socket_type == SOCK_STREAM and
               send(d_socket, &to_send[0], to_send.size(), 0) != to_send.size())
           {
@@ -293,8 +284,6 @@ namespace gr {
           GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
           throw std::runtime_error("Send failed to send msg on socket correctly");
         }
-        // GR_LOG_DEBUG(this->d_logger, "send_context::context header[0]:" + std::to_string(d_context_raw[0]) + "header[1]:" + std::to_string(d_context_raw[1])
-        //   + "header[2]: " + std::to_string(d_context_raw[2]) + " header[3]: " + std::to_string(d_context_raw[3]));
         if(d_socket_type == SOCK_STREAM and 
             send(d_socket, &d_context_raw[0], d_context_raw.size(), 0) != d_context_raw.size())
         {
