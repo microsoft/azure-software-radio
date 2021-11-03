@@ -12,6 +12,7 @@ import numpy as np
 from gnuradio import gr
 from azure_software_radio.blob_common import get_blob_service_client
 
+
 class BlobSink(gr.sync_block):
     """ Write samples out to an Azure Blob.
 
@@ -39,6 +40,7 @@ class BlobSink(gr.sync_block):
         high throughput block transfers. Must be an integer number of items.
     """
     # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
+
     def __init__(self, authentication_method: str = "default", connection_str: str = None,
                  url: str = None, container_name: str = None, blob_name: str = None,
                  block_len: int = 500000, queue_size: int = 4):
@@ -61,7 +63,6 @@ class BlobSink(gr.sync_block):
                                out_sig=[])
 
         self.block_len = block_len
-
 
         self.blob_service_client = get_blob_service_client(
             authentication_method=authentication_method,
