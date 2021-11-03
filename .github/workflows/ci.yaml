@@ -32,6 +32,11 @@ jobs:
           sudo make install -j
       - name: Update GNURadio preferences
         run: |
+          echo "Home is: ${HOME}"
+          echo "RUNNER_TEMP is: ${RUNNER_TEMP}"
+          echo "GITHUB_WORKSPACE is: ${GITHUB_WORKSPACE}"
+          echo "GITHUB_ACTION_PATH is: ${GITHUB_ACTION_PATH}"
+
           mkdir -p "${HOME}/.gnuradio/prefs/"
           touch "${HOME}/.gnuradio/prefs/vmcircbuf_default_factory"
       - name: Run Tests
