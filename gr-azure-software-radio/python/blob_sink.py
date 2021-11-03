@@ -38,7 +38,7 @@ class BlobSink(gr.sync_block):
         block sizes where block_len*itemsize is greater than 4MiB will enable the use of
         high throughput block transfers. Must be an integer number of items.
     """
-    # pylint: disable=too-many-arguments, too-many-instance-attributes
+    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
     def __init__(self, authentication_method: str = "default", connection_str: str = None,
                  url: str = None, container_name: str = None, blob_name: str = None,
                  block_len: int = 500000, queue_size: int = 4):
@@ -90,7 +90,7 @@ class BlobSink(gr.sync_block):
         while not self.que.empty():
 
             data = self.que.get()
-            data_len = len(data)*gr.sizeof_gr_complex
+            data_len = len(data)*np.dtype(np.complex64).itemsize
 
             # TODO: Use structured logging
             self.log.debug(f"Beginning upload of {data_len} bytes")

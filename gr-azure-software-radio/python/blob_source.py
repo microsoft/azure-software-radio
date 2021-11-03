@@ -35,7 +35,7 @@ class BlobSource(gr.sync_block):
     Container Name: Name of the container where the blob of interest is stored.
     Blob Name: The name of the block blob to read from.
     """
-    # pylint: disable=too-many-arguments, too-many-instance-attributes
+    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
     def __init__(self, authentication_method: str = "default", connection_str: str = None,
                  url: str = None, container_name: str = None, blob_name: str = None,
                  queue_size: int = 4):
