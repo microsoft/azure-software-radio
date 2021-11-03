@@ -41,6 +41,9 @@ namespace gr {
           val = htonl(val);
           memcpy(start, &val, sizeof(val));
         }
+
+        void create_udp_socket();
+        void create_tcp_socket();
         
         struct sockaddr_in d_servaddr;
         int d_socket;
@@ -78,6 +81,7 @@ namespace gr {
         std::vector<int8_t> pack_data();
         void send_context();
         std::tuple<u_int32_t, u_int64_t> add_frac_full();
+        fd_set d_fdset;
  
      public:
       difi_sink_cpp_impl(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, uint32_t port, uint8_t socket_type, bool mode, 

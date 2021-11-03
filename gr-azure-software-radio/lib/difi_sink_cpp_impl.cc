@@ -34,30 +34,15 @@ namespace gr {
       d_servaddr.sin_family = AF_INET;
       d_servaddr.sin_port = htons(port);
       d_servaddr.sin_addr.s_addr = inet_addr(ip_addr.c_str());
-      d_socket_type = 1 ? SOCK_DGRAM : SOCK_STREAM;
-
+      d_socket_type = (socket_type == 1) ?  SOCK_STREAM : SOCK_DGRAM;
 
       if(d_socket_type == SOCK_DGRAM)
       {
-        if ((d_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-        {
-          GR_LOG_ERROR(this->d_logger, "Could not make UDP socket, socket may be in use.");
-          throw std::runtime_error("Could not make UDP socket");
-        }
+        create_udp_socket();
       }
       else
       {
-        if ((d_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-        {
-          GR_LOG_ERROR(this->d_logger, "Could not make TCP socket, socket may be in use.");
-          throw std::runtime_error("Could not make TCP socket");
-        }
-
-        if(connect(d_socket, (struct sockaddr*)&d_servaddr, sizeof(d_servaddr)) < 0)
-        {
-          GR_LOG_ERROR(this->d_logger, "Unable to connect TCP socket");
-          throw std::runtime_error("Unable to connect TCP socket");
-        }
+        create_tcp_socket();
       }
 
       if (samples_per_packet < 2)
@@ -137,6 +122,7 @@ namespace gr {
     difi_sink_cpp_impl<T>::~difi_sink_cpp_impl()
     {
       close(d_socket);
+      FD_CLR(d_socket,&d_fdset);
     }
 
     template <class T>
@@ -144,10 +130,39 @@ namespace gr {
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
+      if(d_socket_type == SOCK_STREAM)
+      {
+        // GR_LOG_DEBUG(this->d_logger, "difi::sink work");
+        socklen_t addr_len = sizeof(d_servaddr);
+        if(getpeername(d_socket, (struct sockaddr*)&d_servaddr, &addr_len) < 0)
+        {
+          close(d_socket);
+          create_tcp_socket();
+          return 0;
+        }
+        else
+        {
+          struct timeval tv;
+          tv.tv_sec = 0;
+          tv.tv_usec = 10000;
+
+          if(select(d_socket + 1, NULL, &d_fdset, NULL, &tv) < 0)
+          {
+            GR_LOG_ERROR(this->d_logger, "Could not select client fd");
+            throw std::runtime_error("Could not select client fd");
+          }
+
+          if(!FD_ISSET(d_socket,&d_fdset))
+            return noutput_items;
+        }
+      }
+
       const T *in = reinterpret_cast<const T*>(input_items[0]);
 
       if(d_is_paired_mode)
+      {
         process_tags(noutput_items);
+      }
         
       for(int i = 0; i < noutput_items; i++)
       {
@@ -159,14 +174,19 @@ namespace gr {
               send_context();
 
           auto to_send = pack_data();
-          if(d_socket_type == SOCK_DGRAM &&
+          if(d_socket_type == SOCK_DGRAM and
               sendto(d_socket, &to_send[0], to_send.size(), 0, (const struct sockaddr *) &d_servaddr, sizeof(d_servaddr)) != to_send.size())
           {
             GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
             throw std::runtime_error("Send failed to send msg on socket correctly");
           }
-
-          if(d_socket_type == SOCK_STREAM &&
+        // GR_LOG_DEBUG(this->d_logger, "work: header[0]:" + std::to_string(to_send[0]) + "header[1]:" + std::to_string(to_send[1])
+        //   + "header[2]: " + std::to_string(to_send[2]) + " header[3]: " + std::to_string(to_send[3]));
+        if(to_send[3] != 71 and to_send[3] != 18)
+        {
+          GR_LOG_ERROR(this->d_logger, "work: data size is wrong!!:" + std::to_string(to_send[3]));
+        }
+          if(d_socket_type == SOCK_STREAM and
               send(d_socket, &to_send[0], to_send.size(), 0) != to_send.size())
           {
             GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
@@ -195,14 +215,15 @@ namespace gr {
           auto raw = pmt::dict_ref(tag.value, pmt::intern("raw"), pmt::get_PMT_NIL());;
           std::vector<int8_t> to_send = pmt::s8vector_elements(raw);
           d_raw = to_send;
-          if(d_socket_type == SOCK_DGRAM &&
+          if(d_socket_type == SOCK_DGRAM and
               sendto(d_socket, &to_send[0], to_send.size(), 0, (const struct sockaddr *) &d_servaddr, sizeof(d_servaddr)) != to_send.size())
           {
             GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
             throw std::runtime_error("Send failed to send msg on socket correctly");
           }
-
-          if(d_socket_type == SOCK_STREAM &&
+          // GR_LOG_DEBUG(this->d_logger, "process_tags::context header[0]:" + std::to_string(to_send[0]) + "header[1]:" + std::to_string(to_send[1])
+          // + "header[2]: " + std::to_string(to_send[2]) + " header[3]: " + std::to_string(to_send[3]));
+          if(d_socket_type == SOCK_STREAM and
               send(d_socket, &to_send[0], to_send.size(), 0) != to_send.size())
           {
             GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
@@ -266,14 +287,15 @@ namespace gr {
         }
         u_int32_t header = d_context_static_bits ^ d_context_packet_count << 16 ^ (d_context_packet_size / 4);
         pack_u32(&d_context_raw[0], header);
-        if(d_socket_type == SOCK_DGRAM && 
+        if(d_socket_type == SOCK_DGRAM and 
             sendto(d_socket, &d_context_raw[0], d_context_raw.size(), 0, (const struct sockaddr *) &d_servaddr, sizeof(d_servaddr)) != d_context_raw.size())
         {
           GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
           throw std::runtime_error("Send failed to send msg on socket correctly");
         }
-
-        if(d_socket_type == SOCK_STREAM && 
+        // GR_LOG_DEBUG(this->d_logger, "send_context::context header[0]:" + std::to_string(d_context_raw[0]) + "header[1]:" + std::to_string(d_context_raw[1])
+        //   + "header[2]: " + std::to_string(d_context_raw[2]) + " header[3]: " + std::to_string(d_context_raw[3]));
+        if(d_socket_type == SOCK_STREAM and 
             send(d_socket, &d_context_raw[0], d_context_raw.size(), 0) != d_context_raw.size())
         {
           GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
@@ -305,6 +327,32 @@ namespace gr {
       memcpy(&d_out_buf[d_current_buff_idx], &re, d_unpack_idx_size);
       memcpy(&d_out_buf[d_current_buff_idx + d_unpack_idx_size], &im, d_unpack_idx_size);
     }
+
+    template <class T>
+    void difi_sink_cpp_impl<T>::create_udp_socket()
+    {
+      if ((d_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not make UDP socket, socket may be in use.");
+        throw std::runtime_error("Could not make UDP socket");
+      }
+    }
+
+    template <class T>
+    void difi_sink_cpp_impl<T>::create_tcp_socket()
+    {
+      if ((d_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not make TCP socket, socket may be in use.");
+        throw std::runtime_error("Could not make TCP socket");
+      }
+
+      fcntl(d_socket, F_SETFL, O_NONBLOCK);
+      FD_ZERO(&d_fdset);
+      FD_SET(d_socket,&d_fdset);
+      connect(d_socket, (struct sockaddr*)&d_servaddr, sizeof(d_servaddr));
+    }
+
     template class difi_sink_cpp<gr_complex>;
     template class difi_sink_cpp<std::complex<char>>;
 

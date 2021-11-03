@@ -91,14 +91,20 @@ private:
       memcpy(&imag, start + 1, 1);
       return M(re, imag);
     }
+
+    void create_udp_socket();
+    void create_tcp_socket();
+    void reset_tcp_connection();
+
     std::string d_ip_addr;
     uint32_t d_port;
     int d_stream_number;
-    uint32_t d_buffer_len;
+    uint32_t d_packet_buffer_len;
     int d_socket;
     int d_client_socket;
     uint8_t d_socket_type;
-    std::vector<int8_t> d_buffer;
+    std::vector<int8_t> d_readBuffer;
+    std::vector<int8_t> d_packet_buffer;
     struct sockaddr_in d_servaddr;
     std::deque<char> d_deque;
     std::chrono::time_point<std::chrono::high_resolution_clock> last;
@@ -116,6 +122,8 @@ private:
     u_int32_t d_unpack_idx_size;
     pmt::pmt_t make_context_dict(header_data& header, int size_gotten);
     int buffer_and_send(T* out, int noutput_items);
+    fd_set d_rset;
+    std::vector<int> d_fds;
 
 public:
     difi_source_cpp_impl(std::string ip_addr,
