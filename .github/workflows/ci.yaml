@@ -32,7 +32,7 @@ jobs:
           sudo make install -j
       - name: Update GNURadio preferences
         run: |
-          mkdir -p "${HOME}/.gnuradio/prefs/""
+          mkdir -p "${HOME}/.gnuradio/prefs/"
           touch "${HOME}/.gnuradio/prefs/vmcircbuf_default_factory"
       - name: Run Tests
         env:
