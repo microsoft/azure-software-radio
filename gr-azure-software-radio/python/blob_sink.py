@@ -82,7 +82,7 @@ class BlobSink(gr.sync_block):
         self.log = gr.logger("log_debug")
 
     def upload_queue_contents(self):
-        # pylint: fixme
+        # pylint: disable=fixme
         """
         Pull all items out of the upload queue and stage each queue item as a block in the
         current blob
@@ -108,7 +108,7 @@ class BlobSink(gr.sync_block):
             self.log.debug("Upload complete")
 
     def work(self, input_items, _):
-        # pylint: fixme
+        # pylint: disable=fixme
         """ Buffer up items for upload to blob storage.
 
         Buffer up items in self.block_len sized chunks. When the buffer is full, pass it over

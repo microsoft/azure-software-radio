@@ -101,7 +101,7 @@ class BlobSource(gr.sync_block):
         return data, chunk_residue
 
     def download_chunk_to_queue(self):
-        # pylint: fixme
+        # pylint: disable=fixme
         """
         Pull chunks from the blob, convert the bytes into a numpy array, and add to queue
         """
@@ -123,7 +123,7 @@ class BlobSource(gr.sync_block):
                 self.blob_complete = True
 
     def work(self, _, output_items):
-        # pylint: fixme
+        # pylint: disable=fixme
         """ Stream items from blob storage.
 
         Stream items out from an internal buffer. Once the internal buffer is exhausted,
