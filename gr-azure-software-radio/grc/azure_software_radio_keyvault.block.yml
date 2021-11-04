@@ -21,12 +21,16 @@ parameters:
     label: key
     dtype: string
     default: ''
+-   id: default_cred
+    label: Default Credential
+    dtype: raw
+    default: ''
 value: ${value}
 templates:
     imports: import azure_software_radio.keyvault
     var_make: |+
 
-        self.${id} = ${id} = azure_software_radio.keyvault.pull_key(${keyvault_name}, ${key})
+        self.${id} = ${id} = azure_software_radio.keyvault.pull_key(${keyvault_name}, ${key}, ${default_cred})
 
 documentation: |
     
@@ -36,6 +40,7 @@ documentation: |
     Args:
         KeyVault Name: The keyvault name
         key: A key string which maps to a secret stored in the keyvault.
+        default_cred: A DefaultAzureCredential object, other wise an empty string in which case one is generated locally.
     
     Example:
         KeyVault Name: myvault

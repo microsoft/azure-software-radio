@@ -7,7 +7,7 @@ from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
 
 
-def pull_key(vault_name, key):
+def pull_key(vault_name, key, default_cred=None):
     """
     Pulls given key from a Azure keyvault given the vault name. This method returns a string corresponding to
     the key provided.
@@ -15,6 +15,7 @@ def pull_key(vault_name, key):
     Args:
         KeyVault Name: The keyvault name
         key: A key string which maps to a secret stored in the keyvault.
+        default_cred: A DefaultAzureCredential object, other wise an empty string in which case one is generated locally.
 
     Example:
         KeyVault Name: myvault
@@ -22,6 +23,8 @@ def pull_key(vault_name, key):
 
         The above would pull the SEED secret from myvault and set the blockname equal to value stored for SEED.
     """
+    if default_cred is None or default_cred == '':
+        default_cred = DefaultAzureCredential()
     client = SecretClient(
-        vault_url=f"https://{vault_name}.vault.azure.net", credential=DefaultAzureCredential())
+        vault_url=f"https://{vault_name}.vault.azure.net", credential=default_cred)
     return client.get_secret(key).value
