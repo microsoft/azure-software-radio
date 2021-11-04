@@ -12,7 +12,7 @@ import os
 
 
 
-class qa_blob_common(gr_unittest.TestCase):
+class integration_blob_common(gr_unittest.TestCase):
 
     def setUp(self):
         pass
@@ -78,4 +78,4 @@ class qa_blob_common(gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_blob_common)
+    gr_unittest.run(integration_blob_common)
