@@ -6,16 +6,24 @@
 # See License.txt in the project root for license information.
 #
 
+"""
+Integration tests for functions from blob_sink.py
+"""
+
+import os
+import uuid
+
+from azure.storage.blob import BlobServiceClient
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import numpy as np
-import os
-import uuid
-from azure.storage.blob import BlobServiceClient
+
 from azure_software_radio import blob_sink
 
 
-class integration_blob_sink(gr_unittest.TestCase):
+class IntegrationBlobSink(gr_unittest.TestCase):
+    """ Test case class for running integration tests on blob_sink.py
+    """
 
     def setUp(self):
         """ Pull a blob connection string from an environment variable.
@@ -32,15 +40,13 @@ class integration_blob_sink(gr_unittest.TestCase):
         self.container_client = self.blob_service_client.create_container(
             self.test_blob_container_name)
 
-        self.tb = gr.top_block()
+        self.top_block = gr.top_block()
 
     def tearDown(self):
-        self.tb = None
+        self.top_block = None
         # clean up after test
         self.container_client.delete_container()
         self.blob_service_client.close()
-
-    
 
     def test_round_trip_data_through_blob(self):
         """ Upload known data to a blob using the blob_source block.
@@ -56,16 +62,16 @@ class integration_blob_sink(gr_unittest.TestCase):
         src = blocks.vector_source_c(src_data)
 
         # set up a blob sink
-        op = blob_sink(authentication_method="connection_string",
-                       connection_str=self.blob_connection_string,
-                       container_name=self.test_blob_container_name,
-                       blob_name=blob_name,
-                       block_len=block_len,
-                       queue_size=4)
+        op_block = blob_sink(authentication_method="connection_string",
+                             connection_str=self.blob_connection_string,
+                             container_name=self.test_blob_container_name,
+                             blob_name=blob_name,
+                             block_len=block_len,
+                             queue_size=4)
 
-        self.tb.connect(src, op)
+        self.top_block.connect(src, op_block)
         # run the flowgraph
-        self.tb.run()
+        self.top_block.run()
 
         # connect to the test blob container and download the file
         # compare the file we downloaded against the samples in the vector source
@@ -80,4 +86,4 @@ class integration_blob_sink(gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(integration_blob_sink)
+    gr_unittest.run(IntegrationBlobSink)

@@ -6,21 +6,29 @@
 # See License.txt in the project root for license information.
 #
 
-from gnuradio import gr, gr_unittest
-from gnuradio import blocks
-from azure_software_radio import blob_source
-import numpy as np
+"""
+Integration tests for functions from blob_source.py
+"""
+
 import os
 import uuid
+
 from azure.storage.blob import BlobServiceClient
+from gnuradio import gr, gr_unittest
+from gnuradio import blocks
+import numpy as np
+
+from azure_software_radio import blob_source
 
 
-class integration_blob_source(gr_unittest.TestCase):
+class IntegrationBlobSource(gr_unittest.TestCase):
+    """ Test case class for running integration tests on blob_source.py
+    """
 
     def setUp(self):
-        """ Pull a blob connection string from an environment variable. 
+        """ Pull a blob connection string from an environment variable.
 
-        Use this to set up a separate blob service client for testing. 
+        Use this to set up a separate blob service client for testing.
         """
         self.blob_connection_string = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
         self.blob_service_client = BlobServiceClient.from_connection_string(
@@ -29,10 +37,10 @@ class integration_blob_source(gr_unittest.TestCase):
         self.test_blob_container_name = str(uuid.uuid4())
         self.container_client = self.blob_service_client.create_container(
             self.test_blob_container_name)
-        self.tb = gr.top_block()
+        self.top_block = gr.top_block()
 
     def tearDown(self):
-        self.tb = None
+        self.top_block = None
 
         # clean up after test
         self.container_client.delete_container()
@@ -56,16 +64,16 @@ class integration_blob_source(gr_unittest.TestCase):
             blob=blob_name)
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
         # set up a blob sink
-        op = blob_source(authentication_method="connection_string",
-                         connection_str=self.blob_connection_string,
-                         container_name=self.test_blob_container_name,
-                         blob_name=blob_name,
-                         queue_size=4)
+        op_block = blob_source(authentication_method="connection_string",
+                               connection_str=self.blob_connection_string,
+                               container_name=self.test_blob_container_name,
+                               blob_name=blob_name,
+                               queue_size=4)
         dst = blocks.vector_sink_c()
 
-        self.tb.connect(op, dst)
+        self.top_block.connect(op_block, dst)
         # set up fg
-        self.tb.run()
+        self.top_block.run()
         # check data
 
         result_data = dst.data()
@@ -75,4 +83,4 @@ class integration_blob_source(gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(integration_blob_source)
+    gr_unittest.run(IntegrationBlobSource)
