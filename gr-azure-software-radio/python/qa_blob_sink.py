@@ -14,7 +14,7 @@ from azure_software_radio import blob_sink
 class qa_blob_sink(gr_unittest.TestCase):
 
     def setUp(self):
-        self.blob_connection_string = ( 
+        self.blob_connection_string = (
             "DefaultEndpointsProtocol=https;AccountName=accountname;AccountKey=accountkey;"
             + "EndpointSuffix=core.windows.net"
         )

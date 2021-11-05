@@ -74,9 +74,8 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         self.top_block.connect(op_block, dst)
         self.top_block.run()
 
-        result_data = dst.data()
-
-        self.assertTrue((src_data == result_data).all())
+        self.assertEqual(src_data.tolist(), dst.data()
+)
 
 
 if __name__ == '__main__':

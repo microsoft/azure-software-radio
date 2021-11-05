@@ -17,7 +17,7 @@ from unittest.mock import patch
 class qa_blob_source(gr_unittest.TestCase):
 
     def setUp(self):
-        self.blob_connection_string = ( 
+        self.blob_connection_string = (
             "DefaultEndpointsProtocol=https;AccountName=accountname;AccountKey=accountkey;"
             + "EndpointSuffix=core.windows.net"
         )
@@ -68,9 +68,9 @@ class qa_blob_source(gr_unittest.TestCase):
         data, chunk_residue = op.chunk_to_array(chunk=chunk, chunk_residue=b'')
 
         # check data - it should include all samples except the last one
-        self.assertTrue((data == src_data[:-1]).all())
+        self.assertEqual(data.tolist(), src_data[:-1].tolist())
         # the chunk residue should be the first 6 bytes of the last sample
-        self.assertTrue((chunk_residue == src_data_bytes[-8:-2]))
+        self.assertEqual(chunk_residue, src_data_bytes[-8:-2])
 
 
     def test_chunk_residue_merge(self):
@@ -97,8 +97,8 @@ class qa_blob_source(gr_unittest.TestCase):
         data, chunk_residue = op.chunk_to_array(chunk=chunk, chunk_residue=chunk_residue_in)
 
         # check data - it should include all samples with nothing left in the residue
-        self.assertTrue((data == src_data).all())
-        self.assertEquals(len(chunk_residue), 0)
+        self.assertEqual(data.tolist(), src_data.tolist())
+        self.assertEqual(len(chunk_residue), 0)
 
     def test_end_to_end_run(self):
         '''
@@ -117,7 +117,7 @@ class qa_blob_source(gr_unittest.TestCase):
         with patch.object(blob_source, 'setup_blob_iterator', spec=iter) as mock_iter:
             # add in a list of chunks we want to pretend the blob API gave us
             mock_iter.return_value = iter([src_data.tobytes()])
-            
+
             op = blob_source(authentication_method="connection_string",
                              connection_str=self.blob_connection_string,
                              container_name=self.test_blob_container_name,
@@ -127,8 +127,8 @@ class qa_blob_source(gr_unittest.TestCase):
             self.tb.connect(op, dst)
 
             self.tb.run()
-        
-        self.assertTrue((dst.data() == src_data).all())
+
+        self.assertEqual(dst.data(), src_data.tolist())
 
 if __name__ == '__main__':
     gr_unittest.run(qa_blob_source)

@@ -78,7 +78,7 @@ class IntegrationBlobSink(gr_unittest.TestCase):
 
         result_data = np.frombuffer(blob_client.download_blob().readall(), dtype=np.complex64)
 
-        self.assertTrue((src_data == result_data).all())
+        self.assertEqual(src_data.tolist(), result_data.tolist())
 
 
 if __name__ == '__main__':
