@@ -137,7 +137,9 @@ namespace gr {
         {
           close(d_socket);
           create_tcp_socket();
-          return 0;
+
+          if(getpeername(d_socket, (struct sockaddr*)&d_servaddr, &addr_len) < 0)
+            return noutput_items;
         }
         else
         {
@@ -152,7 +154,9 @@ namespace gr {
           }
 
           if(!FD_ISSET(d_socket,&d_fdset))
+          {
             return noutput_items;
+          }
         }
       }
 
@@ -180,7 +184,7 @@ namespace gr {
             throw std::runtime_error("Send failed to send msg on socket correctly");
           }
           if(d_socket_type == SOCK_STREAM and
-              send(d_socket, &to_send[0], to_send.size(), 0) != to_send.size())
+            send(d_socket, &to_send[0], to_send.size(), 0) != to_send.size())
           {
             GR_LOG_ERROR(this->d_logger, "Send failed to send msg on socket correctly");
             throw std::runtime_error("Send failed to send msg on socket correctly");

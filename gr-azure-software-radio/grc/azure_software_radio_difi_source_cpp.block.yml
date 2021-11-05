@@ -36,6 +36,7 @@ parameters:
   dtype: enum
   options: ['1', '2']
   option_labels: ['TCP', 'UDP']
+  default: '2'
 - id: socket_buffer_size
   label: Socket Buffer Size
   dtype: int

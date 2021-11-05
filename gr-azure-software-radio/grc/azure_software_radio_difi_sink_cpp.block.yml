@@ -40,6 +40,7 @@ parameters:
   dtype: enum
   options: ['1', '2']
   option_labels: ['TCP', 'UDP']
+  default: '2'
 - id: sample_rate
   label: Sample Rate
   dtype: int
