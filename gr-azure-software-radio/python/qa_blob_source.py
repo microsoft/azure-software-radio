@@ -43,7 +43,7 @@ class qa_blob_source(gr_unittest.TestCase):
 
         # really only checking that the init didn't throw an exception above, but adding the check
         # below to keep flake8 happy
-        self.assertTrue(instance is not None)
+        self.assertIsNotNone(instance)
 
 
     def test_chunk_residue(self):
@@ -54,15 +54,13 @@ class qa_blob_source(gr_unittest.TestCase):
         blob_name = 'test-blob.npy'
         num_samples = 500
 
-        # set up a vector source with known complex data
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
-        # set up a blob sink
         op = blob_source(authentication_method="connection_string",
-                        connection_str=self.blob_connection_string,
-                        container_name=self.test_blob_container_name,
-                        blob_name=blob_name,
-                        queue_size=4)
+                         connection_str=self.blob_connection_string,
+                         container_name=self.test_blob_container_name,
+                         blob_name=blob_name,
+                         queue_size=4)
 
         src_data_bytes = src_data.tobytes()
         # don't send the last 2 bytes of the last sample
@@ -83,10 +81,8 @@ class qa_blob_source(gr_unittest.TestCase):
         blob_name = 'test-blob.npy'
         num_samples = 500
 
-        # set up a vector source with known complex data
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
-        # set up a blob sink
         op = blob_source(authentication_method="connection_string",
                          connection_str=self.blob_connection_string,
                          container_name=self.test_blob_container_name,
@@ -100,10 +96,9 @@ class qa_blob_source(gr_unittest.TestCase):
 
         data, chunk_residue = op.chunk_to_array(chunk=chunk, chunk_residue=chunk_residue_in)
 
-        # check data - it should include all samples
+        # check data - it should include all samples with nothing left in the residue
         self.assertTrue((data == src_data).all())
-        # the chunk residue should be the first 6 bytes of the last sample
-        self.assertTrue(len(chunk_residue) == 0)
+        self.assertEquals(len(chunk_residue), 0)
 
     def test_end_to_end_run(self):
         '''
@@ -114,7 +109,6 @@ class qa_blob_source(gr_unittest.TestCase):
         blob_name = 'test-blob.npy'
         num_samples = 500
 
-        # set up a vector source with known complex data
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
         dst = blocks.vector_sink_c()
@@ -124,17 +118,16 @@ class qa_blob_source(gr_unittest.TestCase):
             # add in a list of chunks we want to pretend the blob API gave us
             mock_iter.return_value = iter([src_data.tobytes()])
             
-            # set up a blob sink
             op = blob_source(authentication_method="connection_string",
-                            connection_str=self.blob_connection_string,
-                            container_name=self.test_blob_container_name,
-                            blob_name=blob_name,
-                            queue_size=4)
+                             connection_str=self.blob_connection_string,
+                             container_name=self.test_blob_container_name,
+                             blob_name=blob_name,
+                             queue_size=4)
 
             self.tb.connect(op, dst)
 
             self.tb.run()
-        # check data - it should include all samples
+        
         self.assertTrue((dst.data() == src_data).all())
 
 if __name__ == '__main__':

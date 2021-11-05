@@ -63,7 +63,7 @@ class IntegrationBlobSource(gr_unittest.TestCase):
             container=self.test_blob_container_name,
             blob=blob_name)
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
-        # set up a blob sink
+        
         op_block = blob_source(authentication_method="connection_string",
                                connection_str=self.blob_connection_string,
                                container_name=self.test_blob_container_name,
@@ -72,13 +72,10 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         dst = blocks.vector_sink_c()
 
         self.top_block.connect(op_block, dst)
-        # set up fg
         self.top_block.run()
-        # check data
 
         result_data = dst.data()
 
-        # check data
         self.assertTrue((src_data == result_data).all())
 
 

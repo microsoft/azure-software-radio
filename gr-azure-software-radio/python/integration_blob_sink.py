@@ -57,11 +57,9 @@ class IntegrationBlobSink(gr_unittest.TestCase):
         blob_name = 'test-blob.npy'
         block_len = 500000
 
-        # set up a vector source with known complex data
         src_data = np.arange(0, 2*block_len, 1, dtype=np.complex64)
         src = blocks.vector_source_c(src_data)
 
-        # set up a blob sink
         op_block = blob_sink(authentication_method="connection_string",
                              connection_str=self.blob_connection_string,
                              container_name=self.test_blob_container_name,
@@ -70,7 +68,6 @@ class IntegrationBlobSink(gr_unittest.TestCase):
                              queue_size=4)
 
         self.top_block.connect(src, op_block)
-        # run the flowgraph
         self.top_block.run()
 
         # connect to the test blob container and download the file
@@ -81,7 +78,6 @@ class IntegrationBlobSink(gr_unittest.TestCase):
 
         result_data = np.frombuffer(blob_client.download_blob().readall(), dtype=np.complex64)
 
-        # check data
         self.assertTrue((src_data == result_data).all())
 
 

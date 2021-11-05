@@ -41,7 +41,7 @@ class qa_blob_sink(gr_unittest.TestCase):
 
         # really only checking that the init didn't throw an exception above, but adding the check
         # below to keep flake8 happy
-        self.assertTrue(instance is not None)
+        self.assertIsNotNone(instance)
 
 
 if __name__ == '__main__':
