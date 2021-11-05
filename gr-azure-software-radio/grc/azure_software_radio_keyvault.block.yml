@@ -22,7 +22,7 @@ parameters:
     dtype: string
     default: ''
 -   id: default_cred
-    label: Default Credential
+    label: DefaultAzureCredential
     dtype: raw
     default: ''
 value: ${value}
@@ -40,7 +40,7 @@ documentation: |
     Args:
         KeyVault Name: The keyvault name
         key: A key string which maps to a secret stored in the keyvault.
-        default_cred: A DefaultAzureCredential object, other wise an empty string in which case one is generated locally.
+        DefaultAzureCredential: A DefaultAzureCredential object, other wise an empty string in which case one is generated locally.
     
     Example:
         KeyVault Name: myvault

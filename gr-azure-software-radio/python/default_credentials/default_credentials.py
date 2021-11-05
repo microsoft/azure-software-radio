@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 # Copyright (c) Microsoft Corporation.
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
@@ -7,7 +8,7 @@
 from azure.identity import DefaultAzureCredential
 
 
-def get_default_creds(enable_cli_credential, enable_environment, enable_managed_identity,
+def get_DefaultAzureCredential(enable_cli_credential, enable_environment, enable_managed_identity,
                       enable_powershell, enable_visual_studio_code, enable_shared_token_cache,
                       enable_interactive_browser, cred_authority='login.microsoftonline.com'):
     """

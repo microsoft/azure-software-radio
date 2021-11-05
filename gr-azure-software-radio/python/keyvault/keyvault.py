@@ -23,7 +23,7 @@ def pull_key(vault_name, key, default_cred=None):
 
         The above would pull the SEED secret from myvault and set the blockname equal to value stored for SEED.
     """
-    if default_cred is None or default_cred == '':
+    if not default_cred:
         default_cred = DefaultAzureCredential()
     client = SecretClient(
         vault_url=f"https://{vault_name}.vault.azure.net", credential=default_cred)

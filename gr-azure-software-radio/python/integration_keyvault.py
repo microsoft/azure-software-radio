@@ -6,23 +6,32 @@
 # See License.txt in the project root for license information.
 #
 
+import os
 from gnuradio import gr_unittest
 from azure_software_radio import keyvault
 from azure_software_radio import default_credentials
-import os
 
 keyvault_name = os.getenv('AZURE_KEYVAULT_NAME')
 key_name = os.getenv('AZURE_KEYVAULT_TEST_KEY')
-key_val = "3.14"
+SECRET_VAL = "3.14"
 
 
-class integration_keyvault(gr_unittest.TestCase):
+class IntegrationKeyvault(gr_unittest.TestCase):
+    """
+    Integration tests for keyvault block.
+    """
 
     def test_no_default_cred(self):
+        """
+        Test with no DefaultAzureCredential() supplied.
+        """
         val = keyvault.pull_key(keyvault_name, key_name, '')
-        self.assertTrue(val == key_val)
+        self.assertEqual(val,SECRET_VAL, f"Val: {val}, SECRET_VAL: {SECRET_VAL} are not equal!")
 
     def test_default_cred_provided(self):
+        """
+        Test with DefaultAzureCredential() supplied.
+        """
         dc = default_credentials.get_default_creds(enable_cli_credential=True,
                                                    enable_environment=True,
                                                    enable_managed_identity=True,
@@ -31,8 +40,8 @@ class integration_keyvault(gr_unittest.TestCase):
                                                    enable_shared_token_cache=True,
                                                    enable_interactive_browser=False)
         val = keyvault.pull_key(keyvault_name, key_name, dc)
-        self.assertTrue(val == key_val)
+        self.assertEqual(val,SECRET_VAL, f"Val: {val}, SECRET_VAL: {SECRET_VAL} are not equal!")
 
 
 if __name__ == '__main__':
-    gr_unittest.run(integration_keyvault)
+    gr_unittest.run(IntegrationKeyvault)
