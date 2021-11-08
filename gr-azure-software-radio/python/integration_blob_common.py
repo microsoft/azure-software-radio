@@ -6,13 +6,20 @@
 # See License.txt in the project root for license information.
 #
 
-from gnuradio import gr_unittest
-from azure_software_radio import blob_common
+"""
+Integration tests for functions from blob_common.py
+"""
+
 import os
 
+from gnuradio import gr_unittest
+
+from azure_software_radio import blob_common
 
 
-class qa_blob_common(gr_unittest.TestCase):
+class IntegrationBlobCommon(gr_unittest.TestCase):
+    """ Test case class for running integration tests on blob_common.py
+    """
 
     def setUp(self):
         pass
@@ -78,4 +85,4 @@ class qa_blob_common(gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_blob_common)
+    gr_unittest.run(IntegrationBlobCommon)

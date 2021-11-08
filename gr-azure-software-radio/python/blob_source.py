@@ -26,7 +26,7 @@ class blob_source(gr.sync_block):
     Page blobs are not supported.
 
     Args:
-    Auth Method: Determines how to authenticate to the Azue blob backend. May be one of
+    Auth Method: Determines how to authenticate to the Azure blob backend. May be one of
         "connection_string", "url_with_sas", or "default".
     Connection String: Azure storage account connection string used for
         authentication if Auth Method is "connection_string".
@@ -69,15 +69,24 @@ class blob_source(gr.sync_block):
         self.blob_client = self.blob_service_client.get_blob_client(container=container_name,
                                                                     blob=blob_name)
 
-        self.blob_stream = self.blob_client.download_blob(max_concurrency=1)
-        self.blob_iter = self.blob_stream.chunks()
+        self.blob_iter = None
 
         self.blob_complete = False
 
         self.itemsize = np.complex64().itemsize
         self.chunk_residue = b''
 
+        self.first_run = True
+
         self.log = gr.logger("log_debug")
+
+    def setup_blob_iterator(self):
+        ''' get an iterator into the blob object so we can start doing a streaming download
+        '''
+        blob_stream = self.blob_client.download_blob(max_concurrency=1)
+        blob_iter = blob_stream.chunks()
+
+        return blob_iter
 
     def chunk_to_array(self, chunk: bytes, chunk_residue: bytes):
         """ Convert bytes into a new numpy array with an integer number of elements
@@ -108,7 +117,7 @@ class blob_source(gr.sync_block):
 
             try:
                 self.log.debug("Retrieving next block of data from blob storage")
-                chunk = self.blob_iter.next()
+                chunk = next(self.blob_iter)
                 self.log.debug("Retrieved {} bytes of data from blob storage".format(len(chunk)))
                 data, self.chunk_residue = self.chunk_to_array(chunk, self.chunk_residue)
                 if len(data) > 0:
@@ -130,6 +139,11 @@ class blob_source(gr.sync_block):
         Returns:
             int: Number of items generated in this work call
         """
+
+        # connect to the blob service the first time we run
+        if self.first_run:
+            self.blob_iter = self.setup_blob_iterator()
+            self.first_run = False
 
         out = output_items[0]
         noutput_items = len(out)
