@@ -15,6 +15,21 @@
 
   If the version conflicts are due to the Azure CLI installation using pip, refer to the [Azure CLI Installation](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) for the recommended installation options.  
 
+## Why is my build complaining about liborc and failing?
+  If you get a failure related to liborc when trying to compile the OOT module that looks like this:
+  ```
+  make[2]: *** No rule to make target '/usr/lib/x86_64-linux-gnu/liborc-0.4.so', needed by 'lib/libgnuradio-azure_software_radio.so.v1.0-compat-xxx-xunknown'.  Stop.
+  make[1]: *** [CMakeFiles/Makefile2:251: lib/CMakeFiles/gnuradio-azure_software_radio.dir/all] Error 2
+  make: *** [Makefile:141: all] Error 2
+  ```
+
+  You'll need to install the liborc package. On Ubuntu 20.04, you can install the missing package by running:
+  ```
+  sudo apt install liborc-0.4-dev
+  ```
+
+  You should now be able to compile gr-azure-software-radio.
+
 ## Failures importing azure_software_radio in the flowgraph  
   By default Azure software radio will be installed in the ``` /usr/local/ ``` directory. Use the ``` CMAKE_INSTALL_PREFIX ``` to install elsewhere.  
 
