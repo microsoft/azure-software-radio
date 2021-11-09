@@ -94,7 +94,7 @@ The Key Vault block allows users to pull down keys and secrets from an [Azure Ke
 
 It is expected that the user will setup and store secrets in an Azure Key Vault prior to pulling down keys using this block. To create a Key Vault, see [Create Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli).
 
-See the [Key Vault Example](../examples/README.md#key-vault-example).
+See the [Key Vault Example](./examples/README.md#key-vault-example).
 
 
 ## Blob Blocks
