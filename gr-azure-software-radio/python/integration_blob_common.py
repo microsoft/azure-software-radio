@@ -10,8 +10,10 @@
 Integration tests for functions from blob_common.py
 """
 import os
-import azure_software_radio
+
+import azure.core.exceptions as az_exceptions
 from gnuradio import gr_unittest
+
 from azure_software_radio import blob_common
 
 
@@ -82,6 +84,66 @@ class IntegrationBlobCommon(gr_unittest.TestCase):
 
         blob_service_client.close()
         self.assertIsNotNone(svc_props)
+
+    def test_bad_storage_account(self):
+        '''
+        Check that the code raises the appropriate exception in response to being given a storage
+        account URL that doesn't exist
+        '''
+        url = "https://invalid_url.blob_doesnt_exist.core.windows.net"
+        sas = os.getenv('AZURE_STORAGE_SAS')
+
+        blob_service_client = blob_common.get_blob_service_client(
+            authentication_method="url_with_sas",
+            url=url + '/' + sas,
+            retry_total=0
+        )
+
+        with self.assertRaises(az_exceptions.ServiceRequestError):
+            blob_common.blob_container_info_is_valid(blob_service_client=blob_service_client,
+                                                     container_name="does-not-exist")
+
+    def test_bad_authentication(self):
+        '''
+        Check that the code raises the appropriate exception in response to being given a valid
+        storage account URL but bad authentication info
+        '''
+        url = os.getenv('AZURE_STORAGE_URL')
+        sas = os.getenv('AZURE_STORAGE_SAS')
+
+        # force the SAS token to be wrong
+        if sas[-1] == 'A':
+            bad_sas = sas[:-1] + 'B'
+        else:
+            bad_sas = sas[:-1] + 'A'
+
+        blob_service_client = blob_common.get_blob_service_client(
+            authentication_method="url_with_sas",
+            url=url + '/' + bad_sas,
+            retry_total=0
+        )
+
+        with self.assertRaises(az_exceptions.ClientAuthenticationError):
+            blob_common.blob_container_info_is_valid(blob_service_client=blob_service_client,
+                                                     container_name="does-not-exist")
+
+    def test_missing_container(self):
+        '''
+        Check that the code raises the appropriate exception in response to being given a container
+        name that doesn't exist
+        '''
+        url = os.getenv('AZURE_STORAGE_URL')
+        sas = os.getenv('AZURE_STORAGE_SAS')
+
+        blob_service_client = blob_common.get_blob_service_client(
+            authentication_method="url_with_sas",
+            url=url + '/' + sas,
+            retry_total=0
+        )
+
+        with self.assertRaises(az_exceptions.ResourceNotFoundError):
+            blob_common.blob_container_info_is_valid(blob_service_client=blob_service_client,
+                                                     container_name="does-not-exist")
 
 
 if __name__ == '__main__':
