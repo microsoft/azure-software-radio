@@ -8,8 +8,12 @@ label: Blob Sink
 category: '[Azure software radio]'
 
 templates:
-  imports: import azure_software_radio
-  make: azure_software_radio.blob_sink(${authentication_method},
+  imports:  |-
+    import azure_software_radio
+    import numpy as np
+  make: azure_software_radio.blob_sink(${type.np_type},
+                                       ${vlen},
+                                       ${authentication_method},
                                        ${connection_str},
                                        ${url},
                                        ${container_name},
@@ -19,6 +23,19 @@ templates:
                                        ${retry_total})
 
 parameters:
+- id: type
+  label: Input Type
+  dtype: enum
+  options: [                 fc32,          sc16,          sc8,        f32,      s32,      s16,       s8]
+  option_labels: [Complex float32, Complex int16, Complex int8,      float,      int,    short,     byte]
+  option_attributes:
+      np_type: [     np.complex64,      np.int32,     np.int16, np.float32, np.int32, np.int16, np.ubyte]
+  hide: part
+- id: vlen
+  label: Vector Length
+  dtype: int
+  default: '1'
+  hide: ${ 'part' if vlen == 1 else 'none' }
 - id: authentication_method
   label: Auth Method
   dtype: string
@@ -59,7 +76,7 @@ parameters:
 inputs:
 - label: in
   domain: stream
-  dtype: complex
-  vlen: 1
+  dtype: ${type}
+  vlen: ${vlen}
 
 file_format: 1
