@@ -140,7 +140,7 @@ namespace gr {
 
           if(getpeername(d_socket, (struct sockaddr*)&d_servaddr, &addr_len) < 0)
           {
-            GR_LOG_DEBUG(this->d_logger, "No connection. Trying to re-connect the socket");
+            GR_LOG_DEBUG(this->d_logger, "No connection. Attempting to re-connect the socket");
             return 0;
           }
         }
@@ -152,8 +152,11 @@ namespace gr {
 
           if(select(d_socket + 1, NULL, &d_fdset, NULL, &tv) < 0)
           {
-            GR_LOG_ERROR(this->d_logger, "Could not select client fd");
-            throw std::runtime_error("Could not select client fd");
+            int error_code;
+            socklen_t len = sizeof(error_code);
+            getsockopt(d_socket, SOL_SOCKET, SO_ERROR, &error_code, &len);
+            GR_LOG_ERROR(this->d_logger, "Failed to select file descriptor for socket - error code: " + std::to_string(error_code));
+            throw std::runtime_error("Failed to select file descriptor for socket - error code: " + std::to_string(error_code));
           }
 
           if(!FD_ISSET(d_socket,&d_fdset))
