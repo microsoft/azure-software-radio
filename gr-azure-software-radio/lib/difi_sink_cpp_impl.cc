@@ -139,7 +139,10 @@ namespace gr {
           create_tcp_socket();
 
           if(getpeername(d_socket, (struct sockaddr*)&d_servaddr, &addr_len) < 0)
-            return noutput_items;
+          {
+            GR_LOG_DEBUG(this->d_logger, "No connection. Trying to re-connect the socket");
+            return 0;
+          }
         }
         else
         {
@@ -155,7 +158,7 @@ namespace gr {
 
           if(!FD_ISSET(d_socket,&d_fdset))
           {
-            return noutput_items;
+            return 0;
           }
         }
       }

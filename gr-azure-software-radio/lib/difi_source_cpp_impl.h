@@ -102,8 +102,13 @@ private:
     uint32_t d_packet_buffer_len;
     int d_socket;
     int d_client_socket;
+    int d_fd_max;
+    int d_packet_buffer_start_idx;
+    int d_num_bytes_in_read_buffer;
     uint8_t d_socket_type;
-    std::vector<int8_t> d_readBuffer;
+    fd_set d_rset;
+    struct timeval d_tv;
+    std::vector<int8_t> d_read_buffer;
     std::vector<int8_t> d_packet_buffer;
     struct sockaddr_in d_servaddr;
     std::deque<char> d_deque;
@@ -122,8 +127,6 @@ private:
     u_int32_t d_unpack_idx_size;
     pmt::pmt_t make_context_dict(header_data& header, int size_gotten);
     int buffer_and_send(T* out, int noutput_items);
-    fd_set d_rset;
-    std::vector<int> d_fds;
 
 public:
     difi_source_cpp_impl(std::string ip_addr,

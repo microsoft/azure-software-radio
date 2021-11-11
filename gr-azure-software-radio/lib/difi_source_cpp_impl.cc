@@ -16,6 +16,8 @@
 #include <netinet/in.h>
 #include <errno.h>
 
+#define NUM_BYTES_PER_WORD (4)
+
 namespace gr {
   namespace azure_software_radio {
 
@@ -63,12 +65,19 @@ namespace gr {
           d_packet_buffer_len(socket_buffer_size)
 
     {
+      d_tv.tv_sec = 0;
+      d_tv.tv_usec = 10000;
       d_packet_buffer.resize(socket_buffer_size);
+      d_read_buffer.resize(socket_buffer_size);
       memset(&d_servaddr, 0, sizeof(d_servaddr));
       d_servaddr.sin_family = AF_INET;
       d_servaddr.sin_port = htons(port);
       d_servaddr.sin_addr.s_addr = INADDR_ANY;
       d_socket_type = (socket_type == 1) ?  SOCK_STREAM : SOCK_DGRAM;
+      d_client_socket = -1;
+      d_packet_buffer_start_idx = 0;
+      d_num_bytes_in_read_buffer = 0;
+      d_fd_max = -1;
 
       if(d_socket_type == SOCK_DGRAM)
       {
@@ -112,48 +121,62 @@ namespace gr {
                               gr_vector_const_void_star &input_items,
                               gr_vector_void_star &output_items)
     {
-      // check the file descriptor for incoming client connection
       if(d_socket_type == SOCK_STREAM)
       {
-        struct timeval tv;
-        tv.tv_sec = 0;
-        tv.tv_usec = 10000;
-
+        // select file descriptors that we want to monitor (server and socket client)
         fd_set read_fds = d_rset;
-        int fd_max = *std::max_element(d_fds.begin(), d_fds.end());
-
-        if (select(fd_max+1, &read_fds, NULL, NULL, &tv) < 0)
+        int status = select(d_fd_max+1, &read_fds, NULL, NULL, &d_tv);
+        if (status < 0)
         {
-          GR_LOG_ERROR(this->d_logger, "Could not select server fd");
-          throw std::runtime_error("Could not select server fd");
-        }
+          // get the error code from the file descriptor
+          int error_code;
+          socklen_t len = sizeof(error_code);
+          std::string error_msg = "Could not select file descriptor - ";
 
-        for(auto fd : d_fds)
-        {
-          if(FD_ISSET(fd, &read_fds))
+          if(d_client_socket >= 0)
           {
-            if(fd == d_socket)
+            getsockopt(d_client_socket, SOL_SOCKET, SO_ERROR, &error_code, &len);
+            if(error_code != 0)
             {
-              socklen_t addrlen = sizeof(d_servaddr);
-              d_client_socket = accept(d_socket, (struct sockaddr*)&d_servaddr, &addrlen);
-              
-              if (d_client_socket < 0)
-              {
-                GR_LOG_ERROR(this->d_logger, "Could not accept incoming connection");
-                throw std::runtime_error("Could not accept incoming connection");
-              }
-
-              FD_SET(d_client_socket, &d_rset);
-              d_fds.push_back(d_client_socket);
-            }
-            else
-            {
-              T *out = reinterpret_cast<T *>(output_items[0]);
-              return buffer_and_send(out, noutput_items);
+              error_msg += " (client file descriptor error code: " + std::to_string(error_code) + ")";
             }
           }
+
+          getsockopt(d_socket, SOL_SOCKET, SO_ERROR, &error_code, &len);
+          if(error_code != 0)
+          {
+            error_msg += " (server file descriptor error code: " + std::to_string(error_code) + ")";
+          }
+
+          GR_LOG_ERROR(this->d_logger, error_msg);
+          throw std::runtime_error(error_msg);
         }
-      }
+
+        // accept incoming connection if client has not connected yet
+        if(d_client_socket < 0 and
+            FD_ISSET(d_socket, &read_fds))
+        {
+          socklen_t addrlen = sizeof(d_servaddr);
+          d_client_socket = accept(d_socket, (struct sockaddr*)&d_servaddr, &addrlen);
+          
+          if (d_client_socket < 0)
+          {
+            GR_LOG_ERROR(this->d_logger, "Could not accept incoming connection");
+            throw std::runtime_error("Could not accept incoming connection");
+          }
+
+          FD_SET(d_client_socket, &d_rset);
+          if(d_fd_max < d_client_socket)
+            d_fd_max = d_client_socket;
+        }
+        // check if there is data in the socket buffer
+        else if(d_client_socket >= 0 and
+          FD_ISSET(d_client_socket, &read_fds))
+        {
+          T *out = reinterpret_cast<T *>(output_items[0]);
+          return buffer_and_send(out, noutput_items);
+        }
+      } // else: UDP socket
       else
       {
         T *out = reinterpret_cast<T *>(output_items[0]);
@@ -176,23 +199,123 @@ namespace gr {
       }
       else
       {
-          // compute the number of bytes per packet
-          // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
-          // Packet Size: Bits 0-15
-          size_gotten = recv(d_client_socket, &d_packet_buffer[0], sizeof(int32_t),MSG_WAITALL);
-          // client socket closed, remove from fd list
-          if(size_gotten <= 0)
+          // read scenarios
+          // 1. received complete packet in a single read
+          // 2. received partial packet
+          //    a. current only
+          //    b. current + next packet to process
+          if(d_num_bytes_in_read_buffer == 0)
           {
-            reset_tcp_connection();
-            return 0;
+            size_gotten = recv(d_client_socket, &d_read_buffer[0], d_read_buffer.size(),MSG_WAITALL);
+
+            // when monitoring the file descriptor using 'select' and the fd is set, there should be
+            // bytes in the socket buffer. If the receive call returns 0 bytes then the connection has
+            // been lost and the client needs to re-connect
+            if(size_gotten <= 0)
+            {
+              reset_tcp_connection();
+              d_packet_buffer_start_idx = 0;
+              d_num_bytes_in_read_buffer = 0;
+              return 0;
+            }
+
+            // compute the number of bytes per packet
+            // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
+            // Packet Size: Bits 0-15
+            // check packet size
+            auto header = unpack_u32(&d_read_buffer[0]);
+            int32_t pkt_size = NUM_BYTES_PER_WORD * (header&0xffff);
+            int32_t num_bytes_to_copy = std::min(pkt_size-d_packet_buffer_start_idx,size_gotten);
+
+            std::copy_n(d_read_buffer.cbegin(), num_bytes_to_copy, d_packet_buffer.begin()+d_packet_buffer_start_idx);
+
+            int num_bytes_pending = pkt_size-d_packet_buffer_start_idx-size_gotten;
+
+            if(num_bytes_pending > 0)
+            {
+              d_packet_buffer_start_idx += size_gotten; // copy offset for remaining bytes
+              d_num_bytes_in_read_buffer = 0;
+              return 0;
+            }
+            else if(num_bytes_pending < 0)
+            {
+              d_packet_buffer_start_idx = pkt_size;
+              d_num_bytes_in_read_buffer = abs(num_bytes_pending);
+              size_gotten = pkt_size;
+            }
+            else
+            {
+              d_packet_buffer_start_idx = 0;
+              d_num_bytes_in_read_buffer = 0;
+              size_gotten = pkt_size;
+            }
           }
-          // check packet size
-          auto header = unpack_u32(&d_packet_buffer[0]);
-          int32_t pkt_size = 4 * (header&0xffff) - 4;
-          if(pkt_size>0)
+          else
           {
-            int num_to_read = std::min(pkt_size,int(d_packet_buffer.size()-4));
-            size_gotten+= recv(d_client_socket, &d_packet_buffer[4], num_to_read,MSG_WAITALL);
+            // copy remaining bytes in the buffer to d_packet before reading again
+            // compute the number of bytes per packet
+            // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
+            // Packet Size: Bits 0-15
+            // check packet size
+            auto header = unpack_u32(&d_read_buffer[d_packet_buffer_start_idx]);
+            int32_t pkt_size = NUM_BYTES_PER_WORD * (header&0xffff);
+            int32_t num_bytes_to_copy = std::min(pkt_size,d_num_bytes_in_read_buffer);
+
+            std::copy_n(d_read_buffer.cbegin()+d_packet_buffer_start_idx, num_bytes_to_copy, d_packet_buffer.begin());
+
+            if(pkt_size < d_num_bytes_in_read_buffer)
+            {
+              d_packet_buffer_start_idx += num_bytes_to_copy;
+              d_num_bytes_in_read_buffer -= num_bytes_to_copy;
+              size_gotten = pkt_size;
+            }
+            else if(pkt_size == d_num_bytes_in_read_buffer)
+            {
+              d_packet_buffer_start_idx = 0;
+              d_num_bytes_in_read_buffer = 0;
+              size_gotten = pkt_size;
+            }
+            else
+            {
+              size_gotten = recv(d_client_socket, &d_read_buffer[0], d_read_buffer.size(),MSG_WAITALL);
+
+              // when monitoring the file descriptor using 'select' and the fd is set, there should be
+              // bytes in the socket buffer. If the receive call returns 0 bytes then the connection has
+              // been lost and the client needs to re-connect
+              if(size_gotten <= 0)
+              {
+                reset_tcp_connection();
+                d_packet_buffer_start_idx = 0;
+                d_num_bytes_in_read_buffer = 0;
+                return 0;
+              }
+
+              d_packet_buffer_start_idx = num_bytes_to_copy;
+              num_bytes_to_copy = std::min(pkt_size-d_num_bytes_in_read_buffer,size_gotten);
+
+              std::copy_n(d_read_buffer.cbegin(), num_bytes_to_copy, d_packet_buffer.begin()+d_num_bytes_in_read_buffer);
+
+              int num_bytes_pending = pkt_size-d_packet_buffer_start_idx-size_gotten;
+
+              if(num_bytes_pending > 0)
+              {
+                d_packet_buffer_start_idx += (d_packet_buffer_start_idx+size_gotten); // copy offset for remaining bytes
+                d_num_bytes_in_read_buffer = 0;
+                return 0;
+              }
+              else if(num_bytes_pending < 0)
+              {
+                d_packet_buffer_start_idx = num_bytes_to_copy;
+                d_num_bytes_in_read_buffer = abs(num_bytes_pending);
+                size_gotten = pkt_size;
+              }
+              else
+              {
+                d_packet_buffer_start_idx = 0;
+                d_num_bytes_in_read_buffer = 0;
+                size_gotten = pkt_size;
+              }
+            }
           }
       }
 
@@ -235,8 +358,8 @@ namespace gr {
         uint32_t idx = difi::DATA_START_IDX; //start after the data header
         while (items_written < out_items and idx < size_gotten)
         {
-          T test = d_unpacker(&d_packet_buffer[idx]);
-          out[items_written] = test;
+          T sample = d_unpacker(&d_packet_buffer[idx]);
+          out[items_written] = sample;
           idx += 2 * d_unpack_idx_size;
           items_written++;
         }
@@ -379,9 +502,6 @@ namespace gr {
     template <class T>
     void difi_source_cpp_impl<T>::create_udp_socket()
     {
-      struct timeval tv;
-      tv.tv_sec = 0;
-      tv.tv_usec = 10000;
 
       if ((d_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
       {
@@ -396,7 +516,7 @@ namespace gr {
         throw std::runtime_error("Could not set socket size");
       }
 
-      if (setsockopt(d_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+      if (setsockopt(d_socket, SOL_SOCKET, SO_RCVTIMEO, &d_tv, sizeof(d_tv)) < 0)
       {
         GR_LOG_ERROR(this->d_logger, "Could not set timeout on socket");
         throw std::runtime_error("Could not set timeout on socket");
@@ -413,9 +533,6 @@ namespace gr {
     template <class T>
     void difi_source_cpp_impl<T>::create_tcp_socket()
     {
-      struct timeval tv;
-      tv.tv_sec = 0;
-      tv.tv_usec = 10000;
 
       if ((d_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
       {
@@ -430,7 +547,13 @@ namespace gr {
         throw std::runtime_error("Could not set socket size");
       }
 
-      if (setsockopt(d_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &tv, sizeof(tv)) < 0)
+      if (setsockopt(d_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &d_tv, sizeof(d_tv)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not set timeout on socket");
+        throw std::runtime_error("Could not set timeout on socket");
+      }
+
+      if (setsockopt(d_socket, SOL_SOCKET, SO_RCVTIMEO, &d_tv, sizeof(d_tv)) < 0)
       {
         GR_LOG_ERROR(this->d_logger, "Could not set timeout on socket");
         throw std::runtime_error("Could not set timeout on socket");
@@ -451,7 +574,8 @@ namespace gr {
 
       FD_ZERO(&d_rset);
       FD_SET(d_socket, &d_rset);
-      d_fds.push_back(d_socket);
+      d_client_socket = -1;
+      d_fd_max = d_socket;
     }
 
     template <class T>
@@ -459,7 +583,9 @@ namespace gr {
     {
       close(d_client_socket);
       FD_CLR(d_client_socket, &d_rset);
-      d_fds.pop_back();
+      d_client_socket = -1;
+      d_fd_max = d_socket;
+      GR_LOG_DEBUG(this->d_logger, "Connection lost");
     }
 
     template class difi_source_cpp<gr_complex>;
