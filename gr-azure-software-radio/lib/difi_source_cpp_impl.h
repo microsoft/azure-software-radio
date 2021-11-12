@@ -91,12 +91,25 @@ private:
       memcpy(&imag, start + 1, 1);
       return M(re, imag);
     }
-    std::string d_host_name;
+
+    void create_udp_socket();
+    void create_tcp_socket();
+    void reset_tcp_connection();
+
+    std::string d_ip_addr;
     uint32_t d_port;
     int d_stream_number;
-    uint32_t d_buffer_len;
+    uint32_t d_packet_buffer_len;
     int d_socket;
-    std::vector<int8_t> d_buffer;
+    int d_client_socket;
+    int d_fd_max;
+    int d_packet_buffer_start_idx;
+    int d_num_bytes_in_read_buffer;
+    uint8_t d_socket_type;
+    fd_set d_rset;
+    struct timeval d_tv;
+    std::vector<int8_t> d_read_buffer;
+    std::vector<int8_t> d_packet_buffer;
     struct sockaddr_in d_servaddr;
     std::deque<char> d_deque;
     std::chrono::time_point<std::chrono::high_resolution_clock> last;
@@ -114,10 +127,12 @@ private:
     u_int32_t d_unpack_idx_size;
     pmt::pmt_t make_context_dict(header_data& header, int size_gotten);
     int buffer_and_send(T* out, int noutput_items);
+    int recv_tcp_packet();
 
 public:
-    difi_source_cpp_impl(std::string host_name,
+    difi_source_cpp_impl(std::string ip_addr,
                     uint32_t port,
+                    uint8_t socket_type,
                     uint32_t stream_number,
                     uint32_t socket_buffer_size, 
                     int bit_depth);
