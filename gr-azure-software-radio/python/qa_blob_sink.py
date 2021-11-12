@@ -7,11 +7,8 @@
 # See License.txt in the project root for license information.
 #
 
-
-from gnuradio import gr_unittest
-from gnuradio import blocks
+from gnuradio import gr, gr_unittest
 from azure_software_radio import BlobSink
-import azure_software_radio
 
 
 class qa_BlobSink(gr_unittest.TestCase):

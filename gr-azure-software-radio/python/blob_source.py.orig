@@ -116,11 +116,22 @@ class BlobSource(gr.sync_block):
         """
         # TODO: put this into a separate thread, see ADO #5897
         while not self.que.full() and not self.blob_complete:
+
             try:
-                chunk = next(self.blob_iter)
-                self.log.debug(f"Retrieved {len(chunk)} bytes of data from blob storage")
+<<<<<<< HEAD
+                self.log.debug(
+                    "Retrieving next block of data from blob storage")
+                chunk = self.blob_iter.next()
+                self.log.debug(
+                    f"Retrieved {len(chunk)} bytes of data from blob storage")
                 data, self.chunk_residue = self.chunk_to_array(
                     chunk, self.chunk_residue)
+=======
+                self.log.debug("Retrieving next block of data from blob storage")
+                chunk = next(self.blob_iter)
+                self.log.debug("Retrieved {} bytes of data from blob storage".format(len(chunk)))
+                data, self.chunk_residue = self.chunk_to_array(chunk, self.chunk_residue)
+>>>>>>> dev
                 if len(data) > 0:
                     self.que.put(data)
             except StopIteration:
