@@ -36,6 +36,9 @@ namespace gr {
       d_servaddr.sin_addr.s_addr = inet_addr(ip_addr.c_str());
       d_socket_type = (socket_type == 1) ?  SOCK_STREAM : SOCK_DGRAM;
 
+      d_tv.tv_sec = 0;
+      d_tv.tv_usec = 10000;
+
       if(d_socket_type == SOCK_DGRAM)
       {
         create_udp_socket();
@@ -146,11 +149,7 @@ namespace gr {
         }
         else
         {
-          struct timeval tv;
-          tv.tv_sec = 0;
-          tv.tv_usec = 10000;
-
-          if(select(d_socket + 1, NULL, &d_fdset, NULL, &tv) < 0)
+          if(select(d_socket + 1, NULL, &d_fdset, NULL, &d_tv) < 0)
           {
             int error_code;
             socklen_t len = sizeof(error_code);

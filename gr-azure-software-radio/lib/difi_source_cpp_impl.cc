@@ -199,127 +199,10 @@ namespace gr {
       }
       else
       {
-          // read scenarios
-          // 1. received complete packet in a single read
-          // 2. received partial packet
-          //    a. current only
-          //    b. current + next packet to process
-          if(d_num_bytes_in_read_buffer == 0)
-          {
-            size_gotten = recv(d_client_socket, &d_read_buffer[0], d_read_buffer.size(),MSG_WAITALL);
-
-            // when monitoring the file descriptor using 'select' and the fd is set, there should be
-            // bytes in the socket buffer. If the receive call returns 0 bytes then the connection has
-            // been lost and the client needs to re-connect
-            if(size_gotten <= 0)
-            {
-              reset_tcp_connection();
-              d_packet_buffer_start_idx = 0;
-              d_num_bytes_in_read_buffer = 0;
-              return 0;
-            }
-
-            // compute the number of bytes per packet
-            // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
-            // Packet Size: Bits 0-15
-            // check packet size
-            auto header = unpack_u32(&d_read_buffer[0]);
-            int32_t pkt_size = NUM_BYTES_PER_WORD * (header&0xffff);
-            int32_t num_bytes_to_copy = std::min(pkt_size-d_packet_buffer_start_idx,size_gotten);
-
-            std::copy_n(d_read_buffer.cbegin(), num_bytes_to_copy, d_packet_buffer.begin()+d_packet_buffer_start_idx);
-
-            int num_bytes_pending = pkt_size-d_packet_buffer_start_idx-size_gotten;
-
-            if(num_bytes_pending > 0)
-            {
-              d_packet_buffer_start_idx += size_gotten; // copy offset for remaining bytes
-              d_num_bytes_in_read_buffer = 0;
-              return 0;
-            }
-            else if(num_bytes_pending < 0)
-            {
-              d_packet_buffer_start_idx = pkt_size;
-              d_num_bytes_in_read_buffer = abs(num_bytes_pending);
-              size_gotten = pkt_size;
-            }
-            else
-            {
-              d_packet_buffer_start_idx = 0;
-              d_num_bytes_in_read_buffer = 0;
-              size_gotten = pkt_size;
-            }
-          }
-          else
-          {
-            // copy remaining bytes in the buffer to d_packet before reading again
-            // compute the number of bytes per packet
-            // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
-            // Packet Size: Bits 0-15
-            // check packet size
-            auto header = unpack_u32(&d_read_buffer[d_packet_buffer_start_idx]);
-            int32_t pkt_size = NUM_BYTES_PER_WORD * (header&0xffff);
-            int32_t num_bytes_to_copy = std::min(pkt_size,d_num_bytes_in_read_buffer);
-
-            std::copy_n(d_read_buffer.cbegin()+d_packet_buffer_start_idx, num_bytes_to_copy, d_packet_buffer.begin());
-
-            if(pkt_size < d_num_bytes_in_read_buffer)
-            {
-              d_packet_buffer_start_idx += num_bytes_to_copy;
-              d_num_bytes_in_read_buffer -= num_bytes_to_copy;
-              size_gotten = pkt_size;
-            }
-            else if(pkt_size == d_num_bytes_in_read_buffer)
-            {
-              d_packet_buffer_start_idx = 0;
-              d_num_bytes_in_read_buffer = 0;
-              size_gotten = pkt_size;
-            }
-            else
-            {
-              size_gotten = recv(d_client_socket, &d_read_buffer[0], d_read_buffer.size(),MSG_WAITALL);
-
-              // when monitoring the file descriptor using 'select' and the fd is set, there should be
-              // bytes in the socket buffer. If the receive call returns 0 bytes then the connection has
-              // been lost and the client needs to re-connect
-              if(size_gotten <= 0)
-              {
-                reset_tcp_connection();
-                d_packet_buffer_start_idx = 0;
-                d_num_bytes_in_read_buffer = 0;
-                return 0;
-              }
-
-              d_packet_buffer_start_idx = num_bytes_to_copy;
-              num_bytes_to_copy = std::min(pkt_size-d_num_bytes_in_read_buffer,size_gotten);
-
-              std::copy_n(d_read_buffer.cbegin(), num_bytes_to_copy, d_packet_buffer.begin()+d_num_bytes_in_read_buffer);
-
-              int num_bytes_pending = pkt_size-d_packet_buffer_start_idx-size_gotten;
-
-              if(num_bytes_pending > 0)
-              {
-                d_packet_buffer_start_idx += (d_packet_buffer_start_idx+size_gotten); // copy offset for remaining bytes
-                d_num_bytes_in_read_buffer = 0;
-                return 0;
-              }
-              else if(num_bytes_pending < 0)
-              {
-                d_packet_buffer_start_idx = num_bytes_to_copy;
-                d_num_bytes_in_read_buffer = abs(num_bytes_pending);
-                size_gotten = pkt_size;
-              }
-              else
-              {
-                d_packet_buffer_start_idx = 0;
-                d_num_bytes_in_read_buffer = 0;
-                size_gotten = pkt_size;
-              }
-            }
-          }
+        size_gotten = recv_tcp_packet();
       }
 
-      if (size_gotten < 0)
+      if(size_gotten < 0)
       {
         return 0;
       }
@@ -586,6 +469,133 @@ namespace gr {
       d_client_socket = -1;
       d_fd_max = d_socket;
       GR_LOG_DEBUG(this->d_logger, "Connection lost");
+    }
+
+    template <class T>
+    int difi_source_cpp_impl<T>::recv_tcp_packet()
+    {
+      int size_gotten = -1;
+
+      // read scenarios
+      // 1. received complete packet in a single read
+      // 2. received partial packet
+      //    a. current only
+      //    b. current + next packet to process
+      if(d_num_bytes_in_read_buffer == 0)
+      {
+        size_gotten = recv(d_client_socket, &d_read_buffer[0], d_read_buffer.size(),MSG_WAITALL);
+
+        // when monitoring the file descriptor using 'select' and the fd is set, there should be
+        // bytes in the socket buffer. If the receive call returns 0 bytes then the connection has
+        // been lost and the client needs to re-connect
+        if(size_gotten <= 0)
+        {
+          reset_tcp_connection();
+          d_packet_buffer_start_idx = 0;
+          d_num_bytes_in_read_buffer = 0;
+          return -1;
+        }
+
+        // compute the number of bytes per packet
+        // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
+        // Packet Size: Bits 0-15
+        // check packet size
+        auto header = unpack_u32(&d_read_buffer[0]);
+        int32_t pkt_size = NUM_BYTES_PER_WORD * (header&0xffff);
+        int32_t num_bytes_to_copy = std::min(pkt_size-d_packet_buffer_start_idx,size_gotten);
+
+        std::copy_n(d_read_buffer.cbegin(), num_bytes_to_copy, d_packet_buffer.begin()+d_packet_buffer_start_idx);
+
+        int num_bytes_pending = pkt_size-d_packet_buffer_start_idx-size_gotten;
+
+        if(num_bytes_pending > 0)
+        {
+          d_packet_buffer_start_idx += size_gotten; // copy offset for remaining bytes
+          d_num_bytes_in_read_buffer = 0;
+          return -1;
+        }
+        else if(num_bytes_pending < 0)
+        {
+          d_packet_buffer_start_idx = pkt_size;
+          d_num_bytes_in_read_buffer = abs(num_bytes_pending);
+          size_gotten = pkt_size;
+        }
+        else
+        {
+          d_packet_buffer_start_idx = 0;
+          d_num_bytes_in_read_buffer = 0;
+          size_gotten = pkt_size;
+        }
+      }
+      else
+      {
+        // copy remaining bytes in the buffer to d_packet before reading again
+        // compute the number of bytes per packet
+        // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
+        // Packet Size: Bits 0-15
+        // check packet size
+        auto header = unpack_u32(&d_read_buffer[d_packet_buffer_start_idx]);
+        int32_t pkt_size = NUM_BYTES_PER_WORD * (header&0xffff);
+        int32_t num_bytes_to_copy = std::min(pkt_size,d_num_bytes_in_read_buffer);
+
+        std::copy_n(d_read_buffer.cbegin()+d_packet_buffer_start_idx, num_bytes_to_copy, d_packet_buffer.begin());
+
+        if(pkt_size < d_num_bytes_in_read_buffer)
+        {
+          d_packet_buffer_start_idx += num_bytes_to_copy;
+          d_num_bytes_in_read_buffer -= num_bytes_to_copy;
+          size_gotten = pkt_size;
+        }
+        else if(pkt_size == d_num_bytes_in_read_buffer)
+        {
+          d_packet_buffer_start_idx = 0;
+          d_num_bytes_in_read_buffer = 0;
+          size_gotten = pkt_size;
+        }
+        else
+        {
+          size_gotten = recv(d_client_socket, &d_read_buffer[0], d_read_buffer.size(),MSG_WAITALL);
+
+          // when monitoring the file descriptor using 'select' and the fd is set, there should be
+          // bytes in the socket buffer. If the receive call returns 0 bytes then the connection has
+          // been lost and the client needs to re-connect
+          if(size_gotten <= 0)
+          {
+            reset_tcp_connection();
+            d_packet_buffer_start_idx = 0;
+            d_num_bytes_in_read_buffer = 0;
+            return -1;
+          }
+
+          d_packet_buffer_start_idx = num_bytes_to_copy;
+          num_bytes_to_copy = std::min(pkt_size-d_num_bytes_in_read_buffer,size_gotten);
+
+          std::copy_n(d_read_buffer.cbegin(), num_bytes_to_copy, d_packet_buffer.begin()+d_num_bytes_in_read_buffer);
+
+          int num_bytes_pending = pkt_size-d_packet_buffer_start_idx-size_gotten;
+
+          if(num_bytes_pending > 0)
+          {
+            d_packet_buffer_start_idx += (d_packet_buffer_start_idx+size_gotten); // copy offset for remaining bytes
+            d_num_bytes_in_read_buffer = 0;
+            return -1;
+          }
+          else if(num_bytes_pending < 0)
+          {
+            d_packet_buffer_start_idx = num_bytes_to_copy;
+            d_num_bytes_in_read_buffer = abs(num_bytes_pending);
+            size_gotten = pkt_size;
+          }
+          else
+          {
+            d_packet_buffer_start_idx = 0;
+            d_num_bytes_in_read_buffer = 0;
+            size_gotten = pkt_size;
+          }
+        }
+      }
+
+      return size_gotten;
     }
 
     template class difi_source_cpp<gr_complex>;

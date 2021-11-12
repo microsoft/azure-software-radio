@@ -127,6 +127,7 @@ private:
     u_int32_t d_unpack_idx_size;
     pmt::pmt_t make_context_dict(header_data& header, int size_gotten);
     int buffer_and_send(T* out, int noutput_items);
+    int recv_tcp_packet();
 
 public:
     difi_source_cpp_impl(std::string ip_addr,
