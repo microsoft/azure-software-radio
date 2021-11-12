@@ -6,57 +6,88 @@
 #include <gnuradio/io_signature.h>
 #include "difi_source_cpp_impl.h"
 #include <functional>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <netinet/in.h>
+#include <errno.h>
+
+#define NUM_BYTES_PER_WORD (4)
+
 namespace gr {
   namespace azure_software_radio {
 
-    template <class T>
-    typename difi_source_cpp<T>::sptr difi_source_cpp<T>::make(std::string ip_addr, uint32_t port, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
+    u_int32_t unpack_u32(u_int8_t *start)
     {
-      return gnuradio::make_block_sptr<difi_source_cpp_impl<T>>(ip_addr, port, stream_number, socket_buffer_size, bit_depth);
+      u_int32_t val;
+      memcpy(&val, start, sizeof(val));
+      return ntohl(val);
+    }
+    u_int64_t unpack_u64(u_int8_t *start)
+    {
+      u_int64_t val;
+      memcpy(&val, start, sizeof(val));
+      return be64toh(val);
+    }
+
+      u_int32_t unpack_u32(int8_t *start)
+    {
+      u_int32_t val;
+      memcpy(&val, start, sizeof(val));
+      return ntohl(val);
+    }
+    u_int64_t unpack_u64(int8_t *start)
+    {
+      u_int64_t val;
+      memcpy(&val, start, sizeof(val));
+      return be64toh(val);
     }
 
     template <class T>
-    difi_source_cpp_impl<T>::difi_source_cpp_impl(std::string ip_addr, uint32_t port, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
+    typename difi_source_cpp<T>::sptr difi_source_cpp<T>::make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
+    {
+      return gnuradio::make_block_sptr<difi_source_cpp_impl<T>>(ip_addr, port, socket_type, stream_number, socket_buffer_size, bit_depth);
+    }
+
+    template <class T>
+    difi_source_cpp_impl<T>::difi_source_cpp_impl(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
         : gr::sync_block("source_cpp", gr::io_signature::make(0, 0, 0),
                          gr::io_signature::make(1 /* min outputs */,
                                                 1 /*max outputs */,
                                                 sizeof(T))),
-          d_host_name(ip_addr),
+          d_ip_addr(ip_addr),
           d_port(port),
           d_stream_number(stream_number),
-          d_buffer_len(socket_buffer_size)
+          d_packet_buffer_len(socket_buffer_size)
 
     {
-      d_buffer.resize(socket_buffer_size);
+      d_tv.tv_sec = 0;
+      d_tv.tv_usec = 10000;
+      d_packet_buffer.resize(socket_buffer_size);
+      d_read_buffer.resize(socket_buffer_size);
       memset(&d_servaddr, 0, sizeof(d_servaddr));
       d_servaddr.sin_family = AF_INET;
       d_servaddr.sin_port = htons(port);
       d_servaddr.sin_addr.s_addr = INADDR_ANY;
-      struct timeval tv;
-      tv.tv_sec = 0;
-      tv.tv_usec = 10000;
-      if ((d_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+      d_socket_type = (socket_type == 1) ?  SOCK_STREAM : SOCK_DGRAM;
+      d_client_socket = -1;
+      d_packet_buffer_start_idx = 0;
+      d_num_bytes_in_read_buffer = 0;
+      d_fd_max = -1;
+
+      if(d_socket_type == SOCK_DGRAM)
       {
-        GR_LOG_ERROR(this->d_logger, "Could not make socket, socket may be in use.");
-        throw std::runtime_error("Could not make socket");
+        create_udp_socket();
       }
-      int sock_b_size = 2000000;
-      if(setsockopt(d_socket, SOL_SOCKET, SO_RCVBUF, &sock_b_size, sizeof(sock_b_size)) < 0)
+      else
       {
-        GR_LOG_ERROR(this->d_logger, "Could not set socket size");
-        throw std::runtime_error("Could not set socket size");
+        create_tcp_socket();
       }
-      if (setsockopt(d_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
-      {
-        GR_LOG_ERROR(this->d_logger, "Could not set timeout on socket");
-        throw std::runtime_error("Could not set timeout on socket");
-      }
-      if (bind(d_socket, (const struct sockaddr *)&d_servaddr,
-               sizeof(d_servaddr)) < 0)
-      {
-        GR_LOG_ERROR(this->d_logger, "Could not connect to port, port may be in use");
-        throw std::runtime_error("Could not connect to port");
-      }
+
       d_context = NULL;
       d_last_pkt_n = -1;
       d_static_bits = -1;
@@ -76,6 +107,12 @@ namespace gr {
     template <class T>
     difi_source_cpp_impl<T>::~difi_source_cpp_impl() 
     {
+      if(d_socket_type == SOCK_STREAM)
+      {
+        close(d_client_socket);
+        FD_CLR(d_socket,&d_rset);
+      }
+
       close(d_socket);
     }
 
@@ -84,9 +121,69 @@ namespace gr {
                               gr_vector_const_void_star &input_items,
                               gr_vector_void_star &output_items)
     {
+      if(d_socket_type == SOCK_STREAM)
+      {
+        // select file descriptors that we want to monitor (server and socket client)
+        fd_set read_fds = d_rset;
+        int status = select(d_fd_max+1, &read_fds, NULL, NULL, &d_tv);
+        if (status < 0)
+        {
+          // get the error code from the file descriptor
+          int error_code;
+          socklen_t len = sizeof(error_code);
+          std::string error_msg = "Could not select file descriptor - ";
 
-      T *out = reinterpret_cast<T *>(output_items[0]);
-      return buffer_and_send(out, noutput_items);
+          if(d_client_socket >= 0)
+          {
+            getsockopt(d_client_socket, SOL_SOCKET, SO_ERROR, &error_code, &len);
+            if(error_code != 0)
+            {
+              error_msg += " (client file descriptor error code: " + std::to_string(error_code) + ")";
+            }
+          }
+
+          getsockopt(d_socket, SOL_SOCKET, SO_ERROR, &error_code, &len);
+          if(error_code != 0)
+          {
+            error_msg += " (server file descriptor error code: " + std::to_string(error_code) + ")";
+          }
+
+          GR_LOG_ERROR(this->d_logger, error_msg);
+          throw std::runtime_error(error_msg);
+        }
+
+        // accept incoming connection if client has not connected yet
+        if(d_client_socket < 0 and
+            FD_ISSET(d_socket, &read_fds))
+        {
+          socklen_t addrlen = sizeof(d_servaddr);
+          d_client_socket = accept(d_socket, (struct sockaddr*)&d_servaddr, &addrlen);
+          
+          if (d_client_socket < 0)
+          {
+            GR_LOG_ERROR(this->d_logger, "Could not accept incoming connection");
+            throw std::runtime_error("Could not accept incoming connection");
+          }
+
+          FD_SET(d_client_socket, &d_rset);
+          if(d_fd_max < d_client_socket)
+            d_fd_max = d_client_socket;
+        }
+        // check if there is data in the socket buffer
+        else if(d_client_socket >= 0 and
+          FD_ISSET(d_client_socket, &read_fds))
+        {
+          T *out = reinterpret_cast<T *>(output_items[0]);
+          return buffer_and_send(out, noutput_items);
+        }
+      } // else: UDP socket
+      else
+      {
+        T *out = reinterpret_cast<T *>(output_items[0]);
+        return buffer_and_send(out, noutput_items);
+      }
+
+      return 0;
     }
 
     template <class T>
@@ -94,14 +191,22 @@ namespace gr {
     {
       boost::this_thread::disable_interruption disable_interrupt;
       socklen_t len = sizeof(d_servaddr);
-      int size_gotten = recvfrom(d_socket, &d_buffer[0], d_buffer.size(),
-                                 MSG_WAITALL, (struct sockaddr *)&d_servaddr, &len);
+      int size_gotten = -1;
+      if(d_socket_type == SOCK_DGRAM)
+      {
+        size_gotten = recvfrom(d_socket, &d_packet_buffer[0], d_packet_buffer.size(),
+                                  MSG_WAITALL, (struct sockaddr *)&d_servaddr, &len);
+      }
+      else
+      {
+        size_gotten = recv_tcp_packet();
+      }
 
-
-      if (size_gotten < 0)
+      if(size_gotten < 0)
       {
         return 0;
       }
+
       if (size_gotten % (d_unpack_idx_size * 2) != 0)
       {
         GR_LOG_WARN(this->d_logger, "got a packet which is not divisible by the number bytes per sample, samples will be lost. Check your bit depth configuration.");
@@ -136,8 +241,8 @@ namespace gr {
         uint32_t idx = difi::DATA_START_IDX; //start after the data header
         while (items_written < out_items and idx < size_gotten)
         {
-          T test = d_unpacker(&d_buffer[idx]);
-          out[items_written] = test;
+          T sample = d_unpacker(&d_packet_buffer[idx]);
+          out[items_written] = sample;
           idx += 2 * d_unpack_idx_size;
           items_written++;
         }
@@ -150,39 +255,13 @@ namespace gr {
       }
     }
 
-    u_int32_t unpack_u32(u_int8_t *start)
-    {
-      u_int32_t val;
-      memcpy(&val, start, sizeof(val));
-      return ntohl(val);
-    }
-    u_int64_t unpack_u64(u_int8_t *start)
-    {
-      u_int64_t val;
-      memcpy(&val, start, sizeof(val));
-      return be64toh(val);
-    }
-
-      u_int32_t unpack_u32(int8_t *start)
-    {
-      u_int32_t val;
-      memcpy(&val, start, sizeof(val));
-      return ntohl(val);
-    }
-    u_int64_t unpack_u64(int8_t *start)
-    {
-      u_int64_t val;
-      memcpy(&val, start, sizeof(val));
-      return be64toh(val);
-    }
-
     template <class T>
     void difi_source_cpp_impl<T>::parse_header(header_data &data)
     {
-      auto header = unpack_u32(&d_buffer[0]);
-      auto stream_number = unpack_u32(&d_buffer[4]);
-      auto full = unpack_u32(&d_buffer[16]);
-      auto frac = unpack_u64(&d_buffer[20]);
+      auto header = unpack_u32(&d_packet_buffer[0]);
+      auto stream_number = unpack_u32(&d_packet_buffer[4]);
+      auto full = unpack_u32(&d_packet_buffer[16]);
+      auto frac = unpack_u64(&d_packet_buffer[20]);
       data.type = header >> 28;
       data.pkt_n = (header >> 16) & 0xf;
       data.header = header;
@@ -198,15 +277,14 @@ namespace gr {
           this->add_item_tag(0, this->nitems_written(0), pmt::intern("static_change"), pmt::from_uint64(static_part));
         }
       }
-
     }
 
     template <class T>
     pmt::pmt_t difi_source_cpp_impl<T>::make_pkt_n_dict(int pkt_n, int size_gotten)
     {
       pmt::pmt_t dict = pmt::make_dict();
-      auto full = unpack_u32(&d_buffer[16]);
-      auto frac = unpack_u64(&d_buffer[20]);
+      auto full = unpack_u32(&d_packet_buffer[16]);
+      auto frac = unpack_u64(&d_packet_buffer[20]);
       dict = pmt::dict_add(dict, pmt::intern("pck_n"), pmt::from_uint64((u_int64_t)pkt_n));
       dict = pmt::dict_add(dict, pmt::intern("data_len"), pmt::from_uint64(size_gotten));
       dict = pmt::dict_add(dict, pmt::intern("full"), pmt::from_long(full));
@@ -235,7 +313,7 @@ namespace gr {
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("samp_rate"), pmt::from_double(context.samp_rate));;
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("state_and_event_indicator"), pmt::from_long(context.state_indicators));
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("data_packet_payload_format"), pmt::from_uint64(context.payload_format));
-        pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("raw"), pmt::init_s8vector(size_gotten, &d_buffer[0]));
+        pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("raw"), pmt::init_s8vector(size_gotten, &d_packet_buffer[0]));
       }
       else
       {
@@ -258,7 +336,7 @@ namespace gr {
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("timestamp_calibration_time"), pmt::from_uint64(context.t_cal));
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("state_and_event_indicator"), pmt::from_long(context.state_indicators));
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("data_packet_payload_format"), pmt::from_uint64(context.payload_format));
-        pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("raw"), pmt::init_s8vector(size_gotten, &d_buffer[0]));
+        pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("raw"), pmt::init_s8vector(size_gotten, &d_packet_buffer[0]));
       }
       if ((context.payload_format >> 32 & 0x0000001f) + 1 != d_unpack_idx_size * 8)
       {
@@ -272,36 +350,252 @@ namespace gr {
     void difi_source_cpp_impl<T>::unpack_context_alt(context_packet &context)
     {
       int idx = 0;
-      context.class_id = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
-      context.cif = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
-      context.bw = parse_vita_fixed_double(unpack_u64(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]));
-      context.if_ref_freq = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
-      context.rf_ref_freq = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
-      context.if_band_offset = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
-      context.samp_rate = parse_vita_fixed_double(unpack_u64(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]));
-      context.state_indicators = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
-      context.payload_format = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
+      context.class_id = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
+      context.cif = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
+      context.bw = parse_vita_fixed_double(unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]));
+      context.if_ref_freq = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
+      context.rf_ref_freq = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
+      context.if_band_offset = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
+      context.samp_rate = parse_vita_fixed_double(unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]));
+      context.state_indicators = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
+      context.payload_format = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_ALT_OFFSETS[idx++]]);
     }
     template <class T>
     void difi_source_cpp_impl<T>::unpack_context(context_packet &context)
     {
       int idx = 0;
-      context.class_id = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.full = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.frac = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.cif = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.ref_point = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.bw = parse_vita_fixed_double(unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]));
-      context.if_ref_freq = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.rf_ref_freq = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.if_band_offset = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.ref_lvl = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.gain = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.samp_rate = parse_vita_fixed_double(unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]));
-      context.t_adj = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.t_cal = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.state_indicators = unpack_u32(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
-      context.payload_format = unpack_u64(&d_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.class_id = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.full = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.frac = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.cif = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.ref_point = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.bw = parse_vita_fixed_double(unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]));
+      context.if_ref_freq = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.rf_ref_freq = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.if_band_offset = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.ref_lvl = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.gain = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.samp_rate = parse_vita_fixed_double(unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]));
+      context.t_adj = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.t_cal = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.state_indicators = unpack_u32(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+      context.payload_format = unpack_u64(&d_packet_buffer[difi::CONTEXT_PACKET_OFFSETS[idx++]]);
+    }
+
+    template <class T>
+    void difi_source_cpp_impl<T>::create_udp_socket()
+    {
+
+      if ((d_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not make UDP socket, socket may be in use.");
+        throw std::runtime_error("Could not make UDP socket");
+      }
+
+      int sock_b_size = 2000000;
+      if(setsockopt(d_socket, SOL_SOCKET, SO_RCVBUF, &sock_b_size, sizeof(sock_b_size)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not set socket size");
+        throw std::runtime_error("Could not set socket size");
+      }
+
+      if (setsockopt(d_socket, SOL_SOCKET, SO_RCVTIMEO, &d_tv, sizeof(d_tv)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not set timeout on socket");
+        throw std::runtime_error("Could not set timeout on socket");
+      }
+
+      if (bind(d_socket, (const struct sockaddr *)&d_servaddr,
+               sizeof(d_servaddr)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not connect to port, port may be in use");
+        throw std::runtime_error("Could not connect to port");
+      }
+    }
+
+    template <class T>
+    void difi_source_cpp_impl<T>::create_tcp_socket()
+    {
+
+      if ((d_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not make TCP socket, socket may be in use.");
+        throw std::runtime_error("Could not make TCP socket");
+      }
+
+      int sock_b_size = 2000000;
+      if(setsockopt(d_socket, SOL_SOCKET, SO_RCVBUF, &sock_b_size, sizeof(sock_b_size)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not set socket size");
+        throw std::runtime_error("Could not set socket size");
+      }
+
+      if (setsockopt(d_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &d_tv, sizeof(d_tv)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not set timeout on socket");
+        throw std::runtime_error("Could not set timeout on socket");
+      }
+
+      if (setsockopt(d_socket, SOL_SOCKET, SO_RCVTIMEO, &d_tv, sizeof(d_tv)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not set timeout on socket");
+        throw std::runtime_error("Could not set timeout on socket");
+      }
+
+      if (bind(d_socket, (const struct sockaddr *)&d_servaddr,
+               sizeof(d_servaddr)) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Could not connect to port, port may be in use");
+        throw std::runtime_error("Could not connect to port");
+      }
+
+      if(listen(d_socket, 1) < 0)
+      {
+        GR_LOG_ERROR(this->d_logger, "Error while listening to incoming connections");
+        throw std::runtime_error("Error while listening to incoming connections");
+      }
+
+      FD_ZERO(&d_rset);
+      FD_SET(d_socket, &d_rset);
+      d_client_socket = -1;
+      d_fd_max = d_socket;
+    }
+
+    template <class T>
+    void difi_source_cpp_impl<T>::reset_tcp_connection()
+    {
+      close(d_client_socket);
+      FD_CLR(d_client_socket, &d_rset);
+      d_client_socket = -1;
+      d_fd_max = d_socket;
+      GR_LOG_DEBUG(this->d_logger, "Connection lost");
+    }
+
+    template <class T>
+    int difi_source_cpp_impl<T>::recv_tcp_packet()
+    {
+      int size_gotten = -1;
+
+      // read scenarios
+      // 1. received complete packet in a single read
+      // 2. received partial packet
+      //    a. current only
+      //    b. current + next packet to process
+      if(d_num_bytes_in_read_buffer == 0)
+      {
+        size_gotten = recv(d_client_socket, &d_read_buffer[0], d_read_buffer.size(),MSG_WAITALL);
+
+        // when monitoring the file descriptor using 'select' and the fd is set, there should be
+        // bytes in the socket buffer. If the receive call returns 0 bytes then the connection has
+        // been lost and the client needs to re-connect
+        if(size_gotten <= 0)
+        {
+          reset_tcp_connection();
+          d_packet_buffer_start_idx = 0;
+          d_num_bytes_in_read_buffer = 0;
+          return -1;
+        }
+
+        // compute the number of bytes per packet
+        // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
+        // Packet Size: Bits 0-15
+        // check packet size
+        auto header = unpack_u32(&d_read_buffer[0]);
+        int32_t pkt_size = NUM_BYTES_PER_WORD * (header&0xffff);
+        int32_t num_bytes_to_copy = std::min(pkt_size-d_packet_buffer_start_idx,size_gotten);
+
+        std::copy_n(d_read_buffer.cbegin(), num_bytes_to_copy, d_packet_buffer.begin()+d_packet_buffer_start_idx);
+
+        int num_bytes_pending = pkt_size-d_packet_buffer_start_idx-size_gotten;
+
+        if(num_bytes_pending > 0)
+        {
+          d_packet_buffer_start_idx += size_gotten; // copy offset for remaining bytes
+          d_num_bytes_in_read_buffer = 0;
+          return -1;
+        }
+        else if(num_bytes_pending < 0)
+        {
+          d_packet_buffer_start_idx = pkt_size;
+          d_num_bytes_in_read_buffer = abs(num_bytes_pending);
+          size_gotten = pkt_size;
+        }
+        else
+        {
+          d_packet_buffer_start_idx = 0;
+          d_num_bytes_in_read_buffer = 0;
+          size_gotten = pkt_size;
+        }
+      }
+      else
+      {
+        // copy remaining bytes in the buffer to d_packet before reading again
+        // compute the number of bytes per packet
+        // per DIFI version 1.0.0 spec each packet contains the packet size (number of 32-bit words) in the header
+        // Packet Size: Bits 0-15
+        // check packet size
+        auto header = unpack_u32(&d_read_buffer[d_packet_buffer_start_idx]);
+        int32_t pkt_size = NUM_BYTES_PER_WORD * (header&0xffff);
+        int32_t num_bytes_to_copy = std::min(pkt_size,d_num_bytes_in_read_buffer);
+
+        std::copy_n(d_read_buffer.cbegin()+d_packet_buffer_start_idx, num_bytes_to_copy, d_packet_buffer.begin());
+
+        if(pkt_size < d_num_bytes_in_read_buffer)
+        {
+          d_packet_buffer_start_idx += num_bytes_to_copy;
+          d_num_bytes_in_read_buffer -= num_bytes_to_copy;
+          size_gotten = pkt_size;
+        }
+        else if(pkt_size == d_num_bytes_in_read_buffer)
+        {
+          d_packet_buffer_start_idx = 0;
+          d_num_bytes_in_read_buffer = 0;
+          size_gotten = pkt_size;
+        }
+        else
+        {
+          size_gotten = recv(d_client_socket, &d_read_buffer[0], d_read_buffer.size(),MSG_WAITALL);
+
+          // when monitoring the file descriptor using 'select' and the fd is set, there should be
+          // bytes in the socket buffer. If the receive call returns 0 bytes then the connection has
+          // been lost and the client needs to re-connect
+          if(size_gotten <= 0)
+          {
+            reset_tcp_connection();
+            d_packet_buffer_start_idx = 0;
+            d_num_bytes_in_read_buffer = 0;
+            return -1;
+          }
+
+          d_packet_buffer_start_idx = num_bytes_to_copy;
+          num_bytes_to_copy = std::min(pkt_size-d_num_bytes_in_read_buffer,size_gotten);
+
+          std::copy_n(d_read_buffer.cbegin(), num_bytes_to_copy, d_packet_buffer.begin()+d_num_bytes_in_read_buffer);
+
+          int num_bytes_pending = pkt_size-d_packet_buffer_start_idx-size_gotten;
+
+          if(num_bytes_pending > 0)
+          {
+            d_packet_buffer_start_idx += (d_packet_buffer_start_idx+size_gotten); // copy offset for remaining bytes
+            d_num_bytes_in_read_buffer = 0;
+            return -1;
+          }
+          else if(num_bytes_pending < 0)
+          {
+            d_packet_buffer_start_idx = num_bytes_to_copy;
+            d_num_bytes_in_read_buffer = abs(num_bytes_pending);
+            size_gotten = pkt_size;
+          }
+          else
+          {
+            d_packet_buffer_start_idx = 0;
+            d_num_bytes_in_read_buffer = 0;
+            size_gotten = pkt_size;
+          }
+        }
+      }
+
+      return size_gotten;
     }
 
     template class difi_source_cpp<gr_complex>;
