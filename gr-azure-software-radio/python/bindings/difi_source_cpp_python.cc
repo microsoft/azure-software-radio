@@ -28,6 +28,7 @@ void bind_difi_source_cpp_template(py::module& m, const char* classname)
         .def(py::init(&difi_source_cpp::make),
            py::arg("ip_addr"),
            py::arg("port"),
+           py::arg("protocol"),
            py::arg("stream_number"),
            py::arg("socket_buffer_size"),
            py::arg("bit_depth"),

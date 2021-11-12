@@ -7,57 +7,45 @@
 # See License.txt in the project root for license information.
 #
 
-import numpy as np
-from gnuradio import gr_unittest
+import uuid
+from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from azure_software_radio import BlobSource
-import azure_software_radio
+from azure_software_radio import blob_source
+import numpy as np
 
+
+from unittest.mock import patch
 
 class qa_BlobSource(gr_unittest.TestCase):
 
     # pylint: disable=invalid-name
     def setUp(self):
-        azure_software_radio.blob_setup(self)
+        self.blob_connection_string = (
+            "DefaultEndpointsProtocol=https;AccountName=accountname;AccountKey=accountkey;"
+            + "EndpointSuffix=core.windows.net"
+        )
+        self.tb = gr.top_block()
 
     # pylint: disable=invalid-name
     def tearDown(self):
-        azure_software_radio.blob_teardown(self)
+        self.tb = None
 
-    def test_round_trip_data_through_blob(self):
-        """ Upload known data to a blob using the azure blob API.
 
-        Read this data back into a GNU Radio vector sink using the BlobSource
-        block and confirm that the data wasn't corrupted.
-        """
+    def test_instance(self):
+        '''
+        Ensure we don't throw errors in the constructor when given inputs with valid formats
+        '''
 
-        blob_name = 'test-blob.npy'
-        num_samples = 1000000
+        instance = blob_source(authentication_method="connection_string",
+                               connection_str=self.blob_connection_string,
+                               container_name=self.test_blob_container_name,
+                               blob_name='test-instance',
+                               queue_size=4)
 
-        # set up a vector source with known complex data
-        src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
-        # connect to the test blob container and upload our test data
-        blob_client = self.blob_service_client.get_blob_client(
-            container=self.test_blob_container_name,
-            blob=blob_name)
-        blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
-        # set up a blob sink
-        source = BlobSource(authentication_method="connection_string",
-                            connection_str=self.blob_connection_string,
-                            container_name=self.test_blob_container_name,
-                            blob_name=blob_name,
-                            queue_size=4)
-        dst = blocks.vector_sink_c()
+        # really only checking that the init didn't throw an exception above, but adding the check
+        # below to keep flake8 happy
+        self.assertIsNotNone(instance)
 
-        self.tb.connect(source, dst)
-        # set up fg
-        self.tb.run()
-        # check data
-
-        result_data = dst.data()
-
-        # check data
-        self.assertTrue((src_data == result_data).all())
 
     def test_chunk_residue(self):
         '''
@@ -67,17 +55,8 @@ class qa_BlobSource(gr_unittest.TestCase):
         blob_name = 'test-blob.npy'
         num_samples = 500
 
-        # set up a vector source with known complex data
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
-        # connect to the test blob container and upload our test data
-        blob_client = self.blob_service_client.get_blob_client(
-            container=self.test_blob_container_name,
-            blob=blob_name)
-
-        blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
-
-        # set up a blob sink
         op = BlobSource(authentication_method="connection_string",
                         connection_str=self.blob_connection_string,
                         container_name=self.test_blob_container_name,
@@ -90,11 +69,10 @@ class qa_BlobSource(gr_unittest.TestCase):
         data, chunk_residue = op.chunk_to_array(chunk=chunk, chunk_residue=b'')
 
         # check data - it should include all samples except the last one
-        self.assertTrue((data == src_data[:-1]).all())
+        self.assertEqual(data.tolist(), src_data[:-1].tolist())
         # the chunk residue should be the first 6 bytes of the last sample
-        self.assertTrue((chunk_residue == src_data_bytes[-8:-2]))
+        self.assertEqual(chunk_residue, src_data_bytes[-8:-2])
 
-        op.stop()
 
     def test_chunk_residue_merge(self):
         '''
@@ -104,17 +82,8 @@ class qa_BlobSource(gr_unittest.TestCase):
         blob_name = 'test-blob.npy'
         num_samples = 500
 
-        # set up a vector source with known complex data
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
-        # connect to the test blob container and upload our test data
-        blob_client = self.blob_service_client.get_blob_client(
-            container=self.test_blob_container_name,
-            blob=blob_name)
-
-        blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
-
-        # set up a blob sink
         op = BlobSource(authentication_method="connection_string",
                         connection_str=self.blob_connection_string,
                         container_name=self.test_blob_container_name,
@@ -126,16 +95,41 @@ class qa_BlobSource(gr_unittest.TestCase):
         chunk_residue_in = src_data_bytes[:2]
         chunk = src_data_bytes[2:]
 
-        data, chunk_residue = op.chunk_to_array(
-            chunk=chunk, chunk_residue=chunk_residue_in)
+        data, chunk_residue = op.chunk_to_array(chunk=chunk, chunk_residue=chunk_residue_in)
 
-        # check data - it should include all samples
-        self.assertTrue((data == src_data).all())
-        # the chunk residue should be the first 6 bytes of the last sample
-        self.assertTrue(len(chunk_residue) == 0)
+        # check data - it should include all samples with nothing left in the residue
+        self.assertEqual(data.tolist(), src_data.tolist())
+        self.assertEqual(len(chunk_residue), 0)
 
-        op.stop()
+    def test_end_to_end_run(self):
+        '''
+        Test the block properly starts up, reads data from the blob data queue, and cleanly
+        shuts down
+        '''
 
+        blob_name = 'test-blob.npy'
+        num_samples = 500
+
+        src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
+
+        dst = blocks.vector_sink_c()
+
+        # prevent setup_blob_iterator from making Azure API calls
+        with patch.object(blob_source, 'setup_blob_iterator', spec=iter) as mock_iter:
+            # add in a list of chunks we want to pretend the blob API gave us
+            mock_iter.return_value = iter([src_data.tobytes()])
+
+            op = BlobSource(authentication_method="connection_string",
+                             connection_str=self.blob_connection_string,
+                             container_name=self.test_blob_container_name,
+                             blob_name=blob_name,
+                             queue_size=4)
+
+            self.tb.connect(op, dst)
+
+            self.tb.run()
+
+        self.assertEqual(dst.data(), src_data.tolist())
 
 if __name__ == '__main__':
     gr_unittest.run(qa_BlobSource)

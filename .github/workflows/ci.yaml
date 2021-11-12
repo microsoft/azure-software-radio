@@ -30,6 +30,10 @@ jobs:
         run: |
           cd gr-azure-software-radio/build
           sudo make install -j
+      - name: Update GNURadio preferences
+        run: |
+          mkdir -p "${HOME}/.gnuradio/prefs/"
+          echo "gr::vmcircbuf_sysv_shm_factory" > "${HOME}/.gnuradio/prefs/vmcircbuf_default_factory"
       - name: Run Tests
         env:
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
