@@ -453,7 +453,7 @@ class qa_testcpp(gr_unittest.TestCase):
         samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, SAMPS_PER_PACKET, 0, 352,
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, SAMPS_PER_PACKET, 0, 352,
                                        int(1e6), packet_class_id, oui, 100, 72, 16)
         vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
         tb.connect(vector_source, vita_sink)
@@ -483,7 +483,7 @@ class qa_testcpp(gr_unittest.TestCase):
         tb = gr.top_block()
         vita_source = difi_source_cpp_fc32(
             '127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True,
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, True,
                                        SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 72, 8)
         tb.connect(vita_source, vita_sink)
 
