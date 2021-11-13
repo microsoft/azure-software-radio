@@ -7,6 +7,8 @@
 # See License.txt in the project root for license information.
 #
 
+
+import uuid
 from unittest.mock import patch
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
@@ -23,7 +25,8 @@ class qa_BlobSource(gr_unittest.TestCase):
             + "EndpointSuffix=core.windows.net"
         )
         self.tb = gr.top_block()
-
+        self.test_blob_container_name = str(uuid.uuid4())
+        
     # pylint: disable=invalid-name
     def tearDown(self):
         self.tb = None
