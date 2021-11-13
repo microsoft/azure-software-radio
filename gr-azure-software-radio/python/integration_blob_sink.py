@@ -12,12 +12,10 @@ Integration tests for functions from blob_sink.py
 
 import os
 import uuid
-
 from azure.storage.blob import BlobServiceClient
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import numpy as np
-
 from azure_software_radio import BlobSink
 
 
