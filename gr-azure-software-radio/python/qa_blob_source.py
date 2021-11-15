@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -6,26 +7,27 @@
 # See License.txt in the project root for license information.
 #
 
+
+import uuid
+from unittest.mock import patch
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from azure_software_radio import blob_source
+from azure_software_radio import BlobSource
 import numpy as np
-import uuid
 
-from unittest.mock import patch
 
-class qa_blob_source(gr_unittest.TestCase):
+class qa_BlobSource(gr_unittest.TestCase):
 
+    # pylint: disable=invalid-name
     def setUp(self):
         self.blob_connection_string = (
             "DefaultEndpointsProtocol=https;AccountName=accountname;AccountKey=accountkey;"
             + "EndpointSuffix=core.windows.net"
         )
-
-        # Create a unique name for the container
-        self.test_blob_container_name = str(uuid.uuid4())
         self.tb = gr.top_block()
-
+        self.test_blob_container_name = str(uuid.uuid4())
+        
+    # pylint: disable=invalid-name
     def tearDown(self):
         self.tb = None
 
@@ -35,7 +37,7 @@ class qa_blob_source(gr_unittest.TestCase):
         Ensure we don't throw errors in the constructor when given inputs with valid formats
         '''
 
-        instance = blob_source(authentication_method="connection_string",
+        instance = BlobSource(authentication_method="connection_string",
                                connection_str=self.blob_connection_string,
                                container_name=self.test_blob_container_name,
                                blob_name='test-instance',
@@ -56,11 +58,11 @@ class qa_blob_source(gr_unittest.TestCase):
 
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
-        op = blob_source(authentication_method="connection_string",
-                         connection_str=self.blob_connection_string,
-                         container_name=self.test_blob_container_name,
-                         blob_name=blob_name,
-                         queue_size=4)
+        op = BlobSource(authentication_method="connection_string",
+                        connection_str=self.blob_connection_string,
+                        container_name=self.test_blob_container_name,
+                        blob_name=blob_name,
+                        queue_size=4)
 
         src_data_bytes = src_data.tobytes()
         # don't send the last 2 bytes of the last sample
@@ -83,11 +85,11 @@ class qa_blob_source(gr_unittest.TestCase):
 
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
-        op = blob_source(authentication_method="connection_string",
-                         connection_str=self.blob_connection_string,
-                         container_name=self.test_blob_container_name,
-                         blob_name=blob_name,
-                         queue_size=4)
+        op = BlobSource(authentication_method="connection_string",
+                        connection_str=self.blob_connection_string,
+                        container_name=self.test_blob_container_name,
+                        blob_name=blob_name,
+                        queue_size=4)
 
         src_data_bytes = src_data.tobytes()
         # don't send the first 2 bytes of the first sample
@@ -114,11 +116,11 @@ class qa_blob_source(gr_unittest.TestCase):
         dst = blocks.vector_sink_c()
 
         # prevent setup_blob_iterator from making Azure API calls
-        with patch.object(blob_source, 'setup_blob_iterator', spec=iter) as mock_iter:
+        with patch.object(BlobSource, 'setup_blob_iterator', spec=iter) as mock_iter:
             # add in a list of chunks we want to pretend the blob API gave us
             mock_iter.return_value = iter([src_data.tobytes()])
 
-            op = blob_source(authentication_method="connection_string",
+            op = BlobSource(authentication_method="connection_string",
                              connection_str=self.blob_connection_string,
                              container_name=self.test_blob_container_name,
                              blob_name=blob_name,
@@ -131,4 +133,4 @@ class qa_blob_source(gr_unittest.TestCase):
         self.assertEqual(dst.data(), src_data.tolist())
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_blob_source)
+    gr_unittest.run(qa_BlobSource)

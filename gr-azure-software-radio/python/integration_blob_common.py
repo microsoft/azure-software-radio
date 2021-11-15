@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, duplicate-code
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) Microsoft Corporation.
@@ -9,11 +9,9 @@
 """
 Integration tests for functions from blob_common.py
 """
-
 import os
-
+import azure_software_radio
 from gnuradio import gr_unittest
-
 from azure_software_radio import blob_common
 
 
@@ -21,11 +19,13 @@ class IntegrationBlobCommon(gr_unittest.TestCase):
     """ Test case class for running integration tests on blob_common.py
     """
 
+    # pylint: disable=invalid-name
     def setUp(self):
-        pass
+        azure_software_radio.blob_setup(self)
 
+    # pylint: disable=invalid-name
     def tearDown(self):
-        pass
+        azure_software_radio.blob_teardown(self)
 
     def test_connection_string_auth(self):
         '''

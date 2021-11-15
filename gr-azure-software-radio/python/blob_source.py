@@ -6,15 +6,14 @@
 # See License.txt in the project root for license information.
 #
 
-
+import queue
 import numpy as np
 from gnuradio import gr
-import queue
 
 from azure_software_radio.blob_common import get_blob_service_client, shutdown_blob_service_client
 
 
-class blob_source(gr.sync_block):
+class BlobSource(gr.sync_block):
     """ Read samples from an Azure Blob.
 
     This block has multiple ways to authenticate to the Azure blob backend. Users can directly
@@ -36,10 +35,11 @@ class blob_source(gr.sync_block):
     Container Name: Name of the container where the blob of interest is stored.
     Blob Name: The name of the block blob to read from.
     """
-
+    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
     def __init__(self, authentication_method: str = "default", connection_str: str = None,
                  url: str = None, container_name: str = None, blob_name: str = None,
                  queue_size: int = 4):
+        # pylint: disable=no-member
         """ Initialize the blob_source block
 
         Args:
@@ -56,7 +56,7 @@ class blob_source(gr.sync_block):
                                in_sig=None,
                                out_sig=[np.complex64])
 
-        self.q = queue.Queue(maxsize=queue_size)
+        self.que = queue.Queue(maxsize=queue_size)
         self.buf = np.zeros((0, ), dtype=np.complex64)
         self.num_buf_items_read = 0
 
@@ -73,7 +73,7 @@ class blob_source(gr.sync_block):
 
         self.blob_complete = False
 
-        self.itemsize = np.complex64().itemsize
+        self.itemsize = np.dtype(np.complex64).itemsize
         self.chunk_residue = b''
 
         self.first_run = True
@@ -103,30 +103,32 @@ class blob_source(gr.sync_block):
         chunk = chunk_residue + chunk
         num_data_items = int(np.floor(len(chunk)/self.itemsize))
 
-        data = np.frombuffer(buffer=chunk, count=num_data_items, dtype=np.complex64)
+        data = np.frombuffer(
+            buffer=chunk, count=num_data_items, dtype=np.complex64)
         chunk_residue = chunk[num_data_items*self.itemsize:]
 
         return data, chunk_residue
 
     def download_chunk_to_queue(self):
+        # pylint: disable=fixme
         """
         Pull chunks from the blob, convert the bytes into a numpy array, and add to queue
         """
-        # TODO: put this into a separate thread
-        while not self.q.full() and not self.blob_complete:
-
+        # TODO: put this into a separate thread, see ADO #5897
+        while not self.que.full() and not self.blob_complete:
             try:
-                self.log.debug("Retrieving next block of data from blob storage")
                 chunk = next(self.blob_iter)
-                self.log.debug("Retrieved {} bytes of data from blob storage".format(len(chunk)))
-                data, self.chunk_residue = self.chunk_to_array(chunk, self.chunk_residue)
+                self.log.debug(f"Retrieved {len(chunk)} bytes of data from blob storage")
+                data, self.chunk_residue = self.chunk_to_array(
+                    chunk, self.chunk_residue)
                 if len(data) > 0:
-                    self.q.put(data)
+                    self.que.put(data)
             except StopIteration:
                 self.log.debug("Reached the end of the blob")
                 self.blob_complete = True
 
-    def work(self, input_items, output_items):
+    def work(self, _, output_items):
+        # pylint: disable=fixme
         """ Stream items from blob storage.
 
         Stream items out from an internal buffer. Once the internal buffer is exhausted,
@@ -151,7 +153,7 @@ class blob_source(gr.sync_block):
         num_remaining_items = len(self.buf) - self.num_buf_items_read
 
         # check if we're done
-        if self.q.empty() and num_remaining_items == 0 and self.blob_complete:
+        if self.que.empty() and num_remaining_items == 0 and self.blob_complete:
             shutdown_blob_service_client(self.blob_service_client)
             return -1
 
@@ -169,7 +171,7 @@ class blob_source(gr.sync_block):
         # is it time to get more data from the queue?
         if len(self.buf) <= self.num_buf_items_read:
             # check for more chunks in the downloader
-            # TODO: Multithread this so downloads don't block the work thread
+            # TODO: Multithread this so downloads don't block the work thread, see ADO#5897
 
             # don't try to download from a blob that's complete or we'll get stuck waiting on
             # api call timeouts during shutdown
@@ -177,8 +179,8 @@ class blob_source(gr.sync_block):
                 self.download_chunk_to_queue()
 
             # if there's data to read, go get it
-            if not self.q.empty():
-                self.buf = self.q.get()
+            if not self.que.empty():
+                self.buf = self.que.get()
                 self.num_buf_items_read = 0
 
         return nitems_produced

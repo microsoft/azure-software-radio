@@ -50,6 +50,7 @@ jobs:
       - name: pylint
         continue-on-error: true
         run: |
+          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};
           cd ..
           pylint azure-software-radio --rcfile azure-software-radio/.pylintrc
       - name: check step

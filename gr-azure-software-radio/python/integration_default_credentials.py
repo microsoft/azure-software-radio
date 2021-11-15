@@ -7,7 +7,6 @@
 #
 
 from gnuradio import gr_unittest
-import pytest
 import azure_software_radio.default_credentials
 
 
