@@ -5,6 +5,7 @@
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
 #
+# pylint: disable=invalid-name
 
 """
 Integration tests for functions from blob_source.py
@@ -18,19 +19,21 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import numpy as np
 
-from azure_software_radio import blob_source
+from azure_software_radio import BlobSource
 
 
 class IntegrationBlobSource(gr_unittest.TestCase):
     """ Test case class for running integration tests on blob_source.py
     """
 
+    # pylint: disable=invalid-name
     def setUp(self):
         """ Pull a blob connection string from an environment variable.
 
         Use this to set up a separate blob service client for testing.
         """
-        self.blob_connection_string = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+        self.blob_connection_string = os.getenv(
+            'AZURE_STORAGE_CONNECTION_STRING')
         self.blob_service_client = BlobServiceClient.from_connection_string(
             self.blob_connection_string)
         # Create a unique name for the container
@@ -39,7 +42,11 @@ class IntegrationBlobSource(gr_unittest.TestCase):
             self.test_blob_container_name)
         self.top_block = gr.top_block()
 
+    # pylint: disable=invalid-name
     def tearDown(self):
+        '''
+        Teardown all resources
+        '''
         self.top_block = None
 
         # clean up after test
@@ -63,19 +70,19 @@ class IntegrationBlobSource(gr_unittest.TestCase):
             container=self.test_blob_container_name,
             blob=blob_name)
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
-        
-        op_block = blob_source(authentication_method="connection_string",
-                               connection_str=self.blob_connection_string,
-                               container_name=self.test_blob_container_name,
-                               blob_name=blob_name,
-                               queue_size=4)
+
+        op_block = BlobSource(authentication_method="connection_string",
+                              connection_str=self.blob_connection_string,
+                              container_name=self.test_blob_container_name,
+                              blob_name=blob_name,
+                              queue_size=4)
         dst = blocks.vector_sink_c()
 
         self.top_block.connect(op_block, dst)
         self.top_block.run()
 
         self.assertEqual(src_data.tolist(), dst.data()
-)
+                         )
 
 
 if __name__ == '__main__':

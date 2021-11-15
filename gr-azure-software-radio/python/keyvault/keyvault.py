@@ -1,11 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
-#
 
-from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
-
+from azure.keyvault.secrets import SecretClient
 
 def pull_key(vault_name, key, default_cred=None):
     """
@@ -15,7 +13,8 @@ def pull_key(vault_name, key, default_cred=None):
     Args:
         KeyVault Name: The keyvault name
         key: A key string which maps to a secret stored in the keyvault.
-        default_cred: A DefaultAzureCredential object, other wise an empty string in which case one is generated locally.
+        default_cred: A DefaultAzureCredential object, other wise an empty string in
+                      which case one is generated locally.
 
     Example:
         KeyVault Name: myvault

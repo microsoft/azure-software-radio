@@ -9,7 +9,7 @@ category: '[Azure software radio]'
 
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.blob_source(${authentication_method}, ${connection_str}, ${url}, ${container_name}, ${blob_name})
+  make: azure_software_radio.BlobSource(${authentication_method}, ${connection_str}, ${url}, ${container_name}, ${blob_name})
 
 parameters:
 - id: authentication_method

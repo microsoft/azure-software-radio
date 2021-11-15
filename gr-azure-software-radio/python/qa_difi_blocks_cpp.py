@@ -1,3 +1,6 @@
+
+# pylint: disable=missing-function-docstring, no-self-use, too-many-public-methods
+# pylint: disable=missing-class-docstring, no-name-in-module, no-member, too-many-lines, too-many-locals
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -6,30 +9,37 @@
 # See License.txt in the project root for license information.
 #
 
-from gnuradio import gr, gr_unittest, blocks
-from multiprocessing import Process
-import pytest
+import math
+import random
 import socket
 import struct
-import math
 import time
-import random
+from multiprocessing import Process
+import pytest
 import numpy as np
+from gnuradio import gr, gr_unittest, blocks
 from azure_software_radio import (difi_source_cpp_fc32, difi_source_cpp_sc8, difi_sink_cpp_fc32, difi_sink_cpp_sc8,
-                                 DATA_PACKET_METADATA_FORMAT, VITA_PKT_MOD, CONTEX_ALT_PACK_STRUCT_FORMAT, DIFI_HEADER_SIZE)
-
+                                  DATA_PACKET_METADATA_FORMAT, VITA_PKT_MOD,
+                                  CONTEX_ALT_PACK_STRUCT_FORMAT, DIFI_HEADER_SIZE)
 
 
 SAMPS_PER_PACKET = 1344 // 2
 
+
 class qa_testcpp(gr_unittest.TestCase):
 
+    # pylint: disable=invalid-name
     def setUp(self):
-        self.vita_data = b'\x18\xe6\x01W\x00\x00\x00\x00\x00|8l\x00\x00\x00\x00`X\xec\xac\x00\x00\x00\xe5\xd0\xda\xa1' \
-                         b'\xe0\xd0\xdc\xd5\xe1\xf6\x00\n*\xff@\x01)"\xfb\x1a\xdd\xdf\xe7\xd4\x12\x12,)\x08\x00\xd3\xf8\xe5 \x19+\x12' \
-                         b'\x16\xe1\x1c\xe2*\x1a\x14A\x00*\x05\xef\xfa\xd3\xd5\xee\xd8\x10\x10\x16-\x1e\x121\xf3!\xe5\xf1\xd6\xd3\xd6\xe1' \
-                         b'\xfb\x02$\x1a.\x16*\xfa(\xe0\x17\xdf\xef\xf7\xcb\x0c\xc8\x0c\xe0\xfc\xf8\xe4\xf9\xc9\xf6\xc8\x0c\xf4$\x1e\x12\r\xde' \
-                         b'\xe4\xc3\xe8\xd9\x0c\x04\x1a%\x171\x1d\x1e \x01!\x072\x13<\xf2\x16\xd3\xe6\xfa\xef)\x1c\x06' \
+        self.vita_data = b'\x18\xe6\x01W\x00\x00\x00\x00\x00|8l\x00\x00\x00\x00`X\xec\xac\x00\x00\x00\xe5\xd0\xda' \
+                         b'\xa1' \
+                         b'\xe0\xd0\xdc\xd5\xe1\xf6\x00\n*\xff@\x01)"\xfb\x1a\xdd\xdf\xe7\xd4\x12\x12,)\x08' \
+                         b'\x00\xd3\xf8\xe5 \x19+\x12' \
+                         b'\x16\xe1\x1c\xe2*\x1a\x14A\x00*\x05\xef\xfa\xd3\xd5\xee\xd8\x10\x10\x16-\x1e' \
+                         b'\x121\xf3!\xe5\xf1\xd6\xd3\xd6\xe1' \
+                         b'\xfb\x02$\x1a.\x16*\xfa(\xe0\x17\xdf\xef\xf7\xcb\x0c\xc8\x0c\xe0' \
+                         b'\xfc\xf8\xe4\xf9\xc9\xf6\xc8\x0c\xf4$\x1e\x12\r\xde' \
+                         b'\xe4\xc3\xe8\xd9\x0c\x04\x1a%\x171\x1d\x1e \x01!\x072\x13<\xf2\x16\xd3' \
+                         b'\xe6\xfa\xef)\x1c\x06' \
                          b'\x1f\xd1\x02\xec\xfe2\x00G\xf1#\xfd\x02*\x0b)"\xf1\x0c\xd7\xda\xf9\xdd\x17\x16\x181' \
                          b'\x1f\r/\xe3,\xe4 \x05$#\x1e(\xf9\x19\xd6\x05\xd1\xf4\xdc\xe3\xee\xcf\x15' \
                          b'\xd0/\xfe\r$\xdd\x04\xee\xde!\x05%2\xfe\n\xdf\xd6\xe5\xfa\xff:\xfb9\xd9\x08' \
@@ -43,11 +53,15 @@ class qa_testcpp(gr_unittest.TestCase):
                          b'\x18%!\x1e-\r,\xff&\xf5+\xfa;\t)\xfc\xef\xda\xd8\xec\xfe+\x0b$\xf2\xdc\x05\xd8-\x18' \
                          b'\x0b%\xce\x02\xe7\x08)!/\x11%\xf87\xfa+\xfd\xf0\xf0\xdc\xe2\x10\xe9?\n3%\x07\x0b\xe4' \
                          b'\xe4\xdc\xf4\xe3"\xe5\x1a\xdf\xe5\xe2\xc9\xfe\xd8#\xf3,\xfa\x10\xe7\xf3\xd0\xe6\xd3\xdb' \
-                         b'\xf7\xd8\x1c\xf9"\'\x08+\xe5\x02\xd6\xde\xe2\xd5\x02\xdd!\xe4$\xdd\x0e\xd1\x03\xd1\x0b\xd9' \
+                         b'\xf7\xd8\x1c\xf9"\'\x08+\xe5\x02\xd6\xde\xe2\xd5\x02\xdd!\xe4$\xdd\x0e' \
+                         b'\xd1\x03\xd1\x0b\xd9' \
                          b'\xff\xe8\xdc\n\xd8&\x05\x164\xec/\xdd\xfe\xf5\xd8\x17\xe4$\x19\x15>\x02+\x00\xf3\xfc' \
-                         b'\xd1\xe6\xda\xda\xe9\xe2\xe7\xdc\xe3\xd4\xe7\xf0\xe1\x19\xdb\x16\xef\xec\x1c\xcf9\xe1&\x0c' \
-                         b'\xf6\x1d\xde\xff\xfc\xdf*\xe14\xe6\x18\xd6\x04\xd5\x0e\xf8$\x19*&\x0f/\xe0\'\xd4\xfd\x06' \
-                         b'\xdf*\xfb\x00#\xd7"\xfb\x1e)0\x1f\x1c\x18\xe4-\xe8\x18\x1d\xe5\x11\xdf\xd5\x01\xdd\x06\x1a' \
+                         b'\xd1\xe6\xda\xda\xe9\xe2\xe7\xdc\xe3\xd4\xe7\xf0\xe1\x19\xdb\x16\xef\xec' \
+                         b'\x1c\xcf9\xe1&\x0c' \
+                         b'\xf6\x1d\xde\xff\xfc\xdf*\xe14\xe6\x18\xd6\x04\xd5' \
+                         b'\x0e\xf8$\x19*&\x0f/\xe0\'\xd4\xfd\x06' \
+                         b'\xdf*\xfb\x00#\xd7"\xfb\x1e)0\x1f\x1c\x18\xe4-\xe8\x18\x1d\xe5\x11' \
+                         b'\xdf\xd5\x01\xdd\x06\x1a' \
                          b'\xe6-\xc9\x1a\xd9\x10\x13\x053\xe9\x12\xd1\x00\xd1$\xec \x03\xde\xf3\xd5\xdd' \
                          b'\x17\xf9,)\x01 \xeb\xe7\xec\xcf\xd8\xf8\xcf+\xf7"!\xe6\x1c\xd3\xff\x0e' \
                          b'\xf22\x05\x06\x1f\xcc\x1f\xc8\x0b\xe9\x06\x01 \x02=\x015\x17\x0b.\xf9\x1e' \
@@ -87,19 +101,23 @@ class qa_testcpp(gr_unittest.TestCase):
                          b'\xe5\x02\xe2#\xdf\x02\xe3\xd5\xe4\xda\xdf\xe5\xe7\xd4\xff\xd2\x02\xe3\xea\xdb\xe1\xcd' \
                          b'\xfb\xeb\x17\x1c\x1c.\x0c \xe8\x07\xbf\xfb\xd2\x06\x1d\x06.\xf1\xec\x01\xd0,\x07\x14*'
 
-
+    # pylint: disable=invalid-name
     def tearDown(self):
         pass
-    
+
     def test_vita_source_sink_full_loop(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 72, 8)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM,
+                                       True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 72, 8)
         tb.connect(vita_source, vita_sink)
 
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, self.vita_data))
-        rec_proc = Process(target=socket_rec, args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, self.vita_data))
+        send_proc = Process(target=socket_send, args=(
+            ('127.0.0.1', source_p), socket.SOCK_DGRAM, self.vita_data))
+        rec_proc = Process(target=socket_rec, args=(
+            ('127.0.0.1', sink_p), socket.SOCK_DGRAM, self.vita_data))
         tb_proc = Process(target=run_tb, args=(tb,))
         tb_proc.start()
         rec_proc.start()
@@ -113,18 +131,22 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_timing_basic(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM,
+                                       True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
         tb.connect(vita_source, vita_sink)
         vita_data_time_change = bytearray(self.vita_data)
         full = b'\x00\x00\x00\x00'
         frac = full + full
         vita_data_time_change[16:20] = bytearray(full)
         vita_data_time_change[20:28] = bytearray(frac)
-        
+
         # first msg
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data_time_change))
-        socket_rec_time= Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, 0, 0))
+        send_proc = Process(target=socket_send, args=(
+            ('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data_time_change))
+        socket_rec_time = Process(target=socket_rec_confirm_time, args=(
+            ('127.0.0.1', sink_p), socket.SOCK_DGRAM, 0, 0))
         tb_proc = Process(target=run_tb, args=(tb,))
         tb_proc.start()
         socket_rec_time.start()
@@ -136,9 +158,12 @@ class qa_testcpp(gr_unittest.TestCase):
             pytest.fail()
 
         # second msg
-        vita_data_time_change[1] = (vita_data_time_change[1] & 0xf0) | 7 # update packet count
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data_time_change))
-        socket_rec_time= Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, 1344000000 // 2, 0))
+        vita_data_time_change[1] = (
+            vita_data_time_change[1] & 0xf0) | 7  # update packet count
+        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
+                            socket.SOCK_DGRAM, vita_data_time_change))
+        socket_rec_time = Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p),
+                                                                        socket.SOCK_DGRAM, 1344000000 // 2, 0))
         socket_rec_time.start()
         send_proc.start()
         send_proc.join()
@@ -150,28 +175,33 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_time_full_and_frac(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True,
+                                       SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
         tb.connect(vita_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
         vita_data_time_change = bytearray(self.vita_data)
-        full = b'\x00\x00\x00\x00'
-        frac = full + full
-        vita_data_time_change[16:20] = bytearray(full)
-        vita_data_time_change[20:28] = bytearray(frac)
+        vita_data_time_change[16:20] = bytearray(b'\x00\x00\x00\x00')
+        vita_data_time_change[20:28] = bytearray(
+            b'\x00\x00\x00\x00' + b'\x00\x00\x00\x00')
         frac_base = 1344000000 // 2
         to_one = math.ceil(1e12 / frac_base)
         tb_proc.start()
         time.sleep(1)
         base_pkt_n = 6
-        rec_proc = Process(target=rec_socket_multi_packet, args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, to_one, frac_base))
+        rec_proc = Process(target=rec_socket_multi_packet, args=(('127.0.0.1', sink_p),
+                           socket.SOCK_DGRAM, to_one, frac_base))
         rec_proc.start()
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        for i in range(to_one + 1):
-            vita_data_time_change[1] = (vita_data_time_change[1] & 0xf0) | base_pkt_n
+        i = 0
+        while i < to_one + 1:
+            vita_data_time_change[1] = (
+                vita_data_time_change[1] & 0xf0) | base_pkt_n
             time.sleep(.002)
             sock.sendto(vita_data_time_change, ('127.0.0.1', source_p))
             base_pkt_n = (base_pkt_n + 1) % VITA_PKT_MOD
+            i += 1
         rec_proc.join()
         sock.close()
         tb_proc.kill()
@@ -182,8 +212,10 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_missed_pack_partial_buffer(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM,
+                                       False, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
         # keep one in two to test partial buffer
         keep_1_n = blocks.keep_one_in_n(gr.sizeof_gr_complex*1, 2)
         tb.connect(vita_source, keep_1_n)
@@ -194,7 +226,8 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data_time_change[16:20] = bytearray(full)
         vita_data_time_change[20:28] = bytearray(frac)
         # first msg
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data_time_change))
+        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
+                            socket.SOCK_DGRAM, vita_data_time_change))
         tb_proc = Process(target=run_tb, args=(tb,))
         tb_proc.start()
         send_proc.start()
@@ -205,40 +238,46 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data_time_change[16:20] = bytearray(full)
         vita_data_time_change[20:28] = bytearray(frac)
         # second msg
-        vita_data_time_change[1] = (vita_data_time_change[1] & 0xf0) | 3 # send out of order packet
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data_time_change))
+        # send out of order packet
+        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
+                            socket.SOCK_DGRAM, vita_data_time_change))
         # confirm time was zeroed out when out of order packet came in
-        socket_rec_time= Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, 0, 0))
+        socket_rec_time = Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p),
+                                                                        socket.SOCK_DGRAM, 0, 0))
         socket_rec_time.start()
         # need to send 2 to get 1 since keeping 1 in 2
         send_proc.start()
         send_proc.join()
 
         vita_data_time_change[1] = (vita_data_time_change[1] & 0xf0) | 4
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data_time_change))
+        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
+                            socket.SOCK_DGRAM, vita_data_time_change))
         send_proc.start()
         send_proc.join()
         socket_rec_time.join()
         tb_proc.kill()
         if socket_rec_time.exitcode != 0:
             pytest.fail()
-    
-    
+
     def test_multi_packet_correct(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True,
+                                       SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
         tb.connect(vita_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
         vita_data = bytearray(self.vita_data)
         tb_proc.start()
         base_pkt_n = 6
-        for i in range(VITA_PKT_MOD + 1):
+        i = 0
+        while i < VITA_PKT_MOD + 1:
             vita_data[1] = (vita_data[1] & 0xf0) | base_pkt_n
-            send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data))
-            socket_rec_test = Process(target=socket_rec, 
-                                     args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, vita_data))
+            send_proc = Process(target=socket_send, args=(
+                ('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data))
+            socket_rec_test = Process(target=socket_rec,
+                                      args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, vita_data))
 
             socket_rec_test.start()
             send_proc.start()
@@ -250,23 +289,28 @@ class qa_testcpp(gr_unittest.TestCase):
             base_pkt_n = (base_pkt_n + 1) % VITA_PKT_MOD
             random.randint(29, 1371)
             vita_data[random.randint(29, 1371)] = random.randint(0, 255)
+            i += 1
         tb_proc.kill()
 
     def test_multi_packet_correct_sc8(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_sc8('127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_sc8(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
+        vita_source = difi_source_cpp_sc8(
+            '127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_sc8(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True,
+                                      SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
         tb.connect(vita_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
         vita_data = bytearray(self.vita_data)
         tb_proc.start()
         base_pkt_n = 6
-        for i in range(VITA_PKT_MOD + 1):
+        i = 0
+        while i < VITA_PKT_MOD + 1:
             vita_data[1] = (vita_data[1] & 0xf0) | base_pkt_n
-            send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data))
-            socket_rec_test = Process(target=socket_rec, 
-                                     args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, vita_data))
+            send_proc = Process(target=socket_send, args=(
+                ('127.0.0.1', source_p), socket.SOCK_DGRAM, vita_data))
+            socket_rec_test = Process(target=socket_rec,
+                                      args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, vita_data))
 
             socket_rec_test.start()
             send_proc.start()
@@ -278,46 +322,24 @@ class qa_testcpp(gr_unittest.TestCase):
             base_pkt_n = (base_pkt_n + 1) % VITA_PKT_MOD
             random.randint(29, 1371)
             vita_data[random.randint(29, 1371)] = random.randint(0, 255)
+            i += 1
         tb_proc.kill()
 
     # standalone mode tests
     def test_standalone_context(self):
-        source_p, sink_p = get_open_ports()
-        tb = gr.top_block()
-        samp_rate = int(1e6)
-        oui = 0xf
-        packet_class_id = 1
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, SAMPS_PER_PACKET, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 8)
-        vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
-        tb.connect(vector_source, vita_sink)
-        tb_proc = Process(target=run_tb, args=(tb,))
-        socket_rec_test = Process(target=socket_rec_confirm_context_correct_alt, 
-                            args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM,
-                            samp_rate, packet_class_id, oui, 8))
-        socket_rec_test.start()
-        time.sleep(1)
-        tb_proc.start()
-        socket_rec_test.join()
-        if socket_rec_test.exitcode != 0:
-            tb_proc.kill()
-            pytest.fail()
-    
-    def test_standalone_data(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
         samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
-        add_const = blocks.add_const_cc(1)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, 1024 // 2, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, SAMPS_PER_PACKET, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 8)
         vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
-        tb.connect(vector_source, add_const)
-        tb.connect(add_const, vita_sink)
+        tb.connect(vector_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
-        socket_rec_test = Process(target=socket_rec_confirm_standalone_data, 
-                            args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, 1024 // 2))
+        socket_rec_test = Process(target=socket_rec_confirm_context_correct_alt,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM,
+                                        samp_rate, packet_class_id, oui, 8))
         socket_rec_test.start()
         time.sleep(1)
         tb_proc.start()
@@ -325,16 +347,42 @@ class qa_testcpp(gr_unittest.TestCase):
         if socket_rec_test.exitcode != 0:
             tb_proc.kill()
             pytest.fail()
-    
+
+    def test_standalone_data(self):
+        _, sink_p = get_open_ports()
+        tb = gr.top_block()
+        oui = 0xf
+        packet_class_id = 1
+        add_const = blocks.add_const_cc(1)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, 1024 // 2, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 8)
+        vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
+        tb.connect(vector_source, add_const)
+        tb.connect(add_const, vita_sink)
+        tb_proc = Process(target=run_tb, args=(tb,))
+        socket_rec_test = Process(target=socket_rec_confirm_standalone_data,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, 1024 // 2))
+        socket_rec_test.start()
+        time.sleep(1)
+        tb_proc.start()
+        socket_rec_test.join()
+        if socket_rec_test.exitcode != 0:
+            tb_proc.kill()
+            pytest.fail()
+
     def test_16_bit_depth_full_loop(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 16)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, True, 1344 // 4, 0, 352, int(1e6), 0, 0, 100, 72, 16)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_DGRAM, 0, 2048, 16)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM,
+                                       True, 1344 // 4, 0, 352, int(1e6), 0, 0, 100, 72, 16)
         tb.connect(vita_source, vita_sink)
 
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_DGRAM, self.vita_data))
-        rec_proc = Process(target=socket_rec, args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, self.vita_data))
+        send_proc = Process(target=socket_send, args=(
+            ('127.0.0.1', source_p), socket.SOCK_DGRAM, self.vita_data))
+        rec_proc = Process(target=socket_rec, args=(
+            ('127.0.0.1', sink_p), socket.SOCK_DGRAM, self.vita_data))
         tb_proc = Process(target=run_tb, args=(tb,))
         tb_proc.start()
         rec_proc.start()
@@ -348,18 +396,17 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_standalone_16_bit_data_basic(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
-        samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
         add_const = blocks.add_const_cc(1)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, 512, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 16)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, 512, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 16)
         vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
         tb.connect(vector_source, add_const)
         tb.connect(add_const, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
-        socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16, 
-                            args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, 512))
+        socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, 512))
         socket_rec_test.start()
         time.sleep(1)
         tb_proc.start()
@@ -367,13 +414,14 @@ class qa_testcpp(gr_unittest.TestCase):
         if socket_rec_test.exitcode != 0:
             tb_proc.kill()
             pytest.fail()
-    
+
     def test_standalone_16_bit_data_random_vec(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
         oui = 0xf
         packet_class_id = 1
-        ran_vec = list(np.random.choice([complex(x,x) for x in range(-32767, 32767)], size=(512)))
+        ran_vec = list(np.random.choice(
+            [complex(x, x) for x in range(-32767, 32767)], size=(512)))
         expected = []
         for i in ran_vec:
             re = int(i.real)
@@ -383,14 +431,14 @@ class qa_testcpp(gr_unittest.TestCase):
             expected.append(re[0])
             expected.append(re[1])
             expected.append(im[0])
-            expected.append(im[1])     
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, 512, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 16)
+            expected.append(im[1])
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, 512, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 16)
         vector_source = blocks.vector_source_c(ran_vec, False, 1, [])
         tb.connect(vector_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
-        socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16_vec, 
-                            args=(('127.0.0.1', sink_p),socket.SOCK_DGRAM, expected))
+        socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16_vec,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM, expected))
         socket_rec_test.start()
         time.sleep(1)
         tb_proc.start()
@@ -400,19 +448,19 @@ class qa_testcpp(gr_unittest.TestCase):
             pytest.fail()
 
     def test_standalone_context_16(self):
-        source_p, sink_p = get_open_ports()
+        _, sink_p = get_open_ports()
         tb = gr.top_block()
         samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, SAMPS_PER_PACKET, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 16)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_DGRAM, False, SAMPS_PER_PACKET, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 16)
         vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
         tb.connect(vector_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
-        socket_rec_test = Process(target=socket_rec_confirm_context_correct_alt, 
-                            args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM,
-                            samp_rate, packet_class_id, oui, 16))
+        socket_rec_test = Process(target=socket_rec_confirm_context_correct_alt,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_DGRAM,
+                                        samp_rate, packet_class_id, oui, 16))
         socket_rec_test.start()
         time.sleep(1)
         tb_proc.start()
@@ -425,14 +473,18 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_tcp_difi_source_sink_full_loop(self):
         source_p, sink_p = get_open_ports()
 
-        rec_proc = Process(target=socket_rec, args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, self.vita_data))
+        rec_proc = Process(target=socket_rec, args=(
+            ('127.0.0.1', sink_p), socket.SOCK_STREAM, self.vita_data))
         rec_proc.start()
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_STREAM, self.vita_data))
+        send_proc = Process(target=socket_send, args=(
+            ('127.0.0.1', source_p), socket.SOCK_STREAM, self.vita_data))
         send_proc.start()
 
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 72, 8)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, True,
+                                       SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 72, 8)
         tb.connect(vita_source, vita_sink)
 
         tb_proc = Process(target=run_tb, args=(tb,))
@@ -443,12 +495,14 @@ class qa_testcpp(gr_unittest.TestCase):
         tb_proc.kill()
         if rec_proc.exitcode != 0:
             pytest.fail()
-        
+
     def test_tcp_time_full_and_frac(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM,
+                                       True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
         tb.connect(vita_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
         vita_data_time_change = bytearray(self.vita_data)
@@ -459,7 +513,8 @@ class qa_testcpp(gr_unittest.TestCase):
         frac_base = 1344000000 // 2
         to_one = math.ceil(1e12 / frac_base)
 
-        rec_proc = Process(target=rec_socket_multi_packet, args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, to_one, frac_base))
+        rec_proc = Process(target=rec_socket_multi_packet, args=(('127.0.0.1', sink_p),
+                           socket.SOCK_STREAM, to_one, frac_base))
         rec_proc.start()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(('127.0.0.1', source_p))
@@ -467,8 +522,9 @@ class qa_testcpp(gr_unittest.TestCase):
         tb_proc.start()
         time.sleep(1)
         base_pkt_n = 6
-        for i in range(to_one + 1):
-            vita_data_time_change[1] = (vita_data_time_change[1] & 0xf0) | base_pkt_n
+        for _ in range(to_one + 1):
+            vita_data_time_change[1] = (
+                vita_data_time_change[1] & 0xf0) | base_pkt_n
             time.sleep(.002)
             sock.send(vita_data_time_change)
             base_pkt_n = (base_pkt_n + 1) % VITA_PKT_MOD
@@ -481,15 +537,18 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_tcp_multi_packet_correct(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM,
+                                       True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
         tb.connect(vita_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
         vita_data = bytearray(self.vita_data)
         base_pkt_n = 6
-        send_proc = Process(target=socket_send_multi_packets, args=(('127.0.0.1', source_p), socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
-        socket_rec_test = Process(target=socket_rec_multi_packets, 
-                                    args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1))
+        send_proc = Process(target=socket_send_multi_packets, args=(('127.0.0.1', source_p),
+                            socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
+        socket_rec_test = Process(target=socket_rec_multi_packets,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, VITA_PKT_MOD+1))
         socket_rec_test.start()
         time.sleep(1)
         send_proc.start()
@@ -504,15 +563,18 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_tcp_multi_packet_correct_sc8(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
-        vita_source = difi_source_cpp_sc8('127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
-        vita_sink = difi_sink_cpp_sc8(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
+        vita_source = difi_source_cpp_sc8(
+            '127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 8)
+        vita_sink = difi_sink_cpp_sc8(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM,
+                                      True, SAMPS_PER_PACKET, 0, 352, int(1e6), 0, 0, 100, 108, 8)
         tb.connect(vita_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
         vita_data = bytearray(self.vita_data)
         base_pkt_n = 6
-        send_proc = Process(target=socket_send_multi_packets, args=(('127.0.0.1', source_p), socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
-        socket_rec_test = Process(target=socket_rec_multi_packets, 
-                                    args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1))
+        send_proc = Process(target=socket_send_multi_packets, args=(('127.0.0.1', source_p),
+                            socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
+        socket_rec_test = Process(target=socket_rec_multi_packets,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, VITA_PKT_MOD+1))
         socket_rec_test.start()
         time.sleep(1)
         send_proc.start()
@@ -523,22 +585,22 @@ class qa_testcpp(gr_unittest.TestCase):
         tb_proc.kill()
         if socket_rec_test.exitcode != 0:
             pytest.fail()
-            
+
     # standalone mode tests
     def test_tcp_standalone_context(self):
-        source_p, sink_p = get_open_ports()
+        _, sink_p = get_open_ports()
         tb = gr.top_block()
         samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
 
-        socket_rec_test = Process(target=socket_rec_confirm_context_correct_alt, 
-                            args=(('127.0.0.1', sink_p), socket.SOCK_STREAM,
-                            samp_rate, packet_class_id, oui, 8))
+        socket_rec_test = Process(target=socket_rec_confirm_context_correct_alt,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM,
+                                        samp_rate, packet_class_id, oui, 8))
         socket_rec_test.start()
         time.sleep(1)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, SAMPS_PER_PACKET, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, SAMPS_PER_PACKET, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 8)
         vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
         tb.connect(vector_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
@@ -553,18 +615,17 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_tcp_standalone_data(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
-        samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
 
-        socket_rec_test = Process(target=socket_rec_confirm_standalone_data, 
-                            args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, 1024 // 2))
+        socket_rec_test = Process(target=socket_rec_confirm_standalone_data,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, 1024 // 2))
         socket_rec_test.start()
         time.sleep(1)
 
         add_const = blocks.add_const_cc(1)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, 1024 // 2, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 8)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, 1024 // 2, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 8)
         vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
         tb.connect(vector_source, add_const)
         tb.connect(add_const, vita_sink)
@@ -579,15 +640,19 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_tcp_16_bit_depth_full_loop(self):
         source_p, sink_p = get_open_ports()
 
-        rec_proc = Process(target=socket_rec, args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, self.vita_data))
+        rec_proc = Process(target=socket_rec, args=(
+            ('127.0.0.1', sink_p), socket.SOCK_STREAM, self.vita_data))
         rec_proc.start()
         time.sleep(1)
-        send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p), socket.SOCK_STREAM, self.vita_data))
+        send_proc = Process(target=socket_send, args=(
+            ('127.0.0.1', source_p), socket.SOCK_STREAM, self.vita_data))
         send_proc.start()
 
         tb = gr.top_block()
-        vita_source = difi_source_cpp_fc32('127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 16)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, True, 1344 // 4, 0, 352, int(1e6), 0, 0, 100, 72, 16)
+        vita_source = difi_source_cpp_fc32(
+            '127.0.0.1', source_p, socket.SOCK_STREAM, 0, 2048, 16)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM,
+                                       True, 1344 // 4, 0, 352, int(1e6), 0, 0, 100, 72, 16)
         tb.connect(vita_source, vita_sink)
 
         tb_proc = Process(target=run_tb, args=(tb,))
@@ -602,18 +667,17 @@ class qa_testcpp(gr_unittest.TestCase):
     def test_tcp_standalone_16_bit_data_basic(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
-        samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
 
-        socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16, 
-                            args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, 512))
+        socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, 512))
         socket_rec_test.start()
         time.sleep(1)
 
         add_const = blocks.add_const_cc(1)
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, 512, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 16)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, 512, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 16)
         vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
         tb.connect(vector_source, add_const)
         tb.connect(add_const, vita_sink)
@@ -624,13 +688,14 @@ class qa_testcpp(gr_unittest.TestCase):
         if socket_rec_test.exitcode != 0:
             tb_proc.kill()
             pytest.fail()
-    
+
     def test_tcp_standalone_16_bit_data_random_vec(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
         oui = 0xf
         packet_class_id = 1
-        ran_vec = list(np.random.choice([complex(x,x) for x in range(-32767, 32767)], size=(512)))
+        ran_vec = list(np.random.choice(
+            [complex(x, x) for x in range(-32767, 32767)], size=(512)))
         expected = []
         for i in ran_vec:
             re = int(i.real)
@@ -640,15 +705,15 @@ class qa_testcpp(gr_unittest.TestCase):
             expected.append(re[0])
             expected.append(re[1])
             expected.append(im[0])
-            expected.append(im[1])   
+            expected.append(im[1])
 
-        socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16_vec, 
-                            args=(('127.0.0.1', sink_p),socket.SOCK_STREAM, expected))
+        socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16_vec,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, expected))
         socket_rec_test.start()
         time.sleep(1)
 
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, 512, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 16)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, 512, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 16)
         vector_source = blocks.vector_source_c(ran_vec, False, 1, [])
         tb.connect(vector_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
@@ -658,22 +723,23 @@ class qa_testcpp(gr_unittest.TestCase):
         if socket_rec_test.exitcode != 0:
             tb_proc.kill()
             pytest.fail()
-    
+
     def test_tcp_standalone_context_16(self):
-        source_p, sink_p = get_open_ports()
+        _, sink_p = get_open_ports()
         tb = gr.top_block()
         samp_rate = int(1e6)
         oui = 0xf
         packet_class_id = 1
 
-        socket_rec_test = Process(target=socket_rec_confirm_context_correct_alt, 
-                            args=(('127.0.0.1', sink_p), socket.SOCK_STREAM,
-                            samp_rate, packet_class_id, oui, 16))
+        socket_rec_test = Process(target=socket_rec_confirm_context_correct_alt,
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM,
+                                        samp_rate, packet_class_id, oui, 16))
         socket_rec_test.start()
         time.sleep(1)
 
-        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM, False, SAMPS_PER_PACKET, 0, 352, 
-                            int(1e6), packet_class_id, oui, 100, 72, 16)
+        vita_sink = difi_sink_cpp_fc32(0, 0, '127.0.0.1', sink_p, socket.SOCK_STREAM,
+                                       False, SAMPS_PER_PACKET, 0, 352,
+                                       int(1e6), packet_class_id, oui, 100, 72, 16)
         vector_source = blocks.vector_source_c((0, 0) * 512, False, 1, [])
         tb.connect(vector_source, vita_sink)
         tb_proc = Process(target=run_tb, args=(tb,))
@@ -684,25 +750,26 @@ class qa_testcpp(gr_unittest.TestCase):
             tb_proc.kill()
             pytest.fail()
 
+
 def socket_rec_confirm_standalone_data(server, socket_type, size):
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
-        data = sock.recv(2048) #ignore context
+        data = sock.recv(2048)  # ignore context
         data = sock.recv(2048)
     else:
         sock.listen(1)
-        socket_client, addr = sock.accept()
+        socket_client, _ = sock.accept()
         # read context first, and then data msg
-        for i in range(0,2):
+        for _ in range(0, 2):
             # read one message at a time
             header = socket_client.recv(4)
             #print('header received = %s'%header)
             assert len(header) == 4
-            h = struct.unpack('!I', header[0:4])[0]
-            data_len = ((h & 0xffff)*4)-4
+            tmp_header = struct.unpack('!I', header[0:4])[0]
+            data_len = ((tmp_header & 0xffff)*4)-4
             num_to_read = data_len
-            num_read =0
+            num_read = 0
             data = bytearray(header)
             while num_read != data_len:
                 bytes_read = socket_client.recv((num_to_read))
@@ -712,29 +779,31 @@ def socket_rec_confirm_standalone_data(server, socket_type, size):
             assert len(data) == data_len+4
         socket_client.close()
     sock.close()
-    samples = struct.unpack_from('!%sb' % (len(data) - DIFI_HEADER_SIZE), data, offset=DIFI_HEADER_SIZE)
+    samples = struct.unpack_from(
+        f'!{(len(data) - DIFI_HEADER_SIZE)}b', data, offset=DIFI_HEADER_SIZE)
     expected = (1, 0) * size
     assert samples == expected
+
 
 def socket_rec_confirm_standalone_data_16(server, socket_type, size):
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
-        data = sock.recv(4096) #ignore context
+        data = sock.recv(4096)  # ignore context
         data = sock.recv(4096)
     else:
         sock.listen(1)
-        socket_client, addr = sock.accept()
+        socket_client, _ = sock.accept()
         # read context first, and then data msg
-        for i in range(0,2):
+        for _ in range(0, 2):
             # read one message at a time
             header = socket_client.recv(4)
             #print('header received = %s'%header)
             assert len(header) == 4
-            h = struct.unpack('!I', header[0:4])[0]
-            data_len = ((h & 0xffff)*4)-4
+            tmp_header = struct.unpack('!I', header[0:4])[0]
+            data_len = ((tmp_header & 0xffff)*4)-4
             num_to_read = data_len
-            num_read =0
+            num_read = 0
             data = bytearray(header)
             while num_read != data_len:
                 bytes_read = socket_client.recv((num_to_read))
@@ -744,29 +813,31 @@ def socket_rec_confirm_standalone_data_16(server, socket_type, size):
             assert len(data) == data_len+4
         socket_client.close()
     sock.close()
-    samples = struct.unpack_from('!%sb' % (len(data) - DIFI_HEADER_SIZE), data, offset=DIFI_HEADER_SIZE)
+    samples = struct.unpack_from(
+        f'!{(len(data) - DIFI_HEADER_SIZE)}b', data, offset=DIFI_HEADER_SIZE)
     expected = (1, 0, 0, 0) * size
     assert samples == expected
+
 
 def socket_rec_confirm_standalone_data_16_vec(server, socket_type, vec):
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
-        data = sock.recv(4096) #ignore context
+        data = sock.recv(4096)  # ignore context
         data = sock.recv(4096)
     else:
         sock.listen(1)
-        socket_client, addr = sock.accept()
+        socket_client, _ = sock.accept()
         # read context first, and then data msg
-        for i in range(0,2):
+        for _ in range(0, 2):
             # read one message at a time
             header = socket_client.recv(4)
             #print('header received = %s'%header)
             assert len(header) == 4
-            h = struct.unpack('!I', header[0:4])[0]
-            data_len = ((h & 0xffff)*4)-4
+            tmp_header = struct.unpack('!I', header[0:4])[0]
+            data_len = ((tmp_header & 0xffff)*4)-4
             num_to_read = data_len
-            num_read =0
+            num_read = 0
             data = bytearray(header)
             while num_read != data_len:
                 bytes_read = socket_client.recv((num_to_read))
@@ -778,6 +849,7 @@ def socket_rec_confirm_standalone_data_16_vec(server, socket_type, vec):
     sock.close()
     assert list(data[28::]) == vec
 
+
 def socket_rec_confirm_context_correct_alt(server, socket_type, sample_rate, packet_class_id, oui, expect_bit_depth):
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
@@ -785,7 +857,7 @@ def socket_rec_confirm_context_correct_alt(server, socket_type, sample_rate, pac
         data = sock.recv(2048)
     else:
         sock.listen(1)
-        socket_client, addr = sock.accept()
+        socket_client, _ = sock.accept()
         data = socket_client.recv(2048)
         socket_client.close()
     sock.close()
@@ -796,11 +868,13 @@ def socket_rec_confirm_context_correct_alt(server, socket_type, sample_rate, pac
     r_oui = class_id >> 32
     r_packet_class_id = class_id & 0x000000000000ff
     bit_depth = payload[-1] >> 32 & 0x0000001f
-    assert bit_depth + 1 == expect_bit_depth # bit depth is one plus value in data format see DIFI spec.
+    # bit depth is one plus value in data format see DIFI spec.
+    assert bit_depth + 1 == expect_bit_depth
     assert sample_rate == r_samp_rate
-    assert int(sample_rate *.8) == r_bw
+    assert int(sample_rate * .8) == r_bw
     assert r_oui == oui
     assert r_packet_class_id == packet_class_id
+
 
 def socket_rec_pack_n(server, socket_type, pkt_n, vita_source):
     sock = socket.socket(socket.AF_INET, socket_type)
@@ -809,12 +883,14 @@ def socket_rec_pack_n(server, socket_type, pkt_n, vita_source):
         data = sock.recv(2048)
     else:
         sock.listen(1)
-        socket_client, addr = sock.accept()
+        socket_client, _ = sock.accept()
         data = socket_client.recv(2048)
         socket_client.close()
     sock.close()
-    pack_type, r_pkt_n, stream_num, header, _, _ = vita_source.parse_header(data)
+    _, r_pkt_n, _, _, _, _ = vita_source.parse_header(
+        data)
     assert r_pkt_n == pkt_n
+
 
 def socket_rec(server, socket_type, vita_data):
     sock = socket.socket(socket.AF_INET, socket_type)
@@ -824,15 +900,16 @@ def socket_rec(server, socket_type, vita_data):
         data = sock.recv(2048)
     else:
         sock.listen(1)
-        socket_client, addr = sock.accept()
+        socket_client, _ = sock.accept()
         data = socket_client.recv(2048)
         socket_client.close()
-    
+
     sock.close()
     assert len(data) == 1372
     assert data[28::] == vita_data[28::]
 
-def socket_rec_multi_packets(server, socket_type, vita_data, num_pkts):
+
+def socket_rec_multi_packets(server, socket_type, num_pkts):
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
 
@@ -840,16 +917,16 @@ def socket_rec_multi_packets(server, socket_type, vita_data, num_pkts):
         data = sock.recv(2048)
     else:
         sock.listen(1)
-        socket_client, addr = sock.accept()
-        for i in range(num_pkts):
+        socket_client, _ = sock.accept()
+        for _ in range(num_pkts):
             # read one message at a time
             header = socket_client.recv(4)
             #print('header received = %s'%header)
             assert len(header) == 4
-            h = struct.unpack('!I', header[0:4])[0]
-            data_len = ((h & 0xffff)*4)-4
+            tmp_header = struct.unpack('!I', header[0:4])[0]
+            data_len = ((tmp_header & 0xffff)*4)-4
             num_to_read = data_len
-            num_read =0
+            num_read = 0
             data = bytearray(header)
             while num_read != data_len:
                 bytes_read = socket_client.recv((num_to_read))
@@ -859,29 +936,30 @@ def socket_rec_multi_packets(server, socket_type, vita_data, num_pkts):
             assert len(data) == data_len+4
             assert len(data) == 1372
         socket_client.close()
-    
+
     sock.close()
+
 
 def socket_rec_confirm_time(server, socket_type, frac, full, num_to_receive=1):
     sock = socket.socket(socket.AF_INET, socket_type)
-    sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(server)
 
     if socket_type == socket.SOCK_DGRAM:
-        for i in range(0,num_to_receive):
+        for _ in range(0, num_to_receive):
             data = sock.recv(2048)
     else:
         sock.listen(1)
-        socket_client, addr = sock.accept()
-        for i in range(0,num_to_receive):
+        socket_client, _ = sock.accept()
+        for _ in range(0, num_to_receive):
             # read one message at a time
             header = socket_client.recv(4)
             #print('header received = %s'%header)
             assert len(header) == 4
-            h = struct.unpack('!I', header[0:4])[0]
-            data_len = ((h & 0xffff)*4)-4
+            tmp_header = struct.unpack('!I', header[0:4])[0]
+            data_len = ((tmp_header & 0xffff)*4)-4
             num_to_read = data_len
-            num_read =0
+            num_read = 0
             data = bytearray(header)
             while num_read != data_len:
                 bytes_read = socket_client.recv((num_to_read))
@@ -893,7 +971,7 @@ def socket_rec_confirm_time(server, socket_type, frac, full, num_to_receive=1):
             payload = struct.unpack(DATA_PACKET_METADATA_FORMAT, data[0:28])
             r_full = payload[3]
             r_frac = payload[4]
-            assert math.isclose(frac, r_frac, rel_tol = 1e-11, abs_tol=2)
+            assert math.isclose(frac, r_frac, rel_tol=1e-11, abs_tol=2)
             assert full == r_full
         socket_client.close()
 
@@ -910,19 +988,21 @@ def socket_send(server, socket_type, data):
         sock.send(data)
     sock.close()
 
+
 def get_open_ports():
     sock1 = socket.socket()
     sock1.bind(('', 0))
     sock2 = socket.socket()
-    sock2.bind(('', 0))    
+    sock2.bind(('', 0))
     return sock1.getsockname()[1], sock2.getsockname()[1]
+
 
 def socket_send_multi_packets(server, socket_type, data, num_pkts, base_pkt_n):
     sock = socket.socket(socket.AF_INET, socket_type)
     if socket_type == socket.SOCK_STREAM:
         sock.connect(server)
 
-    for i in range(num_pkts):
+    for _ in range(num_pkts):
         data[1] = (data[1] & 0xf0) | base_pkt_n
         if socket_type == socket.SOCK_DGRAM:
             sock.sendto(data, server)
@@ -933,12 +1013,13 @@ def socket_send_multi_packets(server, socket_type, data, num_pkts, base_pkt_n):
         data[random.randint(29, 1371)] = random.randint(0, 255)
     sock.close()
 
+
 def rec_socket_multi_packet(server, socket_type, num_packets, frac_base):
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_STREAM:
         sock.listen(1)
-        socket_client, addr = sock.accept()
+        socket_client, _ = sock.accept()
 
     for i in range(num_packets + 1):
         frac, full = (i * frac_base) % 1e12, 0 if i < num_packets else 1
@@ -949,10 +1030,10 @@ def rec_socket_multi_packet(server, socket_type, num_packets, frac_base):
             header = socket_client.recv(4)
             #print('header received = %s'%header)
             assert len(header) == 4
-            h = struct.unpack('!I', header[0:4])[0]
-            data_len = ((h & 0xffff)*4)-4
+            tmp_header = struct.unpack('!I', header[0:4])[0]
+            data_len = ((tmp_header & 0xffff)*4)-4
             num_to_read = data_len
-            num_read =0
+            num_read = 0
             data = bytearray(header)
             while num_read != data_len:
                 bytes_read = socket_client.recv((num_to_read))
@@ -964,11 +1045,12 @@ def rec_socket_multi_packet(server, socket_type, num_packets, frac_base):
             payload = struct.unpack(DATA_PACKET_METADATA_FORMAT, data[0:28])
             r_full = payload[3]
             r_frac = payload[4]
-            assert math.isclose(frac, r_frac, rel_tol = 1e-11, abs_tol=2)
+            assert math.isclose(frac, r_frac, rel_tol=1e-11, abs_tol=2)
             assert full == r_full
-        except Exception as e:
+        except Exception as exe:
             sock.close()
-            raise e
+            raise exe
+
 
 def parse_vita_double(bits):
     int_part = bits >> 20
@@ -977,12 +1059,16 @@ def parse_vita_double(bits):
     res = 0
     mask = 0x1
     while power > -21:
-        tmp = (0x1 << abs(power)) * ((int_part >> power if power > -1 else frac_part >> 20 - power) & mask)
+        tmp = (0x1 << abs(power)) * ((int_part >> power if power > -
+                                      1 else frac_part >> 20 - power) & mask)
         res += tmp if power > -1 else (1/tmp if tmp else 0)
         power -= 1
     return res
+
+
 def run_tb(tb):
     tb.run()
+
 
 if __name__ == '__main__':
     gr_unittest.run(qa_testcpp)

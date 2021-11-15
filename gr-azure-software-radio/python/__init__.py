@@ -29,6 +29,7 @@ except ModuleNotFoundError:
     pass
 
 # import any pure python here
-from .blob_sink import blob_sink
-from .blob_source import blob_source
+from .blob_qa_common import blob_teardown, blob_setup
+from .blob_sink import BlobSink
+from .blob_source import BlobSource
 from . import blob_common
