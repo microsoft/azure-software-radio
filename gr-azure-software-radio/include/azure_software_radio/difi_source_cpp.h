@@ -39,8 +39,9 @@ namespace gr {
    *                     against the stream number in the DIFI (VITA) packets. If they do match, the packets will be dropped.
    *  \param socket_buffer_size The size of the socket buffer (must be large enough for the expected packet and MTU size)
    *  \param bit_depth The bit depth
+   *  \param context_pkt_behavior TODO fill
    */
-    static sptr make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth);
+    static sptr make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth, int context_pkt_behavior);
 
     };
     typedef difi_source_cpp<gr_complex> difi_source_cpp_fc32;

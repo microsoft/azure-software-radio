@@ -32,7 +32,8 @@ void bind_difi_source_cpp_template(py::module& m, const char* classname)
            py::arg("stream_number"),
            py::arg("socket_buffer_size"),
            py::arg("bit_depth"),
-            D(difi_source_cpp,make)
+           py::arg("context_pkt_behavior"),
+           D(difi_source_cpp,make)
         );
 }
 

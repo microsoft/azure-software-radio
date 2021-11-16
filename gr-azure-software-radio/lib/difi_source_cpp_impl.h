@@ -95,7 +95,14 @@ private:
     void create_udp_socket();
     void create_tcp_socket();
     void reset_tcp_connection();
-    enum contex_bahavior {throw, ignore, warnings_forward, warnings_no_forward};
+    typedef enum
+    {
+        throw_exe,
+        ignore,
+        warnings_forward,
+        warnings_no_forward
+    }context_bahavior;
+
     std::string d_ip_addr;
     uint32_t d_port;
     int d_stream_number;
@@ -128,7 +135,7 @@ private:
     pmt::pmt_t make_context_dict(header_data& header, int size_gotten);
     int buffer_and_send(T* out, int noutput_items);
     int recv_tcp_packet();
-    contex_bahavior d_behavior;
+    int d_behavior;
     bool d_send; 
 
 public:
@@ -137,7 +144,8 @@ public:
                     uint8_t socket_type,
                     uint32_t stream_number,
                     uint32_t socket_buffer_size, 
-                    int bit_depth);
+                    int bit_depth,
+                    int context_pkt_behavior);
     ~difi_source_cpp_impl();
 
     // Where all the action really happens

@@ -48,13 +48,13 @@ namespace gr {
     }
 
     template <class T>
-    typename difi_source_cpp<T>::sptr difi_source_cpp<T>::make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
+    typename difi_source_cpp<T>::sptr difi_source_cpp<T>::make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth, int context_pkt_behavior)
     {
-      return gnuradio::make_block_sptr<difi_source_cpp_impl<T>>(ip_addr, port, socket_type, stream_number, socket_buffer_size, bit_depth);
+      return gnuradio::make_block_sptr<difi_source_cpp_impl<T>>(ip_addr, port, socket_type, stream_number, socket_buffer_size, bit_depth, context_pkt_behavior);
     }
 
     template <class T>
-    difi_source_cpp_impl<T>::difi_source_cpp_impl(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth)
+    difi_source_cpp_impl<T>::difi_source_cpp_impl(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth, int context_pkt_behavior)
         : gr::sync_block("source_cpp", gr::io_signature::make(0, 0, 0),
                          gr::io_signature::make(1 /* min outputs */,
                                                 1 /*max outputs */,
@@ -63,6 +63,7 @@ namespace gr {
           d_port(port),
           d_stream_number(stream_number),
           d_packet_buffer_len(socket_buffer_size),
+          d_behavior(context_pkt_behavior),
           d_send(true)
 
     {
@@ -251,7 +252,7 @@ namespace gr {
       }
       else
       {
-        d_context = d_behavior == contex_bahavior.ignore ? NULL : make_context_dict(header, size_gotten);
+        d_context = d_behavior == context_bahavior::ignore ? NULL : make_context_dict(header, size_gotten);
         return d_send ? buffer_and_send(out, noutput_items) : 0;
       }
     }
@@ -341,12 +342,12 @@ namespace gr {
       }
       if ((context.payload_format >> 32 & 0x0000001f) + 1 != d_unpack_idx_size * 8)
       {
-        if (d_behavior == contex_bahavior.throw){
+        if (d_behavior == context_bahavior::throw_exe){
 
           GR_LOG_ERROR(this->d_logger, "The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
           throw std::runtime_error("The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
         }
-        d_send = (d_behavior = contex_bahavior.warnings_forward) ? true : false;
+        d_send = (d_behavior == context_bahavior::warnings_forward) ? true : false;
         GR_LOG_WARN(this->d_logger, "The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
 
       }
