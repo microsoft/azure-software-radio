@@ -106,6 +106,7 @@ private:
     int d_packet_buffer_start_idx;
     int d_num_bytes_in_read_buffer;
     uint8_t d_socket_type;
+    bool d_is_socket_read_ready;
     fd_set d_rset;
     struct timeval d_tv;
     std::vector<int8_t> d_read_buffer;

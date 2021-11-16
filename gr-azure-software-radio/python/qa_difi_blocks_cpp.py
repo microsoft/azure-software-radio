@@ -104,7 +104,7 @@ class qa_testcpp(gr_unittest.TestCase):
     # pylint: disable=invalid-name
     def tearDown(self):
         pass
-
+    
     def test_vita_source_sink_full_loop(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
@@ -495,7 +495,7 @@ class qa_testcpp(gr_unittest.TestCase):
         tb_proc.kill()
         if rec_proc.exitcode != 0:
             pytest.fail()
-
+    
     def test_tcp_time_full_and_frac(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
@@ -522,18 +522,20 @@ class qa_testcpp(gr_unittest.TestCase):
         tb_proc.start()
         time.sleep(1)
         base_pkt_n = 6
-        for _ in range(to_one + 1):
+        i = 0
+        while i < to_one + 1:
             vita_data_time_change[1] = (
                 vita_data_time_change[1] & 0xf0) | base_pkt_n
             time.sleep(.002)
             sock.send(vita_data_time_change)
             base_pkt_n = (base_pkt_n + 1) % VITA_PKT_MOD
+            i += 1
         rec_proc.join()
         sock.close()
         tb_proc.kill()
         if rec_proc.exitcode != 0:
             pytest.fail()
-
+          
     def test_tcp_multi_packet_correct(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
@@ -723,7 +725,7 @@ class qa_testcpp(gr_unittest.TestCase):
         if socket_rec_test.exitcode != 0:
             tb_proc.kill()
             pytest.fail()
-
+    
     def test_tcp_standalone_context_16(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
@@ -749,7 +751,7 @@ class qa_testcpp(gr_unittest.TestCase):
         if socket_rec_test.exitcode != 0:
             tb_proc.kill()
             pytest.fail()
-
+    
 
 def socket_rec_confirm_standalone_data(server, socket_type, size):
     sock = socket.socket(socket.AF_INET, socket_type)
@@ -936,7 +938,6 @@ def socket_rec_multi_packets(server, socket_type, num_pkts):
             assert len(data) == data_len+4
             assert len(data) == 1372
         socket_client.close()
-
     sock.close()
 
 
@@ -994,7 +995,12 @@ def get_open_ports():
     sock1.bind(('', 0))
     sock2 = socket.socket()
     sock2.bind(('', 0))
-    return sock1.getsockname()[1], sock2.getsockname()[1]
+    port1 = sock1.getsockname()[1]
+    port2 = sock2.getsockname()[1]
+    sock1.close()
+    sock2.close()
+    return port1, port2
+
 
 
 def socket_send_multi_packets(server, socket_type, data, num_pkts, base_pkt_n):
@@ -1021,7 +1027,7 @@ def rec_socket_multi_packet(server, socket_type, num_packets, frac_base):
         sock.listen(1)
         socket_client, _ = sock.accept()
 
-    for i in range(num_packets + 1):
+    for i in range(num_packets):
         frac, full = (i * frac_base) % 1e12, 0 if i < num_packets else 1
         if socket_type == socket.SOCK_DGRAM:
             data = sock.recv(2048)
@@ -1050,6 +1056,9 @@ def rec_socket_multi_packet(server, socket_type, num_packets, frac_base):
         except Exception as exe:
             sock.close()
             raise exe
+    if socket_type == socket.SOCK_STREAM:
+        socket_client.close()
+    sock.close()
 
 
 def parse_vita_double(bits):
