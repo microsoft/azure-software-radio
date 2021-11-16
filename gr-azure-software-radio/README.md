@@ -33,15 +33,15 @@ python 3.8 or greater
 NOTE: If you have installed the Azure CLI with the default apt package on Ubuntu 20, the install may fail or the module may crash at runtime. See [Ubuntu 20 CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)
 ### Installing Azure software radio OOT
 
-    ```
-    pip install -r python/requirements.txt
+```
+pip install -r python/requirements.txt
 
-    mkdir build
-    cd build
-    cmake ..
-    make
-    sudo make install
-    ```
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
 
 ### Running the Unit Tests
 Run the QA tests with any of the following methods:
