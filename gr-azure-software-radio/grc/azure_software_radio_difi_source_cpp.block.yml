@@ -45,7 +45,14 @@ parameters:
   label: DIFI Stream Number
   dtype: int
   default: 0
-
+- id: context_packet_overrids
+  label: Context Packet Mismatch Behavior
+  category: Context Packet Overrides
+  dtype: enum
+  default: 'Default'
+  options: ['default', 'ignore_mismatch', 'throw_warnings_forward', 'throw_warnings_drop']
+  option_labels: ['Default (Throw Exceptions)', 'Ignore Mismatches - Forward data, No Warnings', 'Throw Warnings - Forward', 'Throw Warnings - No Foward']
+  hide: part
 outputs:
 -   domain: stream
     dtype: ${ type.fcn }
