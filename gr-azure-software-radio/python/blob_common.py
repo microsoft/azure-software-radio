@@ -40,7 +40,7 @@ def get_blob_service_client(authentication_method: str = "default", connection_s
 
     # no connection string was specified, try to use the DefaultAzureCredential
     elif authentication_method == "default":
-        # dial down the logging level for the DefaultAzureCredential to prevent it 
+        # dial down the logging level for the DefaultAzureCredential to prevent it
         # from being overly chatty about which credentials it was using
         az_id_log = logging.getLogger('azure.identity')
         az_id_log.setLevel(logging.CRITICAL)

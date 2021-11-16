@@ -86,8 +86,6 @@ class BlobSink(gr.sync_block):
 
         self.block_id_list = []
 
-        self.blocks_per_commit = 2
-
         self.first_run = True
         self.blob_is_valid = False
 
@@ -130,7 +128,7 @@ class BlobSink(gr.sync_block):
             self.log.error(f"{err}")
             raise err
 
-    def work(self, input_items, output_items):
+    def work(self, input_items, _):
         # pylint: disable=fixme
         """ Buffer up items for upload to blob storage.
 

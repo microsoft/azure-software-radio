@@ -103,7 +103,7 @@ class qa_BlobSource(gr_unittest.TestCase):
         self.assertEqual(len(chunk_residue), 0)
 
     @patch.object(BlobSource, 'blob_auth_and_container_info_is_valid', return_value=True)
-    def test_end_to_end_run(self, container_is_valid_patch):
+    def test_end_to_end_run(self, _):
         '''
         Test the block properly starts up, reads data from the blob data queue, and cleanly
         shuts down
