@@ -62,7 +62,8 @@ namespace gr {
           d_ip_addr(ip_addr),
           d_port(port),
           d_stream_number(stream_number),
-          d_packet_buffer_len(socket_buffer_size)
+          d_packet_buffer_len(socket_buffer_size),
+          d_send(true)
 
     {
       d_tv.tv_sec = 0;
@@ -227,7 +228,7 @@ namespace gr {
       {
         this->add_item_tag(0, this->nitems_written(0), pmt::intern("pck_n"), make_pkt_n_dict(header.pkt_n, size_gotten));
       }
-      if (header.type == 1) // one is a data packet (see DIFI spec)
+      if (header.type == 1 and d_send) // one is a data packet (see DIFI spec)
       {
         uint32_t items_written = 0;
         int out_items = std::min((size_gotten - static_cast<int>(difi::DATA_START_IDX)) / 2, noutput_items);
@@ -250,8 +251,8 @@ namespace gr {
       }
       else
       {
-        d_context = make_context_dict(header, size_gotten);
-        return buffer_and_send(out, noutput_items);
+        d_context = d_behavior == contex_bahavior.ignore ? NULL : make_context_dict(header, size_gotten);
+        return d_send ? buffer_and_send(out, noutput_items) : 0;
       }
     }
 
@@ -340,8 +341,14 @@ namespace gr {
       }
       if ((context.payload_format >> 32 & 0x0000001f) + 1 != d_unpack_idx_size * 8)
       {
-        GR_LOG_ERROR(this->d_logger, "The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
-        throw std::runtime_error("The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
+        if (d_behavior == contex_bahavior.throw){
+
+          GR_LOG_ERROR(this->d_logger, "The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
+          throw std::runtime_error("The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
+        }
+        d_send = (d_behavior = contex_bahavior.warnings_forward) ? true : false;
+        GR_LOG_WARN(this->d_logger, "The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
+
       }
       return pmt_dict;
     }

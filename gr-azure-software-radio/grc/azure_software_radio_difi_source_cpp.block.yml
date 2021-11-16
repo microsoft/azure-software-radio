@@ -9,7 +9,7 @@ category: '[Azure software radio]'
 
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${protocol}, ${stream_num}, ${socket_buffer_size}, int(${bit_depth}))
+  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${protocol}, ${stream_num}, ${socket_buffer_size}, int(${bit_depth}), $)
 
 parameters:
 - id: type
@@ -46,13 +46,12 @@ parameters:
   dtype: int
   default: 0
 - id: context_packet_overrids
-  label: Context Packet Mismatch Behavior
-  category: Context Packet Overrides
+  label: Context Mismatch Behavior
+  category: Context_Config
   dtype: enum
   default: 'Default'
-  options: ['default', 'ignore_mismatch', 'throw_warnings_forward', 'throw_warnings_drop']
+  options: ['0', '1', '2', '3']
   option_labels: ['Default (Throw Exceptions)', 'Ignore Mismatches - Forward data, No Warnings', 'Throw Warnings - Forward', 'Throw Warnings - No Foward']
-  hide: part
 outputs:
 -   domain: stream
     dtype: ${ type.fcn }
