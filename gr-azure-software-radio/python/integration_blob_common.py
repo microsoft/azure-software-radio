@@ -14,6 +14,7 @@ import os
 import azure.core.exceptions as az_exceptions
 from gnuradio import gr_unittest
 
+import azure_software_radio
 from azure_software_radio import blob_common
 
 
