@@ -23,7 +23,7 @@ class qa_BlobSink(gr_unittest.TestCase):
 
         self.tb = gr.top_block()
         self.test_blob_container_name = str(uuid.uuid4())
-        
+
     # pylint: disable=invalid-name
     def tearDown(self):
         self.tb = None

@@ -10,10 +10,12 @@
 
 import uuid
 from unittest.mock import patch
+
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from azure_software_radio import BlobSource
 import numpy as np
+
+from azure_software_radio import BlobSource
 
 
 class qa_BlobSource(gr_unittest.TestCase):
@@ -26,11 +28,10 @@ class qa_BlobSource(gr_unittest.TestCase):
         )
         self.tb = gr.top_block()
         self.test_blob_container_name = str(uuid.uuid4())
-        
+
     # pylint: disable=invalid-name
     def tearDown(self):
         self.tb = None
-
 
     def test_instance(self):
         '''
@@ -38,15 +39,14 @@ class qa_BlobSource(gr_unittest.TestCase):
         '''
 
         instance = BlobSource(authentication_method="connection_string",
-                               connection_str=self.blob_connection_string,
-                               container_name=self.test_blob_container_name,
-                               blob_name='test-instance',
-                               queue_size=4)
+                              connection_str=self.blob_connection_string,
+                              container_name=self.test_blob_container_name,
+                              blob_name='test-instance',
+                              queue_size=4)
 
         # really only checking that the init didn't throw an exception above, but adding the check
         # below to keep flake8 happy
         self.assertIsNotNone(instance)
-
 
     def test_chunk_residue(self):
         '''
@@ -74,7 +74,6 @@ class qa_BlobSource(gr_unittest.TestCase):
         # the chunk residue should be the first 6 bytes of the last sample
         self.assertEqual(chunk_residue, src_data_bytes[-8:-2])
 
-
     def test_chunk_residue_merge(self):
         '''
         Test that we can glue samples back together if we get them in separate chunks
@@ -89,7 +88,8 @@ class qa_BlobSource(gr_unittest.TestCase):
                         connection_str=self.blob_connection_string,
                         container_name=self.test_blob_container_name,
                         blob_name=blob_name,
-                        queue_size=4)
+                        queue_size=4,
+                        retry_total=0)
 
         src_data_bytes = src_data.tobytes()
         # don't send the first 2 bytes of the first sample
@@ -102,7 +102,8 @@ class qa_BlobSource(gr_unittest.TestCase):
         self.assertEqual(data.tolist(), src_data.tolist())
         self.assertEqual(len(chunk_residue), 0)
 
-    def test_end_to_end_run(self):
+    @patch.object(BlobSource, 'blob_auth_and_container_info_is_valid', return_value=True)
+    def test_end_to_end_run(self, _):
         '''
         Test the block properly starts up, reads data from the blob data queue, and cleanly
         shuts down
@@ -121,10 +122,11 @@ class qa_BlobSource(gr_unittest.TestCase):
             mock_iter.return_value = iter([src_data.tobytes()])
 
             op = BlobSource(authentication_method="connection_string",
-                             connection_str=self.blob_connection_string,
-                             container_name=self.test_blob_container_name,
-                             blob_name=blob_name,
-                             queue_size=4)
+                            connection_str=self.blob_connection_string,
+                            container_name=self.test_blob_container_name,
+                            blob_name=blob_name,
+                            queue_size=4,
+                            retry_total=0)
 
             self.tb.connect(op, dst)
 
