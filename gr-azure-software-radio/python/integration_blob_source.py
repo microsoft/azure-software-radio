@@ -14,7 +14,9 @@ Integration tests for functions from blob_source.py
 import os
 import uuid
 
+import azure.core.exceptions as az_exceptions
 from azure.storage.blob import BlobServiceClient
+
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import numpy as np
@@ -81,8 +83,28 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         self.top_block.connect(op_block, dst)
         self.top_block.run()
 
-        self.assertEqual(src_data.tolist(), dst.data()
-                         )
+        self.assertEqual(src_data.tolist(), dst.data())
+
+    def test_read_from_nonexistent_blob(self):
+        """
+        Confirm we get the failure we expect when trying to read from a blob that doesn't exist
+        """
+
+        blob_name = 'test-blob.npy'
+
+        op_block = BlobSource(authentication_method="connection_string",
+                              connection_str=self.blob_connection_string,
+                              container_name=self.test_blob_container_name,
+                              blob_name=blob_name,
+                              queue_size=4,
+                              retry_total=0)
+        src_data = [[]]
+        output_items = [[]]
+
+        with self.assertRaises(az_exceptions.ResourceNotFoundError):
+            # calling work directly, since exceptions raised by a block when run with top_block.run() get
+            # passed through the GNU Radio runtime and aren't directly accessible
+            op_block.work(src_data, output_items)
 
 
 if __name__ == '__main__':

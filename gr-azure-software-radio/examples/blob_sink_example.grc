@@ -126,6 +126,7 @@ blocks:
     comment: ''
     connection_str: ''
     container_name: blob_container_name
+    retry_total: '10'
     url: blob_url
   states:
     bus_sink: false
