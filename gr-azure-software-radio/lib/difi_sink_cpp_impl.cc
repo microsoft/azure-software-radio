@@ -139,7 +139,7 @@ namespace gr {
             throw std::runtime_error("(max_iq - min_iq) too small or is negative, bailing to avoid numerical issues!");
           }
           d_gain = float(full_scale) / (max_iq - min_iq);
-          d_offset = -1.0 * ((max_iq - min_iq) / 2 + min_iq);
+          d_offset = gr_complex(-1.0 * ((max_iq - min_iq) / 2 + min_iq),-1.0 * ((max_iq - min_iq) / 2 + min_iq));
       }
     }
 
