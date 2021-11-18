@@ -8,7 +8,7 @@ label: DIFI Sink
 category: '[Azure software radio]'
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.difi_sink_cpp_${type.fcn}(${reference_time_full}, ${reference_time_frac}, ${ip_addr}, ${port}, ${protocol}, bool(${mode}), ${data_size}, ${stream_id}, int(${reference_point}), ${sample_rate}, int(${packet_class}), ${oui}, ${context_packet_send_count}, int(${context_pack_size}), int(${bit_depth}))
+  make: azure_software_radio.difi_sink_cpp_${type.fcn}(${reference_time_full}, ${reference_time_frac}, ${ip_addr}, ${port}, ${protocol}, bool(${mode}), ${data_size}, ${stream_id}, int(${reference_point}), ${sample_rate}, int(${packet_class}), ${oui}, ${context_packet_send_count}, int(${context_pack_size}), int(${bit_depth}), int(${scaling}), ${gain}, ${offset}, ${max_iq}, ${min_iq})
 
 parameters:
 - id: type
@@ -89,6 +89,35 @@ parameters:
   options: ['72', '108']
   default: '72'
   hide: ${ ('all' if mode == 'True' else 'none') }
+- id: scaling
+  category: Scaling
+  label: Scaling Mode
+  dtype: enum
+  options: ['0', '1', '2']
+  option_labels: ['None','Manual', 'Min-Max']
+  default: 'None'
+- id: gain
+  category: Scaling
+  label: Gain
+  dtype: real
+  default: 1.0
+  hide: ${ ('none' if scaling == 'Manual' else 'all') }
+- id: offset
+  category: Scaling
+  label: Complex Offset
+  dtype: complex
+  default: 0
+  hide: ${ ('none' if scaling == 'Manual' else 'all') }
+- id: max_iq
+  category: Scaling
+  label: Max IQ Value
+  dtype: real
+  hide: ${ ('none' if scaling == 'Min-Max' else 'all') }
+- id: min_iq
+  category: Scaling
+  label: Min IQ Value
+  dtype: real
+  hide: ${ ('none' if scaling == 'Min-Max' else 'all') }
 inputs:
 - label: in
   domain: stream
