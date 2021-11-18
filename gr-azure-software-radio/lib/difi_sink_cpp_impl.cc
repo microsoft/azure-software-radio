@@ -14,16 +14,19 @@ namespace gr {
     typename difi_sink_cpp<T>::sptr
     difi_sink_cpp<T>::make(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, uint32_t port, uint8_t socket_type,
                           bool mode, uint32_t samples_per_packet, int stream_number, int reference_point, u_int64_t samp_rate, 
-                          int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth)
+                          int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth,
+                          int scaling, float gain, gr_complex offset, float max_iq, float min_iq)
     {
       return gnuradio::make_block_sptr<difi_sink_cpp_impl<T>>(reference_time_full, reference_time_frac, ip_addr, port, socket_type, mode, 
-                                                              samples_per_packet, stream_number, reference_point, samp_rate, packet_class, oui, context_interval, context_pack_size, bit_depth);
+                                                              samples_per_packet, stream_number, reference_point, samp_rate, packet_class, oui, context_interval, context_pack_size, bit_depth,
+                                                              scaling, gain, offset, max_iq, min_iq);
     }
 
     template <class T>
     difi_sink_cpp_impl<T>::difi_sink_cpp_impl(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, 
                                               uint32_t port, uint8_t socket_type, bool mode, uint32_t samples_per_packet, int stream_number, int reference_point, 
-                                              u_int64_t samp_rate, int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth)
+                                              u_int64_t samp_rate, int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth,
+                                              int scaling, float gain, gr_complex offset, float max_iq, float min_iq)
       : gr::sync_block("difi_sink_cpp_impl",
               gr::io_signature::make(1, 1, sizeof(T)),
               gr::io_signature::make(0, 0, 0)), d_stream_number(int(stream_number)), d_reference_point(reference_point), d_full_samp(samp_rate), d_oui(oui), 
@@ -119,6 +122,25 @@ namespace gr {
         pack_u64(&d_context_raw[difi::CONTEXT_PACKET_OFFSETS[idx++]], data_payload_format);
       }
       d_out_buf.resize(d_data_len);
+
+      d_scaling_mode = scaling;
+
+      if(d_scaling_mode == 1){
+        //manual
+        d_gain = gain;
+        d_offset = offset;
+      }
+      else if(d_scaling_mode == 2){
+          //min-max
+          int full_scale = 1 << bit_depth;
+          float EPSILON = 0.0001; 
+          if ((max_iq - min_iq) < EPSILON){
+            GR_LOG_ERROR(this->d_logger, "(max_iq - min_iq) too small or is negative, bailing to avoid numerical issues!");
+            throw std::runtime_error("(max_iq - min_iq) too small or is negative, bailing to avoid numerical issues!");
+          }
+          d_gain = float(full_scale) / (max_iq - min_iq);
+          d_offset = -1.0 * ((max_iq - min_iq) / 2 + min_iq);
+      }
     }
 
     template <class T>
@@ -171,10 +193,14 @@ namespace gr {
       {
         process_tags(noutput_items);
       }
-        
+      
       for(int i = 0; i < noutput_items; i++)
       {
-        this->pack_T(in[i]);
+        gr_complex in_val = gr_complex(in[i].real(), in[i].imag());
+        if(d_scaling_mode > 0){
+            in_val = (in_val + d_offset) * d_gain;
+        }
+        this->pack_T(in_val);
         d_current_buff_idx += 2 * d_unpack_idx_size;
         if(d_current_buff_idx >= d_out_buf.size())
         {
