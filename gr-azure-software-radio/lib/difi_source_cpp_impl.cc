@@ -15,6 +15,7 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <chrono>
 
 #define NUM_BYTES_PER_WORD (4)
 
@@ -474,8 +475,7 @@ namespace gr {
       int num_received = 0;
       int num_to_read = len;
 
-      struct timeval begin, end;
-      gettimeofday(&begin,0);
+      auto begin = std::chrono::high_resolution_clock::now();
 
       while(num_received < len)
       {
@@ -517,11 +517,10 @@ namespace gr {
           num_received += size_gotten;
         }
 
-        gettimeofday(&end,0);
-        long seconds = end.tv_sec - begin.tv_sec;
-        long microseconds = end.tv_usec - begin.tv_usec;
-        long time_elapsed = seconds * 1e6 + microseconds;
-        if(time_elapsed > d_tv.tv_usec)
+        auto end = std::chrono::high_resolution_clock::now();
+        auto time_elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end-begin);
+
+        if(time_elapsed.count() > d_tv.tv_usec)
         {
           if(num_received > 0 and num_received != len)
           {
