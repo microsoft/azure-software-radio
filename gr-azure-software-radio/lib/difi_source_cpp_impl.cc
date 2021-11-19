@@ -521,7 +521,9 @@ namespace gr {
         long seconds = end.tv_sec - begin.tv_sec;
         long microseconds = end.tv_usec - begin.tv_usec;
         long time_elapsed = seconds * 1e6 + microseconds;
-        if(time_elapsed > d_tv.tv_usec)
+        if(num_received > 0 and
+           num_received != len and
+           time_elapsed > d_tv.tv_usec)
         {
          GR_LOG_WARN(this->d_logger, "Read timeout error - could not receive the expected number of bytes for a packet. Expected: "
            + std::to_string(len) + " Received: " + std::to_string(num_received));
