@@ -27,8 +27,10 @@ class IntegrationDefaultCredentials(gr_unittest.TestCase):
                                                                               enable_shared_token_cache=False,
                                                                               enable_interactive_browser=False)
         n_creds = len(instance.credentials)
-        self.assertEqual(n_creds, 1, f"Expected 1 credential, got: {n_creds} !")
-        self.assertTrue('EnvironmentCredential' in str(instance.credentials[0]))
+        self.assertEqual(
+            n_creds, 1, f"Expected 1 credential, got: {n_creds} !")
+        self.assertTrue('EnvironmentCredential' in str(
+            instance.credentials[0]))
 
     def test_managed_identity_only(self):
         """
@@ -42,8 +44,10 @@ class IntegrationDefaultCredentials(gr_unittest.TestCase):
                                                                               enable_shared_token_cache=False,
                                                                               enable_interactive_browser=False)
         n_creds = len(instance.credentials)
-        self.assertEqual(n_creds, 1, f"Expected 1 credential, got: {n_creds} !")
-        self.assertTrue('ManagedIdentityCredential' in str(instance.credentials[0]))
+        self.assertEqual(
+            n_creds, 1, f"Expected 1 credential, got: {n_creds} !")
+        self.assertTrue('ManagedIdentityCredential' in str(
+            instance.credentials[0]))
 
 
 if __name__ == '__main__':
