@@ -17,10 +17,11 @@ import time
 from multiprocessing import Process
 import pytest
 import numpy as np
-from gnuradio import gr, gr_unittest, blocks
 from azure_software_radio import (difi_source_cpp_fc32, difi_source_cpp_sc8, difi_sink_cpp_fc32, difi_sink_cpp_sc8,
                                   DATA_PACKET_METADATA_FORMAT, VITA_PKT_MOD,
                                   CONTEX_ALT_PACK_STRUCT_FORMAT, DIFI_HEADER_SIZE)
+from gnuradio import gr, gr_unittest, blocks
+
 
 
 SAMPS_PER_PACKET = 1344 // 2

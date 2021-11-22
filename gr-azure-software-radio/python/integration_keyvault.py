@@ -7,9 +7,9 @@
 #
 
 import os
-from gnuradio import gr_unittest
 from azure_software_radio import keyvault
 from azure_software_radio import default_credentials
+from gnuradio import gr_unittest
 
 keyvault_name = os.getenv('AZURE_KEYVAULT_NAME')
 key_name = os.getenv('AZURE_KEYVAULT_TEST_KEY')
