@@ -749,7 +749,7 @@ class qa_testcpp(gr_unittest.TestCase):
             expected.append(im[1])
 
         socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16_vec,
-                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, expected, 3))
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, expected, 0.03))
         socket_rec_test.start()
         time.sleep(1)
 
@@ -792,7 +792,7 @@ class qa_testcpp(gr_unittest.TestCase):
             expected.append(im[1])
 
         socket_rec_test = Process(target=socket_rec_confirm_standalone_data_16_vec,
-                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, expected, 3))
+                                  args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, expected, 0.03))
         socket_rec_test.start()
         time.sleep(1)
 
@@ -935,11 +935,19 @@ def socket_rec_confirm_standalone_data_16_vec(server, socket_type, vec, diff_all
     if not diff_allowed:
         assert list(data[28::]) == vec
     else:
-        ndiff = 0
-        for i,_ in enumerate(vec):
-            if data[28+i] != vec[i]:
-                ndiff += abs(data[i+28]-vec[i])
-        assert ndiff <= diff_allowed
+        avg_evm = 0
+        n_iq = int(len(vec) / 4)
+        for i in range(n_iq):
+            expected_i = int.from_bytes(vec[i:i+2],"big",signed=True)
+            expected_q = int.from_bytes(vec[i+2:i+4],"big",signed=True)
+            got_i = int.from_bytes(data[i+28:i+2+28],"big",signed=True)
+            got_q = int.from_bytes(data[i+2+28:i+4+28],"big",signed=True)
+            expected = complex(expected_i,expected_q)
+            got = complex(got_i,got_q)
+            diff = expected - got
+            avg_evm += abs(diff) / abs(expected)
+        avg_evm = avg_evm / n_iq
+        assert avg_evm <= diff_allowed
 
 
 def socket_rec_confirm_context_correct_alt(server, socket_type, sample_rate, packet_class_id, oui, expect_bit_depth):
