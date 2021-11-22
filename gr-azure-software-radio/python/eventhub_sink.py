@@ -38,13 +38,11 @@ class EventHubSink(gr.sync_block):
     def __init__(self,authentication_method: str = "default", connection_str: str = None,
                 sas_token: str = None, eventhub_name: str = None, eventhub_host_name: str = None):
 
-        print('event sink init')
         gr.sync_block.__init__(self,
                         name="eventhub_sink",
                         in_sig=[],
                         out_sig=[])
 
-        print('eventhub_sink start')
         self.eventhub_producer = get_eventhub_producer_client(
             authentication_method=authentication_method,
             eventhub_name=eventhub_name,
@@ -55,15 +53,13 @@ class EventHubSink(gr.sync_block):
 
         self.message_port_register_in(pmt.intern('in'))
         self.set_msg_handler(pmt.intern('in'), self.handle_msg)
-        print('eventhub_sink end')
 
     def handle_msg(self, msg):
-        print('handling msg')
         pmsg = pmt.to_python(msg)
-        print(pmsg)
-
         s = json.dumps(pmsg)
-        self.eventhub_producer.send_batch(EventData(s))
+        event_batch = self.eventhub_producer.create_batch()
+        event_batch.add(EventData(s))
+        self.eventhub_producer.send_batch(event_batch)
 
     def work(self, input_items, output_items):
         return 0
