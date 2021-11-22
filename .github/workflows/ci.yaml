@@ -19,6 +19,7 @@ jobs:
       credentials:
         username: ${{  secrets.ACR_PRINCIPAL_ID }}
         password: ${{  secrets.ACR_PRINCIPAL_PWD }}
+    timeout-minutes: 15
            
     steps:
       - uses: actions/checkout@master
