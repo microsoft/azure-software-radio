@@ -938,12 +938,12 @@ def socket_rec_confirm_standalone_data_16_vec(server, socket_type, vec, diff_all
         avg_evm = 0
         n_iq = int(len(vec) / 4)
         for i in range(n_iq):
-            expected_i = int.from_bytes(vec[i:i+2],"big",signed=True)
-            expected_q = int.from_bytes(vec[i+2:i+4],"big",signed=True)
-            got_i = int.from_bytes(data[i+28:i+2+28],"big",signed=True)
-            got_q = int.from_bytes(data[i+2+28:i+4+28],"big",signed=True)
-            expected = complex(expected_i,expected_q)
-            got = complex(got_i,got_q)
+            expected_i = int.from_bytes(vec[i:i+2], "big", signed=True)
+            expected_q = int.from_bytes(vec[i+2:i+4], "big", signed=True)
+            got_i = int.from_bytes(data[i+28:i+2+28], "big", signed=True)
+            got_q = int.from_bytes(data[i+2+28:i+4+28], "big", signed=True)
+            expected = complex(expected_i, expected_q)
+            got = complex(got_i, got_q)
             diff = expected - got
             avg_evm += abs(diff) / abs(expected)
         avg_evm = avg_evm / n_iq
