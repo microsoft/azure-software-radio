@@ -47,7 +47,9 @@ GR_PYTHON_INSTALL(
     blob_sink.py
     blob_source.py
     blob_qa_common.py
-    blob_common.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
+    blob_common.py
+    eventhub_sink.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
+    #eventhub_source.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
 )
 ########################################################################
 GR_PYTHON_INSTALL(
@@ -71,3 +73,5 @@ set(GR_TEST_TARGET_DEPS gnuradio-azure_software_radio)
 GR_ADD_TEST(qa_blob_sink ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_blob_sink.py)
 GR_ADD_TEST(qa_difi_blocks_cpp ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_difi_blocks_cpp.py)
 GR_ADD_TEST(qa_blob_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_blob_source.py)
+GR_ADD_TEST(qa_eventhub_sink ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_eventhub_sink.py)
+GR_ADD_TEST(qa_eventhub_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_eventhub_source.py)
