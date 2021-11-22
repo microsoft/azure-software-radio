@@ -14,7 +14,7 @@ namespace gr {
   namespace azure_software_radio {
 
     /*!
-     * \brief 
+     * \brief
      *  A DIFI source block is based on IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard
      *  The block is not fully compliant just yet. Bit Depths supported are currently 8 and 16 with full support coming at a later date.
      *  This block will emit the following tags in the following situations:
@@ -30,17 +30,16 @@ namespace gr {
      public:
       typedef std::shared_ptr<difi_source_cpp<T>> sptr;
   /*!
-   * \brief 
+   * \brief
    *  \param ip_addr The ip address for the socket to expect DIFI packets from
    *  \param port the port number for the socket
    *  \param socket_type The socket type (TCP or UDP)
    *  \param stream_number The DIFI (VITA) stream number to expect for this stream
    *                     If stream number is -1, the stream number will be ignored, else it will be checked
    *                     against the stream number in the DIFI (VITA) packets. If they do match, the packets will be dropped.
-   *  \param socket_buffer_size The size of the socket buffer (must be large enough for the expected packet and MTU size)
    *  \param bit_depth The bit depth
    */
-    static sptr make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, uint32_t socket_buffer_size, int bit_depth);
+    static sptr make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, int bit_depth);
 
     };
     typedef difi_source_cpp<gr_complex> difi_source_cpp_fc32;
