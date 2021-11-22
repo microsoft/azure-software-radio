@@ -4,9 +4,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
-#
-# pylint: disable=no-member
-#
 
 """
 Integration tests for functions from blob_sink.py
