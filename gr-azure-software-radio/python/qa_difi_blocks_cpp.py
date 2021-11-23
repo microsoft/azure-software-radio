@@ -791,8 +791,7 @@ class qa_testcpp(gr_unittest.TestCase):
         bit_depth = 16
         full_scale = 1 << bit_depth
         gain = full_scale / (maxiq - miniq)
-        offset = complex(-1.0*((maxiq - miniq)/2.0 + miniq), -
-                         1.0*((maxiq - miniq)/2.0 + miniq))
+        offset = complex(-1.0*((maxiq - miniq)/2.0 + miniq), - 1.0*((maxiq - miniq)/2.0 + miniq))
         ran_vec = []
         for i in range(512):
             ran_vec.append(complex(np.random.random()*(maxiq-miniq) +
