@@ -515,7 +515,7 @@ class qa_testcpp(gr_unittest.TestCase):
         to_one = math.ceil(1e12 / frac_base)
 
         rec_proc = Process(target=rec_socket_multi_packet, args=(('127.0.0.1', sink_p),
-                           socket.SOCK_STREAM, to_one, frac_base))
+                                                                 socket.SOCK_STREAM, to_one, frac_base))
         rec_proc.start()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(('127.0.0.1', source_p))
@@ -549,7 +549,7 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data = bytearray(self.vita_data)
         base_pkt_n = 6
         send_proc = Process(target=socket_send_multi_packets, args=(('127.0.0.1', source_p),
-                            socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
+                                                                    socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
         socket_rec_test = Process(target=socket_rec_multi_packets,
                                   args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, VITA_PKT_MOD+1))
         socket_rec_test.start()
@@ -575,7 +575,7 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data = bytearray(self.vita_data)
         base_pkt_n = 6
         send_proc = Process(target=socket_send_multi_packets, args=(('127.0.0.1', source_p),
-                            socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
+                                                                    socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
         socket_rec_test = Process(target=socket_rec_multi_packets,
                                   args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, VITA_PKT_MOD+1))
         socket_rec_test.start()
