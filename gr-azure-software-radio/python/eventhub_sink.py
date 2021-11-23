@@ -6,14 +6,13 @@
 # See License.txt in the project root for license information.
 #
 
+import json
+import pmt
+
 from gnuradio import gr
 from azure.eventhub import EventHubProducerClient, EventData
 from azure.core.credentials import AzureSasCredential
 from azure.identity import DefaultAzureCredential
-
-import json
-import numpy as np
-import pmt
 
 
 class EventHubSink(gr.sync_block):
@@ -36,13 +35,20 @@ class EventHubSink(gr.sync_block):
         send events to it.
     Partition ID: The partition id to send events to.
     """
-    def __init__(self,authentication_method: str = "default", connection_str: str = None,
-            sas_token: str = None, eventhub_host_name: str = None, eventhub_name: str = None, partition_id: str = None):
+    # pylint: disable=too-many-arguments, no-member
+    def __init__(
+            self,
+            authentication_method: str = "default",
+            connection_str: str = None,
+            sas_token: str = None,
+            eventhub_host_name: str = None,
+            eventhub_name: str = None,
+            partition_id: str = None):
 
         gr.sync_block.__init__(self,
-                        name="eventhub_sink",
-                        in_sig=[],
-                        out_sig=[])
+                               name="eventhub_sink",
+                               in_sig=[],
+                               out_sig=[])
 
         self.partition_id = partition_id
 
@@ -58,18 +64,28 @@ class EventHubSink(gr.sync_block):
         self.set_msg_handler(pmt.intern('in'), self.handle_msg)
 
     def handle_msg(self, msg):
+        """
+        This function handles the message passing operating (PMT message) from GNU Radio.
+        It converts the PMT structure to python and later to JSON to send as an event.
+        """
         pmsg = pmt.to_python(msg)
-        s = json.dumps(pmsg)
-        event_batch = self.eventhub_producer.create_batch(partition_id=self.partition_id)
-        event_batch.add(EventData(s))
+        jmsg = json.dumps(pmsg)
+        event_batch = self.eventhub_producer.create_batch(
+            partition_id=self.partition_id)
+        event_batch.add(EventData(jmsg))
         self.eventhub_producer.send_batch(event_batch)
 
     def stop(self):
         self.eventhub_producer.close()
         return True
 
-def get_eventhub_producer_client(authentication_method: str = "default",  connection_str: str = None,
-                            sas_token: str = None, eventhub_host_name: str = None, eventhub_name: str = None):
+
+def get_eventhub_producer_client(
+        authentication_method: str = "default",
+        connection_str: str = None,
+        sas_token: str = None,
+        eventhub_host_name: str = None,
+        eventhub_name: str = None):
     """ Initialize the Event Hub Producer client
 
     Args:
@@ -89,20 +105,22 @@ def get_eventhub_producer_client(authentication_method: str = "default",  connec
         EventHubProducerClient: An Event Hub producer client ready to be used
     """
     if authentication_method == "connection_string":
-        eventhub_producer_client = EventHubProducerClient.from_connection_string(connection_str,
-                                                    eventhub_name=eventhub_name)
+        eventhub_producer_client = EventHubProducerClient.from_connection_string(
+            connection_str, eventhub_name=eventhub_name)
 
     elif authentication_method == "sas_token":
         credential = AzureSasCredential(sas_token)
-        eventhub_producer_client = EventHubProducerClient(fully_qualified_namespace=eventhub_host_name,
-                                                     eventhub_name=eventhub_name,
-                                                     credential=credential)
+        eventhub_producer_client = EventHubProducerClient(
+            fully_qualified_namespace=eventhub_host_name,
+            eventhub_name=eventhub_name,
+            credential=credential)
 
     elif authentication_method == "default":
         default_credential = DefaultAzureCredential()
-        eventhub_producer_client = EventHubProducerClient(fully_qualified_namespace=eventhub_host_name,
-                                                     eventhub_name=eventhub_name,
-                                                     credential=default_credential)
+        eventhub_producer_client = EventHubProducerClient(
+            fully_qualified_namespace=eventhub_host_name,
+            eventhub_name=eventhub_name,
+            credential=default_credential)
     else:
         raise ValueError("Unsupported authentication method specified")
 

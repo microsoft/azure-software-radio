@@ -16,12 +16,12 @@ class qa_EventHubSource(gr_unittest.TestCase):
 
     # pylint: disable=invalid-name
     def setUp(self):
-        self.eventhub_connection_string = (
+        self.eventhub_consumer_connection_string = (
             "Endpoint=sb://<FQDN>/;SharedAccessKeyName=<KeyName>;SharedAccessKey=<KeyValue>"
         )
 
         self.tb = gr.top_block()
-        self.test_eventhub_name = str(uuid.uuid4())
+        self.test_consumer_eventhub_name = str(uuid.uuid4())
 
     # pylint: disable=invalid-name
     def tearDown(self):
@@ -32,10 +32,11 @@ class qa_EventHubSource(gr_unittest.TestCase):
         Ensure we don't throw errors in the constructor when given inputs with valid formats
         '''
 
-        instance = EventHubSource(authentication_method="connection_string",
-                            connection_str=self.eventhub_connection_string,
-                            eventhub_name=self.test_eventhub_name,
-                            starting_position=-1)
+        instance = EventHubSource(
+            authentication_method="connection_string",
+            connection_str=self.eventhub_consumer_connection_string,
+            eventhub_name=self.test_consumer_eventhub_name,
+            starting_position=-1)
 
         self.assertIsNotNone(instance)
 

@@ -16,12 +16,12 @@ class qa_EventHubSink(gr_unittest.TestCase):
 
     # pylint: disable=invalid-name
     def setUp(self):
-        self.eventhub_connection_string = (
+        self.eventhub_producer_connection_string = (
             "Endpoint=sb://<FQDN>/;SharedAccessKeyName=<KeyName>;SharedAccessKey=<KeyValue>"
         )
 
         self.tb = gr.top_block()
-        self.test_eventhub_name = str(uuid.uuid4())
+        self.test_producer_eventhub_name = str(uuid.uuid4())
 
     # pylint: disable=invalid-name
     def tearDown(self):
@@ -33,8 +33,8 @@ class qa_EventHubSink(gr_unittest.TestCase):
         '''
 
         instance = EventHubSink(authentication_method="connection_string",
-                            connection_str=self.eventhub_connection_string,
-                            eventhub_name=self.test_eventhub_name)
+                                connection_str=self.eventhub_producer_connection_string,
+                                eventhub_name=self.test_producer_eventhub_name)
 
         self.assertIsNotNone(instance)
 

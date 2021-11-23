@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -11,9 +12,9 @@ Integration tests for functions from eventhub_sink.py
 """
 
 import datetime
-import numpy as np
 import json
 import os
+import numpy as np
 import pmt
 
 from azure_software_radio import EventHubSink
@@ -21,13 +22,17 @@ from azure.eventhub import EventHubConsumerClient
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 
-NUM_MSGS=10
+NUM_MSGS = 10
 
-class pmt_message_generator(gr.sync_block):
+
+class PmtMessageGenerator(gr.sync_block):
+    """
+    This is a PMT Message Generating class for testing purposes
+    """
     def __init__(self, msg_list, msg_interval):
         gr.sync_block.__init__(
             self,
-            name="message generator",
+            name="PMT message generator",
             in_sig=[np.float32],
             out_sig=None
         )
@@ -36,30 +41,49 @@ class pmt_message_generator(gr.sync_block):
         self.msg_ctr = 0
         self.message_port_register_out(pmt.intern('out_port'))
 
-    def work(self, input_items, output_items):
-        inLen = len(input_items[0])
+    def work(self, input_items, _output_items):
+        in_len = len(input_items[0])
         while self.msg_ctr < len(self.msg_list) and \
                 (self.msg_ctr * self.msg_interval) < \
-                (self.nitems_read(0) + inLen):
+                (self.nitems_read(0) + in_len):
 
             msg = pmt.make_dict()
-            msg = pmt.dict_add(msg, pmt.string_to_symbol("this"), pmt.from_long(self.msg_ctr))
-            msg = pmt.dict_add(msg, pmt.string_to_symbol("is"), pmt.from_long(self.msg_ctr))
-            msg = pmt.dict_add(msg, pmt.string_to_symbol("a"), pmt.from_double(self.msg_ctr))
-            msg = pmt.dict_add(msg, pmt.string_to_symbol("test"), pmt.from_long(self.msg_ctr))
+            msg = pmt.dict_add(
+                msg,
+                pmt.string_to_symbol("this"),
+                pmt.from_long(
+                    self.msg_ctr))
+            msg = pmt.dict_add(
+                msg,
+                pmt.string_to_symbol("is"),
+                pmt.from_long(
+                    self.msg_ctr))
+            msg = pmt.dict_add(
+                msg,
+                pmt.string_to_symbol("a"),
+                pmt.from_double(
+                    self.msg_ctr))
+            msg = pmt.dict_add(
+                msg,
+                pmt.string_to_symbol("test"),
+                pmt.from_long(
+                    self.msg_ctr))
 
             self.message_port_pub(pmt.intern('out_port'),
                                   msg)
             self.msg_ctr += 1
-        return inLen
+        return in_len
+
 
 class IntegrationEventhubSink(gr_unittest.TestCase):
 
     def setUp(self):
         self.tb = gr.top_block()
 
-        self.eventhub_connection_string = os.getenv('AZURE_EVENTHUB_CONNECTION_STRING')
-        self.eventhub_consumer_group = os.getenv('AZURE_EVENTHUB_CONSUMER_GROUP')
+        self.eventhub_connection_string = os.getenv(
+            'AZURE_EVENTHUB_CONNECTION_STRING')
+        self.eventhub_consumer_group = os.getenv(
+            'AZURE_EVENTHUB_CONSUMER_GROUP')
         self.eventhub_name = os.getenv('AZURE_EVENTHUB_NAME')
         self.eventhub_consumer = EventHubConsumerClient.from_connection_string(
             conn_str=self.eventhub_connection_string,
@@ -70,9 +94,9 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
     def tearDown(self):
         self.tb = None
 
-    def on_event(self,partition_context,event):
-        s = json.loads(list(event.body)[0])
-        print('Received the event: %s'%s)
+    def on_event(self, _partition_context, event):
+        msg = json.loads(list(event.body)[0])
+        print('Received the event: %s' % msg)
         self.num_rx_msgs += 1
         if self.num_rx_msgs == NUM_MSGS:
             self.eventhub_consumer.close()
@@ -89,11 +113,12 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
         for i in range(NUM_MSGS * msg_interval):
             src_data.append(float(i))
         src = blocks.vector_source_f(src_data, False)
-        pmt_msg_gen = pmt_message_generator(msg_list, msg_interval)
+        pmt_msg_gen = PmtMessageGenerator(msg_list, msg_interval)
 
-        sink_block = EventHubSink(authentication_method="connection_string",
-                        connection_str=self.eventhub_connection_string,
-                        eventhub_name=self.eventhub_name)
+        sink_block = EventHubSink(
+            authentication_method="connection_string",
+            connection_str=self.eventhub_connection_string,
+            eventhub_name=self.eventhub_name)
 
         # Connect vector source to message gen
         self.tb.connect(src, pmt_msg_gen)
@@ -112,8 +137,10 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
 
         self.tb.run()
         with self.eventhub_consumer:
-            self.eventhub_consumer.receive(on_event=self.on_event, starting_position=test_start_time)
-        self.assertEqual(NUM_MSGS,self.num_rx_msgs)
+            self.eventhub_consumer.receive(
+                on_event=self.on_event,
+                starting_position=test_start_time)
+        self.assertEqual(NUM_MSGS, self.num_rx_msgs)
 
 
 if __name__ == '__main__':

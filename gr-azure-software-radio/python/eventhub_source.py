@@ -6,15 +6,15 @@
 # See License.txt in the project root for license information.
 #
 
+import json
+import threading
+import pmt
+
 from gnuradio import gr
 from azure.eventhub import EventHubConsumerClient
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureSasCredential
 
-import asyncio
-import pmt
-import json
-import threading
 
 class EventHubSource(gr.sync_block):
     """ Receives and converts JSON events from Azure Event Hub to GNU Radio PMT format.
@@ -38,14 +38,22 @@ class EventHubSource(gr.sync_block):
     Partition ID: The partition ID to receive events from.
     Starting Position: The position of an event in the Event Hub partition.
     """
-    def __init__(self,authentication_method: str = "default", connection_str: str = None,
-            sas_token: str = None, eventhub_host_name: str = None, eventhub_name: str = None,
-            consumer_group: str = None, partition_id: str = None, starting_position = None):
+    # pylint:  disable=too-many-arguments, no-member
+    def __init__(
+            self,
+            authentication_method: str = "default",
+            connection_str: str = None,
+            sas_token: str = None,
+            eventhub_host_name: str = None,
+            eventhub_name: str = None,
+            consumer_group: str = None,
+            partition_id: str = None,
+            starting_position=None):
 
         gr.sync_block.__init__(self,
-                        name="eventhub_source",
-                        in_sig=[],
-                        out_sig=[])
+                               name="eventhub_source",
+                               in_sig=[],
+                               out_sig=[])
         self.starting_position = starting_position
         self.partition_id = partition_id
 
@@ -57,26 +65,43 @@ class EventHubSource(gr.sync_block):
             eventhub_name=eventhub_name,
             consumer_group=consumer_group,
         )
+        
         self.message_port_register_out(pmt.intern('out'))
 
         self.rec_thread = threading.Thread(target=self.receive)
         self.rec_thread.start()
 
     def receive(self):
-        self.eventhub_consumer.receive(on_event=self.on_event, partition_id=self.partition_id, starting_position=self.starting_position)
+        """
+        Receive events from event hub given the specified partition and starting position.
+        The receive call is blocking and must be run in a dedicated thread.
+        """
+        self.eventhub_consumer.receive(
+            on_event=self.on_event,
+            partition_id=self.partition_id,
+            starting_position=self.starting_position)
 
-    def on_event(self, partition_context, event):
+    def on_event(self, _partition_context, event):
+        """
+        Convert the received JSON message to PMT. The expected Event Hub event only has one message batched.
+        """
+        # pylint: disable=no-member
         msg = json.loads(list(event.body)[0])
         pmsg = pmt.to_pmt(msg)
         self.message_port_pub(pmt.intern("out"), pmsg)
-   
+
     def stop(self):
         self.eventhub_consumer.close()
         return True
 
 
-def get_eventhub_consumer_client(authentication_method: str = "default",  connection_str: str = None,
-                            sas_token: str = None, eventhub_host_name: str = None, eventhub_name: str = None, consumer_group: str = None):
+def get_eventhub_consumer_client(
+        authentication_method: str = "default",
+        connection_str: str = None,
+        sas_token: str = None,
+        eventhub_host_name: str = None,
+        eventhub_name: str = None,
+        consumer_group: str = None):
     """ Initialize the Event Hub Consumer client
 
     Args:
@@ -98,23 +123,24 @@ def get_eventhub_consumer_client(authentication_method: str = "default",  connec
         EventHubConsumerClient: An Event Hub consumer client ready to be used
     """
     if authentication_method == "connection_string":
-        eventhub_consumer_client = EventHubConsumerClient.from_connection_string(connection_str,
-                                                    eventhub_name=eventhub_name,
-                                                    consumer_group=consumer_group)
+        eventhub_consumer_client = EventHubConsumerClient.from_connection_string(
+            connection_str, eventhub_name=eventhub_name, consumer_group=consumer_group)
 
     elif authentication_method == "sas_token":
         credential = AzureSasCredential(sas_token)
-        eventhub_consumer_client = EventHubConsumerClient(fully_qualified_namespace=eventhub_host_name,
-                                                     eventhub_name=eventhub_name,
-                                                     consumer_group=consumer_group,
-                                                     credential=credential)
+        eventhub_consumer_client = EventHubConsumerClient(
+            fully_qualified_namespace=eventhub_host_name,
+            eventhub_name=eventhub_name,
+            consumer_group=consumer_group,
+            credential=credential)
 
     elif authentication_method == "default":
         default_credential = DefaultAzureCredential()
-        eventhub_consumer_client = EventHubConsumerClient(fully_qualified_namespace=eventhub_host_name,
-                                                     eventhub_name=eventhub_name,
-                                                     consumer_group=consumer_group,
-                                                     credential=default_credential)
+        eventhub_consumer_client = EventHubConsumerClient(
+            fully_qualified_namespace=eventhub_host_name,
+            eventhub_name=eventhub_name,
+            consumer_group=consumer_group,
+            credential=default_credential)
     else:
         raise ValueError("Unsupported authentication method specified")
 
