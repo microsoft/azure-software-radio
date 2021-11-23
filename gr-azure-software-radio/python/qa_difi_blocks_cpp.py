@@ -23,8 +23,8 @@ from azure_software_radio import (difi_source_cpp_fc32, difi_source_cpp_sc8, dif
 from gnuradio import gr, gr_unittest, blocks
 
 
-
 SAMPS_PER_PACKET = 1344 // 2
+
 
 class qa_testcpp(gr_unittest.TestCase):
 
@@ -114,9 +114,9 @@ class qa_testcpp(gr_unittest.TestCase):
                          b'\xda\xce\xd9\xe9\xec%\xf7\'\x01\xea\x07\xc2\xfd\xd3\xe9\xf8\xd8\x02\xd3\xe8\xdb\xdb' \
                          b'\xe5\x02\xe2#\xdf\x02\xe3\xd5\xe4\xda\xdf\xe5\xe7\xd4\xff\xd2\x02\xe3\xea\xdb\xe1\xcd' \
                          b'\xfb\xeb\x17\x1c\x1c.\x0c \xe8\x07\xbf\xfb\xd2\x06\x1d\x06.\xf1\xec\x01\xd0,\x07\x14*'
-                             
 
     # pylint: disable=invalid-name
+
     def tearDown(self):
         pass
 
@@ -748,7 +748,7 @@ class qa_testcpp(gr_unittest.TestCase):
         tb = gr.top_block()
         oui = 0xf
         packet_class_id = 1
-        gain = 1 + 99 * np.random.random() # 1 - 100
+        gain = 1 + 99 * np.random.random()  # 1 - 100
         offset = complex(10 * np.random.random(), 10 * np.random.random())
         ran_vec = list(np.random.choice(
             [complex(x, x) for x in range(-100, 100)], size=(512)))
@@ -791,10 +791,12 @@ class qa_testcpp(gr_unittest.TestCase):
         bit_depth = 16
         full_scale = 1 << bit_depth
         gain = full_scale / (maxiq - miniq)
-        offset = complex(-1.0*((maxiq - miniq)/2.0 + miniq), -1.0*((maxiq - miniq)/2.0 + miniq))
+        offset = complex(-1.0*((maxiq - miniq)/2.0 + miniq), -
+                         1.0*((maxiq - miniq)/2.0 + miniq))
         ran_vec = []
         for i in range(512):
-            ran_vec.append(complex(np.random.random()*(maxiq-miniq) + miniq, np.random.random()*(maxiq-miniq) + miniq))
+            ran_vec.append(complex(np.random.random()*(maxiq-miniq) +
+                           miniq, np.random.random()*(maxiq-miniq) + miniq))
         expected = []
         for i in ran_vec:
             scaled = gain * (i + offset)
@@ -824,7 +826,6 @@ class qa_testcpp(gr_unittest.TestCase):
             tb_proc.kill()
             pytest.fail()
 
-
     def test_tcp_standalone_context_16(self):
         _, sink_p = get_open_ports()
         tb = gr.top_block()
@@ -850,7 +851,7 @@ class qa_testcpp(gr_unittest.TestCase):
         if socket_rec_test.exitcode != 0:
             tb_proc.kill()
             pytest.fail()
-    
+
     def test_context_packet_behavior_mode_1(self):
         source_p, sink_p = get_open_ports()
         tb = gr.top_block()
@@ -1047,6 +1048,7 @@ def socket_rec_confirm_context_correct_alt(server, socket_type, sample_rate, pac
     assert r_oui == oui
     assert r_packet_class_id == packet_class_id
 
+
 def socket_rec_pack_n(server, socket_type, pkt_n, vita_source):
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
@@ -1169,7 +1171,6 @@ def get_open_ports():
     sock1.close()
     sock2.close()
     return port1, port2
-
 
 
 def socket_send_multi_packets(server, socket_type, data, num_pkts, base_pkt_n):
