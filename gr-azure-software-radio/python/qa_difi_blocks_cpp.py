@@ -162,7 +162,7 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data_time_change[1] = (
             vita_data_time_change[1] & 0xf0) | 7  # update packet count
         send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
-                            socket.SOCK_DGRAM, vita_data_time_change))
+                                                      socket.SOCK_DGRAM, vita_data_time_change))
         socket_rec_time = Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p),
                                                                         socket.SOCK_DGRAM, 1344000000 // 2, 0))
         socket_rec_time.start()
@@ -192,7 +192,7 @@ class qa_testcpp(gr_unittest.TestCase):
         time.sleep(1)
         base_pkt_n = 6
         rec_proc = Process(target=rec_socket_multi_packet, args=(('127.0.0.1', sink_p),
-                           socket.SOCK_DGRAM, to_one, frac_base))
+                                                                 socket.SOCK_DGRAM, to_one, frac_base))
         rec_proc.start()
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         i = 0
@@ -228,7 +228,7 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data_time_change[20:28] = bytearray(frac)
         # first msg
         send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
-                            socket.SOCK_DGRAM, vita_data_time_change))
+                                                      socket.SOCK_DGRAM, vita_data_time_change))
         tb_proc = Process(target=run_tb, args=(tb,))
         tb_proc.start()
         send_proc.start()
@@ -241,7 +241,7 @@ class qa_testcpp(gr_unittest.TestCase):
         # second msg
         # send out of order packet
         send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
-                            socket.SOCK_DGRAM, vita_data_time_change))
+                                                      socket.SOCK_DGRAM, vita_data_time_change))
         # confirm time was zeroed out when out of order packet came in
         socket_rec_time = Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p),
                                                                         socket.SOCK_DGRAM, 0, 0))
@@ -252,7 +252,7 @@ class qa_testcpp(gr_unittest.TestCase):
 
         vita_data_time_change[1] = (vita_data_time_change[1] & 0xf0) | 4
         send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
-                            socket.SOCK_DGRAM, vita_data_time_change))
+                                                      socket.SOCK_DGRAM, vita_data_time_change))
         send_proc.start()
         send_proc.join()
         socket_rec_time.join()
