@@ -284,6 +284,7 @@ namespace gr {
         }
         d_send = d_behavior == context_bahavior::warnings_forward;
         GR_LOG_WARN(this->d_logger, error_string);
+        return NULL;
       }
       return pmt_dict;
     }

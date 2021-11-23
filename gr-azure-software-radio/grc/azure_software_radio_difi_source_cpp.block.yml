@@ -42,11 +42,11 @@ parameters:
   default: 0
 - id: context_behavior
   label: Context Mismatch Behavior
-  category: Context_Config
+  category: DIFI Advanced
   dtype: enum
   default: 'Default'
   options: ['0', '1', '2', '3']
-  option_labels: ['Default (Throw Exceptions)', 'Ignore Mismatches - Forward data, No Warnings', 'Throw Warnings - Forward', 'Throw Warnings - No Foward']
+  option_labels: ['Default - Throw Exceptions', 'Ignore Mismatches - Forward data, No Warnings', 'Throw Warnings - Forward', 'Throw Warnings - No Foward']
 outputs:
 -   domain: stream
     dtype: ${ type.fcn }
