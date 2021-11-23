@@ -794,8 +794,7 @@ class qa_testcpp(gr_unittest.TestCase):
         offset = complex(-1.0*((maxiq - miniq)/2.0 + miniq), - 1.0*((maxiq - miniq)/2.0 + miniq))
         ran_vec = []
         for i in range(512):
-            ran_vec.append(complex(np.random.random()*(maxiq-miniq) +
-                           miniq, np.random.random()*(maxiq-miniq) + miniq))
+            ran_vec.append(complex(np.random.random()*(maxiq-miniq) + miniq, np.random.random()*(maxiq-miniq) + miniq))
         expected = []
         for i in ran_vec:
             scaled = gain * (i + offset)
