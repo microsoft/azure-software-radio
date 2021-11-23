@@ -549,7 +549,8 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data = bytearray(self.vita_data)
         base_pkt_n = 6
         send_proc = Process(target=socket_send_multi_packets, args=(('127.0.0.1', source_p),
-                                                                    socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
+                                                                    socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1,
+                                                                    base_pkt_n))
         socket_rec_test = Process(target=socket_rec_multi_packets,
                                   args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, VITA_PKT_MOD+1))
         socket_rec_test.start()
@@ -575,7 +576,8 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data = bytearray(self.vita_data)
         base_pkt_n = 6
         send_proc = Process(target=socket_send_multi_packets, args=(('127.0.0.1', source_p),
-                                                                    socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1, base_pkt_n))
+                                                                    socket.SOCK_STREAM, vita_data, VITA_PKT_MOD+1,
+                                                                    base_pkt_n))
         socket_rec_test = Process(target=socket_rec_multi_packets,
                                   args=(('127.0.0.1', sink_p), socket.SOCK_STREAM, VITA_PKT_MOD+1))
         socket_rec_test.start()
