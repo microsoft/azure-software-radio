@@ -21,6 +21,16 @@ namespace gr {
      *  pck_n tag: Emitted when a missed packet occurs, will update the upstream blocks with the current packet number to expect and the current time stamps
      *  context tag: Emitted when a new DIFI context packet is recieved with the context packet dynamic information
      *  static_change: Emitted when the static parts of the DIFI context packet changes
+     * 
+     *  DIFI Advanced:
+     *  This tab contains more advanced settings for the DIFI block and should be used by users who know the devices and network in use. 
+     * 
+     *  Context Packet Mismatch Behavior
+     *    - Default: Throws exceptions if context packet is incorrect or non-compliant
+     *    - Ignore Mismatches - Forward data, no warnings: Entirely ignore the context packet, only forwards data
+     *    - Throw Warnings - Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but still forward DIFI data. 
+     *    - Throw Warnings - No Forward: Displays Warnings about context packet mismatch or non-compliant context packets, 
+     *                       but won't forward data until a correct context packet is received or one that does not mismatch the given settings
      * \ingroup azure_software_radio
      *
      */
@@ -38,7 +48,7 @@ namespace gr {
    *                     If stream number is -1, the stream number will be ignored, else it will be checked
    *                     against the stream number in the DIFI (VITA) packets. If they do match, the packets will be dropped.
    *  \param bit_depth The bit depth
-   *  \param context_pkt_behavior TODO fill
+   *  \param context_pkt_behavior Set the behavior of handling non-compliant context packets. 
    */
     static sptr make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, int bit_depth, int context_pkt_behavior);
 
