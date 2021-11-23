@@ -83,11 +83,16 @@ namespace gr {
         std::tuple<u_int32_t, u_int64_t> add_frac_full();
         fd_set d_fdset;
         struct timeval d_tv;
+        int d_scaling_mode;
+        float d_gain;
+        gr_complex d_offset;
+        float d_max_iq;
+        float d_min_iq;
  
      public:
       difi_sink_cpp_impl(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, uint32_t port, uint8_t socket_type, bool mode, 
                         uint32_t samples_per_packet, int stream_number, int reference_point, u_int64_t samp_rate, int packet_class, 
-                        int oui, int context_interval, int context_pack_size, int bit_depth);
+                        int oui, int context_interval, int context_pack_size, int bit_depth, int scaling, float gain, gr_complex offset, float max_iq, float min_iq);
       ~difi_sink_cpp_impl();
 
       // Where all the action really happens
