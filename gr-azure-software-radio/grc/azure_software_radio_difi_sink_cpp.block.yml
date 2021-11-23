@@ -104,7 +104,7 @@ parameters:
   label: Gain
   dtype: real
   default: 1.0
-  hide: ${ ('none' if scaling == 'Manual' else 'all') }s
+  hide: ${ ('none' if scaling == 'Manual' else 'all') }
 - id: offset
   category: Scaling
   label: Complex Offset
