@@ -31,6 +31,8 @@ class BlobSource(gr.sync_block):
     Page blobs are not supported.
 
     Args:
+    Output Type: Data type of the sample stream
+    Vector Length: Number of items per vector
     Auth Method: Determines how to authenticate to the Azure blob backend. May be one of
         "connection_string", "url_with_sas", or "default".
     Connection String: Azure storage account connection string used for
@@ -45,12 +47,14 @@ class BlobSource(gr.sync_block):
         more quickly iteratively debug authentication and permissions issues.
     """
     # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
-    def __init__(self, authentication_method: str = "default", connection_str: str = None,
-                 url: str = None, container_name: str = None, blob_name: str = None,
+    def __init__(self, np_dtype: np.dtype, vlen: int = 1, authentication_method: str = "default",
+                 connection_str: str = None, url: str = None, container_name: str = None, blob_name: str = None,
                  queue_size: int = 4, retry_total: int = 10):
         """ Initialize the blob_source block
 
         Args:
+            np_dtype (np.dtype): Numpy data type of each item in the stream
+            vlen (int): Number of items per vector
             authentication_method (str): See "Auth Method" in class docstring above
             connection_str (optional, str): See "Connection String" in class docstring above
             url (optional, str): See "URL" in class docstring above
@@ -61,14 +65,21 @@ class BlobSource(gr.sync_block):
             retry_total (int, optional): Total number of Azure API retries to allow before throwing
                 an exception
         """
+        # work-around the following deprecation in numpy:
+        # FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated
+        if vlen == 1:
+            out_sig = [np_dtype]
+        else:
+            out_sig = [(np_dtype, vlen)]
+
         gr.sync_block.__init__(self,
                                name="blob_source",
                                in_sig=None,
-                               out_sig=[np.complex64])
+                               out_sig=out_sig)
 
-        self.que = queue.Queue(maxsize=queue_size)
-        self.buf = np.zeros((0, ), dtype=np.complex64)
-        self.num_buf_items_read = 0
+        self.queue = queue.Queue(maxsize=queue_size)
+        self.buf = np.zeros((0, ), dtype=np.byte)
+        self.num_buf_bytes_read = 0
 
         self.blob_service_client = get_blob_service_client(
             authentication_method=authentication_method,
@@ -84,7 +95,7 @@ class BlobSource(gr.sync_block):
 
         self.blob_complete = False
 
-        self.itemsize = np.dtype(np.complex64).itemsize
+        self.item_size = np_dtype().itemsize*vlen
         self.chunk_residue = b''
 
         self.first_run = True
@@ -129,11 +140,10 @@ class BlobSource(gr.sync_block):
         """
 
         chunk = chunk_residue + chunk
-        num_data_items = int(np.floor(len(chunk)/self.itemsize))
+        num_data_items = int(np.floor(len(chunk)/self.item_size))
 
-        data = np.frombuffer(
-            buffer=chunk, count=num_data_items, dtype=np.complex64)
-        chunk_residue = chunk[num_data_items*self.itemsize:]
+        data = np.frombuffer(buffer=chunk, count=num_data_items*self.item_size, dtype=np.byte)
+        chunk_residue = chunk[num_data_items*self.item_size:]
 
         return data, chunk_residue
 
@@ -143,14 +153,14 @@ class BlobSource(gr.sync_block):
         Pull chunks from the blob, convert the bytes into a numpy array, and add to queue
         """
         # TODO: put this into a separate thread, see ADO #5897
-        while not self.que.full() and not self.blob_complete:
+        while not self.queue.full() and not self.blob_complete:
             try:
                 chunk = next(self.blob_iter)
                 self.log.debug(f"Retrieved {len(chunk)} bytes of data from blob storage")
                 data, self.chunk_residue = self.chunk_to_array(
                     chunk, self.chunk_residue)
                 if len(data) > 0:
-                    self.que.put(data)
+                    self.queue.put(data)
             except StopIteration:
                 self.log.debug("Reached the end of the blob")
                 self.blob_complete = True
@@ -178,29 +188,34 @@ class BlobSource(gr.sync_block):
             self.blob_iter = self.setup_blob_iterator()
             self.first_run = False
 
-        out = output_items[0]
-        noutput_items = len(out)
+        # get a view into the output buffer as a 1D array of bytes, so our code can copy over the data
+        # without caring about the actual datatype or vlen in use
+        out_view = output_items[0].view()
+        out_view.shape = (output_items[0].size,)
+        out = out_view.view(dtype=np.byte)
 
-        num_remaining_items = len(self.buf) - self.num_buf_items_read
+        noutput_items = len(output_items[0])
+
+        num_remaining_bytes = len(self.buf) - self.num_buf_bytes_read
 
         # check if we're done
-        if self.que.empty() and num_remaining_items == 0 and self.blob_complete:
+        if self.queue.empty() and num_remaining_bytes == 0 and self.blob_complete:
             shutdown_blob_service_client(self.blob_service_client)
             return -1
 
         # do we have anything to produce?
-        nitems_produced = min(num_remaining_items, noutput_items)
-
+        nitems_produced = min(int(num_remaining_bytes/self.item_size), noutput_items)
+        num_bytes_produced = nitems_produced*self.item_size
         if nitems_produced > 0:
 
-            start_ind = self.num_buf_items_read
-            stop_ind = self.num_buf_items_read+nitems_produced
+            start_ind = self.num_buf_bytes_read
+            stop_ind = self.num_buf_bytes_read+num_bytes_produced
 
-            out[:nitems_produced] = self.buf[start_ind:stop_ind]
-            self.num_buf_items_read = self.num_buf_items_read + nitems_produced
+            out[:num_bytes_produced] = self.buf[start_ind:stop_ind]
+            self.num_buf_bytes_read = self.num_buf_bytes_read + num_bytes_produced
 
         # is it time to get more data from the queue?
-        if len(self.buf) <= self.num_buf_items_read:
+        if len(self.buf) <= self.num_buf_bytes_read:
             # check for more chunks in the downloader
             # TODO: Multithread this so downloads don't block the work thread, see ADO#5897
 
@@ -210,9 +225,9 @@ class BlobSource(gr.sync_block):
                 self.download_chunk_to_queue()
 
             # if there's data to read, go get it
-            if not self.que.empty():
-                self.buf = self.que.get()
-                self.num_buf_items_read = 0
+            if not self.queue.empty():
+                self.buf = self.queue.get()
+                self.num_buf_bytes_read = 0
 
         return nitems_produced
 

@@ -115,13 +115,13 @@ parameters:
   category: Scaling
   label: Max IQ Value
   dtype: real
-  default: 0.0
+  default: 1.0
   hide: ${ ('none' if scaling == 'Min-Max' else 'all') }
 - id: min_iq
   category: Scaling
   label: Min IQ Value
   dtype: real
-  default: 0.0
+  default: -1.0
   hide: ${ ('none' if scaling == 'Min-Max' else 'all') }
 inputs:
 - label: in
