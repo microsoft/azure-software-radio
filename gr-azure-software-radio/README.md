@@ -149,7 +149,7 @@ There are two DIFI blocks (source and sink) as part of this out of tree module. 
       - Default: Throws exceptions if context packet is incorrect or non-compliant
       - Ignore Mismatches - Forward data, no warnings: Entirely ignore the context packet, only forwards data
       - Throw Warnings - Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but still forward DIFI data. 
-      - Throw Warnings - No Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but won't forward data until a correct context packet is received or one that does not mismatch the given settings
+      - Throw Warnings - No Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but won't forward data until a correct context packet is received or one that matches the given settings
 
  * DIFI Sink Block
 	The DIFI sink block forwards packets to a given IP address and port number and packets the data with the given bit depth. This block operates in two modes, standalone and paired.

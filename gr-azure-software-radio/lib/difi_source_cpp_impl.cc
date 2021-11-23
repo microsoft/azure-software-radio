@@ -286,6 +286,7 @@ namespace gr {
         GR_LOG_WARN(this->d_logger, error_string);
         return NULL;
       }
+      d_send = true;
       return pmt_dict;
     }
 
