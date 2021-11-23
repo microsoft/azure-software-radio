@@ -41,6 +41,11 @@ void bind_difi_sink_cpp_template(py::module& m, const char* classname)
            py::arg("context_interval"),
            py::arg("context_pack_size"),
            py::arg("bit_depth"),
+           py::arg("scaling"),
+           py::arg("gain"),
+           py::arg("offset"),
+           py::arg("max_iq"),
+           py::arg("min_iq"),
            D(difi_sink_cpp,make)
         );
 

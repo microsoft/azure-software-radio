@@ -49,6 +49,7 @@ jobs:
           export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test;
         shell: bash
       - name: pylint
+        continue-on-error: false
         run: |
           export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};
           cd ..
