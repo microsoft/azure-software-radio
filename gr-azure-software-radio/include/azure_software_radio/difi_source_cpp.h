@@ -30,7 +30,7 @@ namespace gr {
      *    - Ignore Mismatches - Forward data, no warnings: Entirely ignore the context packet, only forwards data
      *    - Throw Warnings - Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but still forward DIFI data. 
      *    - Throw Warnings - No Forward: Displays Warnings about context packet mismatch or non-compliant context packets, 
-     *                       but won't forward data until a correct context packet is received or one that does not mismatch the given settings
+     *                       but won't forward data until a correct context packet is received or one that matches the given settings
      * \ingroup azure_software_radio
      *
      */
