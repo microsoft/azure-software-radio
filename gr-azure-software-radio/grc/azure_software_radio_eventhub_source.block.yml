@@ -4,13 +4,13 @@
 #
 
 
-id: azure_software_radio_eventhub_sink
-label: Event Hub Sink
+id: azure_software_radio_eventhub_source
+label: Event Hub Source
 category: '[Azure software radio]'
 
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.EventHubSink(${authentication_method}, ${connection_str}, ${sas}, ${eventhub_host_name}, ${eventhub_name}, ${partition_id})
+  make: azure_software_radio.EventHubSource(${authentication_method}, ${connection_str}, ${sas}, ${eventhub_host_name}, ${eventhub_name}, ${consumer_grp}, ${partition_id}, ${starting_position})
 
 parameters:
 - id: authentication_method
@@ -37,14 +37,22 @@ parameters:
   label: Event Hub Name
   dtype: string
   default: ''
+- id: consumer_grp
+  label: Consumer Group
+  dtype: string
+  default: ''
 - id: partition_id
   label: Partition ID
   dtype: raw
   default: '0'
+- id: starting_position
+  label: Starting Position
+  dtype: raw
+  default: '-1'
 
-inputs:
+outputs:
 -   domain: message
-    id: in
+    id: out
     optional: true
 
 

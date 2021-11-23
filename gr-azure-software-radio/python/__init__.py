@@ -34,4 +34,4 @@ from .blob_sink import BlobSink
 from .blob_source import BlobSource
 from . import blob_common
 from .eventhub_sink import EventHubSink
-#from .eventhub_source import EventHubSource
+from .eventhub_source import EventHubSource

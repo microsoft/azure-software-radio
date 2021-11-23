@@ -20,11 +20,10 @@ from azure_software_radio import EventHubSink
 from azure.eventhub import EventHubConsumerClient
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from multiprocessing import Process
 
 NUM_MSGS=10
 
-class message_generator(gr.sync_block):
+class pmt_message_generator(gr.sync_block):
     def __init__(self, msg_list, msg_interval):
         gr.sync_block.__init__(
             self,
@@ -90,7 +89,7 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
         for i in range(NUM_MSGS * msg_interval):
             src_data.append(float(i))
         src = blocks.vector_source_f(src_data, False)
-        pmt_msg_gen = message_generator(msg_list, msg_interval)
+        pmt_msg_gen = pmt_message_generator(msg_list, msg_interval)
 
         sink_block = EventHubSink(authentication_method="connection_string",
                         connection_str=self.eventhub_connection_string,

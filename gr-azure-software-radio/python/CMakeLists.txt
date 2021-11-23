@@ -48,8 +48,8 @@ GR_PYTHON_INSTALL(
     blob_source.py
     blob_qa_common.py
     blob_common.py
-    eventhub_sink.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
-    #eventhub_source.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
+    eventhub_sink.py
+    eventhub_source.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
 )
 ########################################################################
 GR_PYTHON_INSTALL(
