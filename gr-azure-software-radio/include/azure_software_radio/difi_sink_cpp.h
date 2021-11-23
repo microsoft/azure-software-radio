@@ -46,10 +46,15 @@ namespace gr {
         \param context_interval the number of data packets to send before sending the next context packet
         \param context_pack_size The size of the context packet, either 72 or 108 (Which are supported by MS Spec)
         \param bit_depth The bit depth
-        
+        \param scaling The scaling mode
+        \param gain In manual scaling mode, gain applied to signal
+        \param offset In manual scaling mode, complex offset added to signal
+        \param max_iq In Min-Max scaling mode, expectd maximum value of I or Q ie. Max(Max(I),Max(Q))
+        \param min_iq In Min-Max scaling mode, expectd minimum value of I or Q ie. Min(Min(I),Min(Q))
        */
       static sptr make(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, uint32_t port, uint8_t socket_type, bool mode, uint32_t samples_per_packet, 
-                      int stream_number, int reference_point, u_int64_t samp_rate, int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth);
+                      int stream_number, int reference_point, u_int64_t samp_rate, int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth, 
+                      int scaling, float gain, gr_complex offset, float max_iq, float min_iq);
     };
     typedef difi_sink_cpp<gr_complex> difi_sink_cpp_fc32;
     typedef difi_sink_cpp<std::complex<char>> difi_sink_cpp_sc8;

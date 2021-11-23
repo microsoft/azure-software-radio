@@ -5,12 +5,18 @@
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
 #
+# pylint: disable=no-member
+#
 
 import queue
 import uuid
-import numpy as np
+
+import azure.core.exceptions as az_exceptions
 from gnuradio import gr
-from azure_software_radio.blob_common import get_blob_service_client
+import numpy as np
+
+from azure_software_radio.blob_common import blob_container_info_is_valid, get_blob_service_client
+from azure_software_radio.blob_common import shutdown_blob_service_client
 
 
 class BlobSink(gr.sync_block):
@@ -25,7 +31,7 @@ class BlobSink(gr.sync_block):
     and append blobs are not supported.
 
     Args:
-    Auth Method: Determines how to authenticate to the Azue blob backend. May be one of
+    Auth Method: Determines how to authenticate to the Azure blob backend. May be one of
         "connection_string", "url_with_sas", or "default".
     Connection String: Azure storage account connection string used for
         authentication if Auth Method is "connection_string".
@@ -38,13 +44,15 @@ class BlobSink(gr.sync_block):
     Blob Block Length: How many items to write out at once to a block in the blob. Note that
         block sizes where block_len*itemsize is greater than 4MiB will enable the use of
         high throughput block transfers. Must be an integer number of items.
+    Retry Total: Total number of Azure API retries to allow before throwing an exception. Higher
+        numbers make the block more resilient to intermittent failures, lower numbers help to
+        more quickly iteratively debug authentication and permissions issues.
     """
     # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
 
     def __init__(self, authentication_method: str = "default", connection_str: str = None,
                  url: str = None, container_name: str = None, blob_name: str = None,
-                 block_len: int = 500000, queue_size: int = 4):
-        # pylint: disable=no-member
+                 block_len: int = 500000, queue_size: int = 4, retry_total: int = 10):
         """ Initialize the blob_sink block
 
         Args:
@@ -56,6 +64,8 @@ class BlobSink(gr.sync_block):
             block_len (int): See "Blob Block Length" in class docstring above
             queue_size (int, optional): Defaults to 4. How many blocks of data to
                 buffer up before blocking. Larger numbers require more memory overhead
+            retry_total (int, optional): Total number of Azure API retries to allow before throwing
+                an exception
         """
         gr.sync_block.__init__(self,
                                name="blob_sink",
@@ -65,7 +75,8 @@ class BlobSink(gr.sync_block):
         self.blob_service_client = get_blob_service_client(
             authentication_method=authentication_method,
             connection_str=connection_str,
-            url=url
+            url=url,
+            retry_total=retry_total
         )
 
         self.block_len = block_len
@@ -78,7 +89,8 @@ class BlobSink(gr.sync_block):
 
         self.block_id_list = []
 
-        self.blocks_per_commit = 2
+        self.first_run = True
+        self.blob_is_valid = False
 
         self.log = gr.logger("log_debug")
 
@@ -108,6 +120,17 @@ class BlobSink(gr.sync_block):
             # TODO: Use structured logging, see ADO#7767
             self.log.debug("Upload complete")
 
+    def create_blob(self):
+        """
+        Explicitly create the blob so we can catch errors
+        """
+        try:
+            self.blob_client.commit_block_list(block_list=[])
+        except az_exceptions.HttpResponseError as err:
+            self.log.error("Blob sink failed when attempting to create the blob file")
+            self.log.error(f"{err}")
+            raise err
+
     def work(self, input_items, _):
         # pylint: disable=fixme
         """ Buffer up items for upload to blob storage.
@@ -122,6 +145,16 @@ class BlobSink(gr.sync_block):
         Returns:
             int: Number of items consumed in this work call
         """
+
+        # connect to the blob service the first time we run
+        if self.first_run:
+            self.blob_is_valid = blob_container_info_is_valid(
+                blob_service_client=self.blob_service_client,
+                container_name=self.blob_client.container_name)
+
+            self.create_blob()
+
+            self.first_run = False
 
         in0 = input_items[0]
 
@@ -154,15 +187,18 @@ class BlobSink(gr.sync_block):
     def stop(self):
         """ Cleanly shut down everything
         """
-        self.log.info(
-            "Uploading the remaining items in the buffer and shutting down")
 
-        if self.num_buf_items > 0:
-            self.que.put(self.buf[:self.num_buf_items], block=True)
-        self.upload_queue_contents()
+        if self.blob_is_valid:
+            self.log.info("Uploading the remaining items in the buffer and shutting down")
 
-        self.log.debug(f"Commiting {len(self.block_id_list)} block IDs")
-        self.blob_client.commit_block_list(block_list=self.block_id_list)
-        self.blob_service_client.close()
+            if self.num_buf_items > 0:
+                self.q.put(self.buf[:self.num_buf_items], block=True)
+            self.upload_queue_contents()
+
+            self.log.debug("Commiting {} block IDs".format(len(self.block_id_list)))
+
+            self.blob_client.commit_block_list(block_list=self.block_id_list)
+
+        shutdown_blob_service_client(self.blob_service_client)
 
         return True

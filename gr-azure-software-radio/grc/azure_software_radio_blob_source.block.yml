@@ -9,7 +9,13 @@ category: '[Azure software radio]'
 
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.BlobSource(${authentication_method}, ${connection_str}, ${url}, ${container_name}, ${blob_name})
+  make: azure_software_radio.blob_source(${authentication_method},
+                                         ${connection_str},
+                                         ${url},
+                                         ${container_name},
+                                         ${blob_name},
+                                         ${queue_size},
+                                         ${retry_total})
 
 parameters:
 - id: authentication_method
@@ -21,12 +27,12 @@ parameters:
   label: Connection String
   dtype: string
   default: ''
-  hide: ${'all' if authentication_method != 'connection_string' else 'part'}
+  hide: ${'all' if authentication_method != 'connection_string' else 'none'}
 - id: url
   label: URL
   dtype: string
-  default: '' 
-  hide: ${'all' if authentication_method == 'connection_string' else 'part'}
+  default: ''
+  hide: ${'all' if authentication_method == 'connection_string' else 'none'}
 - id: container_name
   label: Container Name
   dtype: string
@@ -35,6 +41,15 @@ parameters:
   label: Blob Name
   dtype: string
   default: ''
+- id: queue_size
+  label: Queue size
+  dtype: int
+  default: 4
+  hide: 'all'
+- id: retry_total
+  label: Retry Total
+  dtype: int
+  default: 10
 
 outputs:
 - label: out

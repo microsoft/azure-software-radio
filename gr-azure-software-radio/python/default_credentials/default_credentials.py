@@ -9,8 +9,8 @@ from azure.identity import DefaultAzureCredential
 
 
 def get_DefaultAzureCredential(enable_cli_credential, enable_environment, enable_managed_identity,
-                      enable_powershell, enable_visual_studio_code, enable_shared_token_cache,
-                      enable_interactive_browser, cred_authority='login.microsoftonline.com'):
+                               enable_powershell, enable_visual_studio_code, enable_shared_token_cache,
+                               enable_interactive_browser, cred_authority='login.microsoftonline.com'):
     """
     Returns DefaultAzureCredential
     Args:

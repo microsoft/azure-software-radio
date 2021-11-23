@@ -4,7 +4,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
-#
 
 """
 Integration tests for functions from blob_sink.py
@@ -12,10 +11,13 @@ Integration tests for functions from blob_sink.py
 
 import os
 import uuid
+
+import azure.core.exceptions as az_exceptions
 from azure.storage.blob import BlobServiceClient
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import numpy as np
+
 from azure_software_radio import BlobSink
 
 
@@ -62,11 +64,11 @@ class IntegrationBlobSink(gr_unittest.TestCase):
         src = blocks.vector_source_c(src_data)
 
         op_block = BlobSink(authentication_method="connection_string",
-                             connection_str=self.blob_connection_string,
-                             container_name=self.test_blob_container_name,
-                             blob_name=blob_name,
-                             block_len=block_len,
-                             queue_size=4)
+                            connection_str=self.blob_connection_string,
+                            container_name=self.test_blob_container_name,
+                            blob_name=blob_name,
+                            block_len=block_len,
+                            queue_size=4)
 
         self.top_block.connect(src, op_block)
         self.top_block.run()
@@ -81,6 +83,28 @@ class IntegrationBlobSink(gr_unittest.TestCase):
 
         self.assertEqual(src_data.tolist(), result_data.tolist())
 
+    def test_write_to_read_only_container(self):
+        """
+        Confirm we get the failure we expect when trying to write a blob to a container where we do not have
+        write access
+        """
+
+        url = os.getenv('AZURE_STORAGE_URL')
+        read_only_sas = os.getenv('AZURE_STORAGE_READONLY_SAS')
+
+        blob_name = 'test-blob.npy'
+        block_len = 500
+
+        op_block = BlobSink(authentication_method="url_with_sas",
+                            url=url + '/' + read_only_sas,
+                            container_name=self.test_blob_container_name,
+                            blob_name=blob_name,
+                            block_len=block_len,
+                            queue_size=4,
+                            retry_total=0)
+
+        with self.assertRaises(az_exceptions.HttpResponseError):
+            op_block.create_blob()
 
 if __name__ == '__main__':
     gr_unittest.run(IntegrationBlobSink)

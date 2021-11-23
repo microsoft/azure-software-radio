@@ -6,10 +6,9 @@
 id: azure_software_radio_difi_source_cpp
 label: DIFI Source
 category: '[Azure software radio]'
-
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${protocol}, ${stream_num}, ${socket_buffer_size}, int(${bit_depth}), int(${context_behavior}))
+  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${protocol}, ${stream_num}, int(${bit_depth}), int(${context_behavior}))
 
 parameters:
 - id: type
@@ -37,10 +36,6 @@ parameters:
   options: ['1', '2']
   option_labels: ['TCP', 'UDP']
   default: '2'
-- id: socket_buffer_size
-  label: Socket Buffer Size
-  dtype: int
-  default: 4096
 - id: stream_num
   label: DIFI Stream Number
   dtype: int
