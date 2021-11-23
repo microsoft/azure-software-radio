@@ -97,11 +97,11 @@ private:
     void reset_tcp_connection();
     typedef enum
     {
-        throw_exe,
-        ignore,
-        warnings_forward,
-        warnings_no_forward
-    }context_bahavior;
+        throw_exe = 0,
+        ignore = 1,
+        warnings_forward = 2,
+        warnings_no_forward = 3
+    }context_behavior;
 
     int tcp_readall(int8_t* buf,int len);
     bool is_tcp_socket_ready();

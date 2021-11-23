@@ -184,7 +184,7 @@ namespace gr {
       }
       else
       {
-        d_context = d_behavior == context_bahavior::ignore ? NULL : make_context_dict(header, size_gotten);
+        d_context = d_behavior == context_behavior::ignore ? NULL : make_context_dict(header, size_gotten);
         return d_send ? buffer_and_send(out, noutput_items) : 0;
       }
     }
@@ -278,11 +278,11 @@ namespace gr {
         std::string error_string = r_bit_depth != d_unpack_idx_size * 8 ? 
                                     "The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string(r_bit_depth) : 
                                     "The context packet size is not 108 bits per DIFI spec. The context packet recieved size is: " + std::to_string(size_gotten);
-        if (d_behavior == context_bahavior::throw_exe){
+        if (d_behavior == context_behavior::throw_exe){
             GR_LOG_ERROR(this->d_logger, error_string);
             throw std::runtime_error(error_string);
         }
-        d_send = d_behavior == context_bahavior::warnings_forward;
+        d_send = d_behavior == context_behavior::warnings_forward;
         GR_LOG_WARN(this->d_logger, error_string);
         return NULL;
       }
