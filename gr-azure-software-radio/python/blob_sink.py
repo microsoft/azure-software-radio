@@ -14,6 +14,7 @@ import uuid
 import azure.core.exceptions as az_exceptions
 from gnuradio import gr
 import numpy as np
+import urllib3.exceptions
 
 from azure_software_radio.blob_common import blob_container_info_is_valid, get_blob_service_client
 from azure_software_radio.blob_common import shutdown_blob_service_client
@@ -31,6 +32,8 @@ class BlobSink(gr.sync_block):
     and append blobs are not supported.
 
     Args:
+    Input Type: Data type of the sample stream
+    Vector Length: Number of items per vector
     Auth Method: Determines how to authenticate to the Azure blob backend. May be one of
         "connection_string", "url_with_sas", or "default".
     Connection String: Azure storage account connection string used for
@@ -49,13 +52,14 @@ class BlobSink(gr.sync_block):
         more quickly iteratively debug authentication and permissions issues.
     """
     # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
-
-    def __init__(self, authentication_method: str = "default", connection_str: str = None,
-                 url: str = None, container_name: str = None, blob_name: str = None,
+    def __init__(self, np_dtype: np.dtype, vlen: int = 1, authentication_method: str = "default",
+                 connection_str: str = None, url: str = None, container_name: str = None, blob_name: str = None,
                  block_len: int = 500000, queue_size: int = 4, retry_total: int = 10):
         """ Initialize the blob_sink block
 
         Args:
+            np_dtype (np.dtype class): Numpy data type of each item in the stream
+            vlen (int): Number of items per vector
             authentication_method (str): See "Auth Method" in class docstring above
             connection_str (optional, str): See "Connection String" in class docstring above
             url (optional, str): See "URL" in class docstring above
@@ -67,9 +71,16 @@ class BlobSink(gr.sync_block):
             retry_total (int, optional): Total number of Azure API retries to allow before throwing
                 an exception
         """
+        # work-around the following deprecation in numpy:
+        # FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated
+        if vlen == 1:
+            in_sig = [np_dtype]
+        else:
+            in_sig = [(np_dtype, vlen)]
+
         gr.sync_block.__init__(self,
                                name="blob_sink",
-                               in_sig=[np.complex64],
+                               in_sig=in_sig,
                                out_sig=[])
 
         self.blob_service_client = get_blob_service_client(
@@ -79,11 +90,11 @@ class BlobSink(gr.sync_block):
             retry_total=retry_total
         )
 
+        self.item_size = np_dtype().itemsize*vlen
         self.block_len = block_len
-        self.que = queue.Queue(maxsize=queue_size)
-        self.buf = np.zeros((self.block_len, ), dtype=np.complex64)
-        self.num_buf_items = 0
-
+        self.queue = queue.Queue(maxsize=queue_size)
+        self.buf = np.zeros((self.block_len*self.item_size, ), dtype=np.byte)
+        self.num_buf_bytes = 0
         self.blob_client = self.blob_service_client.get_blob_client(container=container_name,
                                                                     blob=blob_name)
 
@@ -94,6 +105,20 @@ class BlobSink(gr.sync_block):
 
         self.log = gr.logger("log_debug")
 
+    def stage_block(self, data: np.array):
+        # pylint: disable=fixme
+        """ Stage a block to blob storage and generate a UUID to use as a block ID
+        """
+        # TODO: Use structured logging, see ADO#7767
+        self.log.debug(f"Beginning upload of {len(data)} bytes")
+
+        block_id = str(uuid.uuid4())
+        self.blob_client.stage_block(block_id=block_id,
+                                     data=data.tobytes(),
+                                     length=len(data))
+
+        return block_id
+
     def upload_queue_contents(self):
         # pylint: disable=fixme
         """
@@ -101,18 +126,11 @@ class BlobSink(gr.sync_block):
         current blob
         """
         # TODO: put this into a separate thread, see ADO #5897
-        while not self.que.empty():
+        while not self.queue.empty():
 
-            data = self.que.get()
-            data_len = len(data)*np.dtype(np.complex64).itemsize
+            data = self.queue.get()
 
-            # TODO: Use structured logging
-            self.log.debug(f"Beginning upload of {data_len} bytes")
-
-            block_id = str(uuid.uuid4())
-            self.blob_client.stage_block(block_id=block_id,
-                                         data=data.tobytes(),
-                                         length=data_len)
+            block_id = self.stage_block(data)
 
             # track block IDs so we can commit the list later
             self.block_id_list.append(block_id)
@@ -126,7 +144,7 @@ class BlobSink(gr.sync_block):
         """
         try:
             self.blob_client.commit_block_list(block_list=[])
-        except az_exceptions.HttpResponseError as err:
+        except (az_exceptions.HttpResponseError, urllib3.exceptions.LocationParseError) as err:
             self.log.error("Blob sink failed when attempting to create the blob file")
             self.log.error(f"{err}")
             raise err
@@ -156,25 +174,26 @@ class BlobSink(gr.sync_block):
 
             self.first_run = False
 
-        in0 = input_items[0]
+        # get a view into the input buffer as a 1D array of bytes, so our code can copy over the data
+        # without caring about the actual datatype or vlen in use
+        in0 = input_items[0].reshape((input_items[0].size,)).view(dtype=np.byte)
 
-        # figure out how many items we're going to copy into the temp item buffer this
+        # figure out how many bytes we're going to copy into the temp item buffer this
         # work call
-        num_copy_items = min([self.block_len-self.num_buf_items,
+        num_copy_bytes = min([self.block_len*self.item_size-self.num_buf_bytes,
                               len(in0)])
 
-        self.buf[self.num_buf_items:self.num_buf_items +
-                 num_copy_items] = in0[:num_copy_items]
-        self.num_buf_items = self.num_buf_items + num_copy_items
+        self.buf[self.num_buf_bytes:self.num_buf_bytes + num_copy_bytes] = in0[:num_copy_bytes]
+        self.num_buf_bytes = self.num_buf_bytes + num_copy_bytes
 
-        if self.num_buf_items == self.block_len:
+        if self.num_buf_bytes == self.block_len*self.item_size:
             try:
-                self.que.put(self.buf, block=False)
+                self.queue.put(self.buf, block=False)
 
                 # get fresh memory for the buffer so we don't corrupt the data we've put into the
                 # upload queue
-                self.buf = np.zeros((self.block_len, ), dtype=np.complex64)
-                self.num_buf_items = 0
+                self.buf = np.zeros((self.block_len*self.item_size, ), dtype=np.byte)
+                self.num_buf_bytes = 0
             except queue.Full:
                 self.log.debug(
                     "The upload queue is full, will try to requeue in the next work call")
@@ -182,7 +201,7 @@ class BlobSink(gr.sync_block):
             # TODO: Make this step multithreaded so uploads don't block the work call, see ADO #5897
             self.upload_queue_contents()
 
-        return num_copy_items
+        return int(num_copy_bytes/self.item_size)
 
     def stop(self):
         """ Cleanly shut down everything
@@ -191,8 +210,8 @@ class BlobSink(gr.sync_block):
         if self.blob_is_valid:
             self.log.info("Uploading the remaining items in the buffer and shutting down")
 
-            if self.num_buf_items > 0:
-                self.q.put(self.buf[:self.num_buf_items], block=True)
+            if self.num_buf_bytes > 0:
+                self.queue.put(self.buf[:self.num_buf_bytes], block=True)
             self.upload_queue_contents()
 
             self.log.debug("Commiting {} block IDs".format(len(self.block_id_list)))

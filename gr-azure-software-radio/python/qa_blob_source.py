@@ -26,8 +26,8 @@ class qa_BlobSource(gr_unittest.TestCase):
             "DefaultEndpointsProtocol=https;AccountName=accountname;AccountKey=accountkey;"
             + "EndpointSuffix=core.windows.net"
         )
-        self.tb = gr.top_block()
         self.test_blob_container_name = str(uuid.uuid4())
+        self.tb = gr.top_block(catch_exceptions=False)
 
     # pylint: disable=invalid-name
     def tearDown(self):
@@ -38,7 +38,9 @@ class qa_BlobSource(gr_unittest.TestCase):
         Ensure we don't throw errors in the constructor when given inputs with valid formats
         '''
 
-        instance = BlobSource(authentication_method="connection_string",
+        instance = BlobSource(np_dtype=np.complex64,
+                              vlen=1,
+                              authentication_method="connection_string",
                               connection_str=self.blob_connection_string,
                               container_name=self.test_blob_container_name,
                               blob_name='test-instance',
@@ -58,7 +60,9 @@ class qa_BlobSource(gr_unittest.TestCase):
 
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
-        op = BlobSource(authentication_method="connection_string",
+        op = BlobSource(np_dtype=np.complex64,
+                        vlen=1,
+                        authentication_method="connection_string",
                         connection_str=self.blob_connection_string,
                         container_name=self.test_blob_container_name,
                         blob_name=blob_name,
@@ -70,7 +74,7 @@ class qa_BlobSource(gr_unittest.TestCase):
         data, chunk_residue = op.chunk_to_array(chunk=chunk, chunk_residue=b'')
 
         # check data - it should include all samples except the last one
-        self.assertEqual(data.tolist(), src_data[:-1].tolist())
+        self.assertEqual(data.tobytes(), src_data[:-1].tobytes())
         # the chunk residue should be the first 6 bytes of the last sample
         self.assertEqual(chunk_residue, src_data_bytes[-8:-2])
 
@@ -84,12 +88,15 @@ class qa_BlobSource(gr_unittest.TestCase):
 
         src_data = np.arange(0, num_samples, 1, dtype=np.complex64)
 
-        op = BlobSource(authentication_method="connection_string",
+        op = BlobSource(np_dtype=np.complex64,
+                        vlen=1,
+                        authentication_method="connection_string",
                         connection_str=self.blob_connection_string,
                         container_name=self.test_blob_container_name,
                         blob_name=blob_name,
                         queue_size=4,
                         retry_total=0)
+
 
         src_data_bytes = src_data.tobytes()
         # don't send the first 2 bytes of the first sample
@@ -99,7 +106,7 @@ class qa_BlobSource(gr_unittest.TestCase):
         data, chunk_residue = op.chunk_to_array(chunk=chunk, chunk_residue=chunk_residue_in)
 
         # check data - it should include all samples with nothing left in the residue
-        self.assertEqual(data.tolist(), src_data.tolist())
+        self.assertEqual(data.tobytes(), src_data.tobytes())
         self.assertEqual(len(chunk_residue), 0)
 
     @patch.object(BlobSource, 'blob_auth_and_container_info_is_valid', return_value=True)
@@ -121,7 +128,9 @@ class qa_BlobSource(gr_unittest.TestCase):
             # add in a list of chunks we want to pretend the blob API gave us
             mock_iter.return_value = iter([src_data.tobytes()])
 
-            op = BlobSource(authentication_method="connection_string",
+            op = BlobSource(np_dtype=np.complex64,
+                            vlen=1,
+                            authentication_method="connection_string",
                             connection_str=self.blob_connection_string,
                             container_name=self.test_blob_container_name,
                             blob_name=blob_name,
