@@ -9,7 +9,6 @@
 # See License.txt in the project root for license information.
 #
 
-import sys
 import math
 import random
 import socket
