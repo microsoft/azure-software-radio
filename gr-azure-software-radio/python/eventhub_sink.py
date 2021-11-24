@@ -50,7 +50,10 @@ class EventHubSink(gr.sync_block):
                                in_sig=[],
                                out_sig=[])
 
-        self.partition_id = partition_id
+        if partition_id:
+            self.partition_id = partition_id
+        else:
+            self.partition_id = None
 
         self.eventhub_producer = get_eventhub_producer_client(
             authentication_method=authentication_method,

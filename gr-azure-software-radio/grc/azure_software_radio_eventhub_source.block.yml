@@ -43,12 +43,12 @@ parameters:
   default: ''
 - id: partition_id
   label: Partition ID
-  dtype: raw
-  default: '0'
+  dtype: string
+  default: ''
 - id: starting_position
   label: Starting Position
   dtype: raw
-  default: '-1'
+  default: '@latest'
 
 outputs:
 -   domain: message

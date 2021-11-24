@@ -54,8 +54,12 @@ class EventHubSource(gr.sync_block):
                                name="eventhub_source",
                                in_sig=[],
                                out_sig=[])
+
         self.starting_position = starting_position
-        self.partition_id = partition_id
+        if partition_id:
+            self.partition_id = partition_id
+        else:
+            self.partition_id = None
 
         self.eventhub_consumer = get_eventhub_consumer_client(
             authentication_method=authentication_method,
@@ -92,6 +96,7 @@ class EventHubSource(gr.sync_block):
 
     def stop(self):
         self.eventhub_consumer.close()
+        self.rec_thread.join()
         return True
 
 

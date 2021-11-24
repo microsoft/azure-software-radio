@@ -39,8 +39,8 @@ parameters:
   default: ''
 - id: partition_id
   label: Partition ID
-  dtype: raw
-  default: '0'
+  dtype: string
+  default: ''
 
 inputs:
 -   domain: message

@@ -104,9 +104,7 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
     def test_round_trip_data_through_eventhub(self):
         test_start_time = datetime.datetime.utcnow()
         msg_interval = 1000
-        msg_list = []
-        for i in range(NUM_MSGS):
-            msg_list.append(pmt.from_long(i))
+        msg_list = [pmt.from_long(i) for i in range(NUM_MSGS)]
 
         # Create dummy data to trigger messages
         src_data = []

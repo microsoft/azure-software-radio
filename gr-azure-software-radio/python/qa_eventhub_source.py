@@ -36,7 +36,8 @@ class qa_EventHubSource(gr_unittest.TestCase):
             authentication_method="connection_string",
             connection_str=self.eventhub_consumer_connection_string,
             eventhub_name=self.test_consumer_eventhub_name,
-            starting_position=-1)
+            consumer_group="$Default",
+            starting_position="@latest")
 
         self.assertIsNotNone(instance)
 
