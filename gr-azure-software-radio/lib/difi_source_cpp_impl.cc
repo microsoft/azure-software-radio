@@ -49,20 +49,22 @@ namespace gr {
     }
 
     template <class T>
-    typename difi_source_cpp<T>::sptr difi_source_cpp<T>::make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, int bit_depth)
+    typename difi_source_cpp<T>::sptr difi_source_cpp<T>::make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, int bit_depth, int context_pkt_behavior)
     {
-      return gnuradio::make_block_sptr<difi_source_cpp_impl<T>>(ip_addr, port, socket_type, stream_number, bit_depth);
+      return gnuradio::make_block_sptr<difi_source_cpp_impl<T>>(ip_addr, port, socket_type, stream_number, bit_depth, context_pkt_behavior);
     }
 
     template <class T>
-    difi_source_cpp_impl<T>::difi_source_cpp_impl(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, int bit_depth)
+    difi_source_cpp_impl<T>::difi_source_cpp_impl(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, int bit_depth, int context_pkt_behavior)
         : gr::sync_block("source_cpp", gr::io_signature::make(0, 0, 0),
                          gr::io_signature::make(1 /* min outputs */,
                                                 1 /*max outputs */,
                                                 sizeof(T))),
           d_ip_addr(ip_addr),
           d_port(port),
-          d_stream_number(stream_number)
+          d_stream_number(stream_number),
+          d_behavior(context_pkt_behavior),
+          d_send(true)
 
     {
       d_tv.tv_sec = 0;
@@ -141,6 +143,7 @@ namespace gr {
       {
         GR_LOG_WARN(this->d_logger, "got a packet which is not divisible by the number bytes per sample, samples will be lost. Check your bit depth configuration.");
       }
+
       header_data header;
       parse_header(header);
       if (d_stream_number != -1 and header.stream_num != d_stream_number)
@@ -157,7 +160,8 @@ namespace gr {
       {
         this->add_item_tag(0, this->nitems_written(0), pmt::intern("pck_n"), make_pkt_n_dict(header.pkt_n, size_gotten));
       }
-      if (header.type == 1) // one is a data packet (see DIFI spec)
+
+      if (header.type == 1 and d_send) // one is a data packet (see DIFI spec)
       {
         uint32_t items_written = 0;
         int out_items = std::min((size_gotten - static_cast<int>(difi::DATA_START_IDX)) / 2, noutput_items);
@@ -180,8 +184,8 @@ namespace gr {
       }
       else
       {
-        d_context = make_context_dict(header, size_gotten);
-        return buffer_and_send(out, noutput_items);
+        d_context = d_behavior == context_behavior::ignore ? NULL : make_context_dict(header, size_gotten);
+        return d_send ? buffer_and_send(out, noutput_items) : 0;
       }
     }
 
@@ -245,7 +249,7 @@ namespace gr {
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("data_packet_payload_format"), pmt::from_uint64(context.payload_format));
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("raw"), pmt::init_s8vector(size_gotten, &d_packet_buffer[0]));
       }
-      else
+      else if (size_gotten == 108)
       {
         unpack_context(context);
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("header"), pmt::from_long(header.header));
@@ -268,11 +272,21 @@ namespace gr {
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("data_packet_payload_format"), pmt::from_uint64(context.payload_format));
         pmt_dict = pmt::dict_add(pmt_dict, pmt::intern("raw"), pmt::init_s8vector(size_gotten, &d_packet_buffer[0]));
       }
-      if ((context.payload_format >> 32 & 0x0000001f) + 1 != d_unpack_idx_size * 8)
+      auto r_bit_depth = (context.payload_format >> 32 & 0x0000001f) + 1;
+      if (r_bit_depth != d_unpack_idx_size * 8 or (size_gotten != 108 and size_gotten != 72))
       {
-        GR_LOG_ERROR(this->d_logger, "The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
-        throw std::runtime_error("The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string((context.payload_format >> 32 & 0x0000001f) + 1));
+        std::string error_string = r_bit_depth != d_unpack_idx_size * 8 ? 
+                                    "The context packet bit depth does not match the input bit depth, check your configuration.\nContext packet bit depth is: " + std::to_string(r_bit_depth) : 
+                                    "The context packet size is not 108 bits per DIFI spec. The context packet recieved size is: " + std::to_string(size_gotten);
+        if (d_behavior == context_behavior::throw_exe){
+            GR_LOG_ERROR(this->d_logger, error_string);
+            throw std::runtime_error(error_string);
+        }
+        d_send = d_behavior == context_behavior::warnings_forward;
+        GR_LOG_WARN(this->d_logger, error_string);
+        return NULL;
       }
+      d_send = true;
       return pmt_dict;
     }
 

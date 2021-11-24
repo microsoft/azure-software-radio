@@ -95,10 +95,16 @@ private:
     void create_udp_socket();
     void create_tcp_socket();
     void reset_tcp_connection();
-    int recv_tcp_packet();
+    typedef enum
+    {
+        throw_exe = 0,
+        ignore = 1,
+        warnings_forward = 2,
+        warnings_no_forward = 3
+    }context_behavior;
+
     int tcp_readall(int8_t* buf,int len);
     bool is_tcp_socket_ready();
-
     std::string d_ip_addr;
     uint32_t d_port;
     int d_stream_number;
@@ -125,16 +131,18 @@ private:
     u_int32_t d_unpack_idx_size;
     pmt::pmt_t make_context_dict(header_data& header, int size_gotten);
     int buffer_and_send(T* out, int noutput_items);
+    int recv_tcp_packet();
+    int d_behavior;
+    bool d_send; 
 
 public:
     difi_source_cpp_impl(std::string ip_addr,
                     uint32_t port,
                     uint8_t socket_type,
                     uint32_t stream_number,
-                    int bit_depth);
+                    int bit_depth,
+                    int context_pkt_behavior);
     ~difi_source_cpp_impl();
-
-    // Where all the action really happens
     int work(int noutput_items,
              gr_vector_const_void_star& input_items,
              gr_vector_void_star& output_items);

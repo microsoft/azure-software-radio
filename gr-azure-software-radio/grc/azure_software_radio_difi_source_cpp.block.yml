@@ -6,10 +6,9 @@
 id: azure_software_radio_difi_source_cpp
 label: DIFI Source
 category: '[Azure software radio]'
-
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${protocol}, ${stream_num}, int(${bit_depth}))
+  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${protocol}, ${stream_num}, int(${bit_depth}), int(${context_behavior}))
 
 parameters:
 - id: type
@@ -41,7 +40,13 @@ parameters:
   label: DIFI Stream Number
   dtype: int
   default: 0
-
+- id: context_behavior
+  label: Context Mismatch Behavior
+  category: DIFI Advanced
+  dtype: enum
+  default: 'Default'
+  options: ['0', '1', '2', '3']
+  option_labels: ['Default - Throw Exceptions', 'Ignore - Forward Data, No Warnings', 'Throw Warnings - Forward', 'Throw Warnings - No Foward']
 outputs:
 -   domain: stream
     dtype: ${ type.fcn }
