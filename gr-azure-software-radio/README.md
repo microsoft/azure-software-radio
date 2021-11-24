@@ -147,7 +147,7 @@ It is expected that the user will setup a storage account and a container prior 
 ## Event Hub Blocks
 The Event Hub blocks (source and sink) provide an interface to send and receive events to [Azure Event Hubs](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about) using the message passing interface in GNU Radio.
 
-It is expected that the user will create an Event Hubs namespace and Event Hub entity prior to using the Event Hub source and sink blocks. To create an Event Hub, see [Create an Event Hub](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create).
+It is expected that the user will create an Event Hubs namespace, Event Hub entity and consumer group prior to using the Event Hub source and sink blocks. To create an Event Hub, see [Create an Event Hub](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create).
 
 ### Event Hub Block Descriptions
  * EventHub Source Block\
