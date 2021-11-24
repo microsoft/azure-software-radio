@@ -1,0 +1,139 @@
+options:
+  parameters:
+    author: Johanna Rivera
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: Copyright (c) Microsoft Corporation
+    description: Simple Event Hub example that uses connection string authentication
+      to receive events.
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: no_gui
+    hier_block_src_path: '.:'
+    id: eventhub_example
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: EventHub Source example
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: connection_str
+  id: variable
+  parameters:
+    comment: ''
+    value: os.getenv('AZURE_EVENTHUB_CONNECTION_STRING')
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 12.0]
+    rotation: 0
+    state: enabled
+- name: consumer_grp
+  id: variable
+  parameters:
+    comment: ''
+    value: os.getenv('AZURE_EVENTHUB_CONSUMER_GROUP')
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [624, 12.0]
+    rotation: 0
+    state: enabled
+- name: eventhub_name
+  id: variable
+  parameters:
+    comment: ''
+    value: os.getenv('AZURE_EVENTHUB_NAME')
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [488, 12.0]
+    rotation: 180
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '32000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 12]
+    rotation: 0
+    state: enabled
+- name: azure_software_radio_eventhub_source_0
+  id: azure_software_radio_eventhub_source
+  parameters:
+    affinity: ''
+    alias: ''
+    authentication_method: connection_string
+    comment: ''
+    connection_str: connection_str
+    consumer_grp: consumer_grp
+    eventhub_host_name: ''
+    eventhub_name: eventhub_name
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    partition_id: ''
+    sas: ''
+    starting_position: '''-1'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 252.0]
+    rotation: 0
+    state: true
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [672, 288.0]
+    rotation: 0
+    state: true
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import os
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 84.0]
+    rotation: 0
+    state: true
+
+connections:
+- [azure_software_radio_eventhub_source_0, out, blocks_message_debug_0, print]
+
+metadata:
+  file_format: 1
