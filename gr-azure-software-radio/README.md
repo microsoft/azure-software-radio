@@ -91,7 +91,7 @@ unit test data requiring interactions with actual Azure infrastructure.
 
 
 #### Event Hub Integration Tests
-In order to run the integration tests for the event hub blocks, you must first create an event hub resource on Azure, obtain the connection string and event hub entity name.
+In order to run the integration tests for the event hub blocks, you must first create an event hub resource on Azure, create a consumer group in the event hub, obtain the connection string and event hub entity name.
 
 The event hub integration test code require the following environment variables:
 - AZURE_EVENTHUB_STORAGE_CONNECTION_STRING: Connection string for the event hub namespace you created for testing.
@@ -134,10 +134,10 @@ The two Blob blocks (source and sink) provide an interface to read and write sam
 It is expected that the user will setup a storage account and a container prior to accessing Blob storage with the Blob source and sink blocks. To create a storage account, see [Create Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal).
 
 ### Blob Block Descriptions
- * Blob Source Block
+ * Blob Source Block\
 	The Blob source block reads samples from Azure Blob storage. This block currently supports complex64 inputs and block blobs (Page blobs and append blobs are not supported at this time).
 
- * Blob Sink Block
+ * Blob Sink Block\
 	The Blob sink block writes samples to Azure Blob storage. This block currently supports complex64 inputs and block blobs (Page blobs and append blobs are not supported at this time).
 
 	There are several ways to authenticate to the Azue blob backend, these blocks support authentication using a connection string, a URL with an embedded SAS token, or use credentials supported by the DefaultAzureCredential class.
@@ -150,10 +150,10 @@ The Event Hub blocks (source and sink) provide an interface to send and receive 
 It is expected that the user will create an Event Hubs namespace and Event Hub entity prior to using the Event Hub source and sink blocks. To create an Event Hub, see [Create an Event Hub](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create).
 
 ### Event Hub Block Descriptions
- * EventHub Source Block
+ * EventHub Source Block\
 	The EventHub source block receives a JSON formatted event message from Azure Event Hub and converts it to GNU Radio PMT format.
 
- * EventHub Sink Block
+ * EventHub Sink Block\
 	The EventHub sink block converts a PMT message to JSON and sends it to Azure Event Hub.
 
 	These blocks support multiple ways to authenticate to the Azue Event Hub backend, such as using a connection string, a SAS token, or use credentials supported by the DefaultAzureCredential class.
@@ -166,7 +166,7 @@ This is a set of GNU Radio blocks based on IEEE-ISTO Std 4900-2021: Digital IF I
 There are two DIFI blocks (source and sink) as part of this out of tree module. The Bit Depths currently supported are 8 and 16 with support for the full range of bit depths specified in the DIFI standard coming later.
 
 ### DIFI Block Descriptions
- * DIFI Source Block
+ * DIFI Source Block\
 	The DIFI source block receives UDP DIFI packets from a given IP address and port. It then forwards them to GNU Radio as a complex64 (gr_complex) or signed complex 8 (std::complex<char>).
 	This block emits the following tags in the following situations:
 	  pck_n tag: Emitted when a missed packet occurs, will update the upstream blocks with the current packet number to expect and the current time stamps
@@ -181,7 +181,7 @@ There are two DIFI blocks (source and sink) as part of this out of tree module. 
       - Throw Warnings - Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but still forward DIFI data.
       - Throw Warnings - No Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but won't forward data until a correct context packet is received or one that matches the given settings
 
- * DIFI Sink Block
+ * DIFI Sink Block\
 	The DIFI sink block forwards packets to a given IP address and port number and packets the data with the given bit depth. This block operates in two modes, standalone and paired.
 
 	Pair Mode: The block expects to be paired with a DIFI source block that sends context packets, timing information, and packet count information. The sink block forwards context packets received via tags. For data packets, it adds the correct timestamps and packet number. The data format is packeted as complex64 (gr_complex) or complex signed 8 (std::complex<char>)) samples.

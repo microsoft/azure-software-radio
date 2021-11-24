@@ -78,7 +78,9 @@ Once you are done with running the examples, delete your blob object to stop bei
 To run [eventhub_sink_example.grc](../examples/eventhub_sink_example.grc) or [eventhub_source_example.grc](../examples/eventhub-source-example.grc), you must first do the following:
 1. Create an Event Hub in your Azure subscription
     - See: [Create an Event Hub](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create) for instructions.
-2. Choose how to authenticate to the Azure Event Hub. This example uses the "connection string" authentication option.
+2. Create a Consumer Group in the Event Hub
+    - See: [Create an Event Hub Consumer Group](https://docs.microsoft.com/en-us/cli/azure/eventhubs/eventhub/consumer-group?view=azure-cli-latest)
+3. Choose how to authenticate to the Azure Event Hub. This example uses the "connection string" authentication option.
     - See [Get an Event Hub Connection String](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string) for instructions on how to obtain a connection string.
 
 ## Event Hub Sink Example
@@ -108,7 +110,7 @@ and then launch GNU Radio Companion from the same terminal. This will ensure you
 To run the flowgraph, you must:
 - change the connection_str variable to use your connection string
 - change the eventhub_name variable to use the event hub entity you created as part of the [Event Hub Prerequisites section above](#event-hub-example-prerequisites)
-- change the consumer_grp variable to use the default or create a new consumer group. See [Create an Event Hub Consumer Group](https://docs.microsoft.com/en-us/cli/azure/eventhubs/eventhub/consumer-group?view=azure-cli-latest)
+- change the consumer_grp variable to use the default or use the created consumer group as part of the [Event Hub Prerequisites section above](#event-hub-example-prerequisites)
 
 Run the flowgraph and you should see the Message Debug block showing the contents of the received events.
 
