@@ -108,7 +108,7 @@ and then launch GNU Radio Companion from the same terminal. This will ensure you
 To run the flowgraph, you must:
 - change the connection_str variable to use your connection string
 - change the eventhub_name variable to use the event hub entity you created as part of the [Event Hub Prerequisites section above](#event-hub-example-prerequisites)
-- change the consumer_grp variable to use your consumer group
+- change the consumer_grp variable to use the default or create a new consumer group. See [Create an Event Hub Consumer Group](https://docs.microsoft.com/en-us/cli/azure/eventhubs/eventhub/consumer-group?view=azure-cli-latest)
 
-Run the flowgraph and you should see the Message Debug bloc showing the contents of the received events.
+Run the flowgraph and you should see the Message Debug block showing the contents of the received events.
 
