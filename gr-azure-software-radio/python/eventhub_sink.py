@@ -15,6 +15,7 @@ from azure.core.credentials import AzureSasCredential
 from azure.identity import DefaultAzureCredential
 
 
+# pylint: disable=abstract-method
 class EventHubSink(gr.sync_block):
     """ Converts GNU Radio PMT to JSON and sends event to Azure Event Hub.
 

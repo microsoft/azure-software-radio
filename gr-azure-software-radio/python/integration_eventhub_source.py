@@ -20,7 +20,7 @@ from azure_software_radio import EventHubSource
 from azure.eventhub import EventHubProducerClient, EventData
 from gnuradio import gr, gr_unittest
 
-
+# pylint: disable=abstract-method
 class PmtMessageConsumer(gr.sync_block):
     def __init__(self):
         gr.sync_block.__init__(

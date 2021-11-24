@@ -15,7 +15,7 @@ from azure.eventhub import EventHubConsumerClient
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureSasCredential
 
-
+# pylint: disable=abstract-method
 class EventHubSource(gr.sync_block):
     """ Receives and converts JSON events from Azure Event Hub to GNU Radio PMT format.
 
@@ -69,7 +69,7 @@ class EventHubSource(gr.sync_block):
             eventhub_name=eventhub_name,
             consumer_group=consumer_group,
         )
-        
+
         self.message_port_register_out(pmt.intern('out'))
 
         self.rec_thread = threading.Thread(target=self.receive)

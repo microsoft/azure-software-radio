@@ -24,7 +24,7 @@ from gnuradio import blocks
 
 NUM_MSGS = 10
 
-
+#pylint: disable=abstract-method
 class PmtMessageGenerator(gr.sync_block):
     """
     This is a PMT Message Generating class for testing purposes
@@ -41,6 +41,7 @@ class PmtMessageGenerator(gr.sync_block):
         self.msg_ctr = 0
         self.message_port_register_out(pmt.intern('out_port'))
 
+    # pylint: disable=arguments-differ
     def work(self, input_items, _output_items):
         in_len = len(input_items[0])
         while self.msg_ctr < len(self.msg_list) and \
