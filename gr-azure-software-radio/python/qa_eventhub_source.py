@@ -40,6 +40,7 @@ class qa_EventHubSource(gr_unittest.TestCase):
             starting_position="@latest")
 
         self.assertIsNotNone(instance)
+        instance.stop()
 
 
 if __name__ == '__main__':
