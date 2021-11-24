@@ -1,0 +1,59 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the GNU General Public License v3.0 or later.
+# See License.txt in the project root for license information.
+#
+
+
+id: azure_software_radio_eventhub_source
+label: Event Hub Source
+category: '[Azure software radio]'
+
+templates:
+  imports: import azure_software_radio
+  make: azure_software_radio.EventHubSource(${authentication_method}, ${connection_str}, ${sas}, ${eventhub_host_name}, ${eventhub_name}, ${consumer_grp}, ${partition_id}, ${starting_position})
+
+parameters:
+- id: authentication_method
+  label: Auth Method
+  dtype: string
+  default: 'default'
+  options: ['connection_string', 'sas', 'default']
+- id: connection_str
+  label: Connection String
+  dtype: string
+  default: ''
+  hide: ${'all' if authentication_method != 'connection_string' else 'part'}
+- id: sas
+  label: SAS
+  dtype: string
+  default: ''
+  hide: ${'all' if authentication_method != 'sas' else 'part'}
+- id: eventhub_host_name
+  label: Event Hub Host Name
+  dtype: string
+  default: ''
+  hide: ${'all' if authentication_method == 'connection_string' else 'part'}
+- id: eventhub_name
+  label: Event Hub Name
+  dtype: string
+  default: ''
+- id: consumer_grp
+  label: Consumer Group
+  dtype: string
+  default: ''
+- id: partition_id
+  label: Partition ID
+  dtype: string
+  default: ''
+- id: starting_position
+  label: Starting Position
+  dtype: raw
+  default: '@latest'
+
+outputs:
+-   domain: message
+    id: out
+    optional: true
+
+
+file_format: 1

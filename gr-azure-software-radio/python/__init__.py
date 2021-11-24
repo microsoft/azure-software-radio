@@ -33,3 +33,5 @@ from .blob_qa_common import blob_teardown, blob_setup
 from .blob_sink import BlobSink
 from .blob_source import BlobSource
 from . import blob_common
+from .eventhub_sink import EventHubSink
+from .eventhub_source import EventHubSource

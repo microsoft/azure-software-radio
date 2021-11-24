@@ -10,11 +10,15 @@ The Azure software radio Out of Tree (OOT) Module allows users to leverage and e
     - [Installing Azure software radio OOT](#installing-azure-software-radio-oot)
     - [Running the Unit Tests](#running-the-unit-tests)
     - [Running the Integration Tests](#running-the-integration-tests)
+      - [Blob Integration Tests](#blob-integration-tests)
+      - [Event Hub Integration Tests](#event-hub-integration-tests)
   - [Frequently Asked Questions](#frequently-asked-questions)
 - [Azure software radio Out of Tree Module Blocks](#azure-software-radio-out-of-tree-module-blocks)
   - [Key Vault Block](#key-vault-block)
   - [Blob Blocks](#blob-blocks)
     - [Blob Block Descriptions](#blob-block-descriptions)
+  - [Event Hub Blocks](#event-hub-blocks)
+    - [Event Hub Block Descriptions](#event-hub-block-descriptions)
   - [IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard (DIFI)](#ieee-isto-std-4900-2021-digital-if-interoperability-standard-difi)
     - [DIFI Block Descriptions](#difi-block-descriptions)
 
@@ -61,6 +65,8 @@ Run the QA tests with any of the following methods:
     ```
 
 ### Running the Integration Tests
+
+#### Blob Integration Tests
 To run the integration tests for the blob blocks, you must first create a storage account on Azure
 and obtain the connection string.
 
@@ -76,13 +82,21 @@ The blob integration test code require the following environment variables:
   AZURE_STORAGE_URL, but with read-only permissions to the storage account.
 
 
-
 Finally, you must have at least one set of credentials supported by DefaultAzureCredential in your
 environment that has permissions to the blob account to test against. Running `az login` should be
 sufficient to provide this.
 
 The integration test code will create a randomly generated container to store
 unit test data requiring interactions with actual Azure infrastructure.
+
+
+#### Event Hub Integration Tests
+In order to run the integration tests for the event hub blocks, you must first create an event hub resource on Azure, create a consumer group in the event hub, obtain the connection string and event hub entity name.
+
+The event hub integration test code require the following environment variables:
+- AZURE_EVENTHUB_STORAGE_CONNECTION_STRING: Connection string for the event hub namespace you created for testing.
+- AZURE_EVENTHUB_NAME: The event hub entity name in the namespace.
+- AZURE_EVENTHUB_CONSUMER_GROUP: The consumer group entity name in the event hub.
 
 Tests can be run with any of the following methods:
  - From the terminal you'll use to run the tests, run:
@@ -120,15 +134,31 @@ The two Blob blocks (source and sink) provide an interface to read and write sam
 It is expected that the user will setup a storage account and a container prior to accessing Blob storage with the Blob source and sink blocks. To create a storage account, see [Create Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal).
 
 ### Blob Block Descriptions
- * Blob Source Block
+ * Blob Source Block\
 	The Blob source block reads samples from Azure Blob storage. This block currently supports complex64 inputs and block blobs (Page blobs and append blobs are not supported at this time).
 
- * Blob Sink Block
+ * Blob Sink Block\
 	The Blob sink block writes samples to Azure Blob storage. This block currently supports complex64 inputs and block blobs (Page blobs and append blobs are not supported at this time).
 
 	There are several ways to authenticate to the Azue blob backend, these blocks support authentication using a connection string, a URL with an embedded SAS token, or use credentials supported by the DefaultAzureCredential class.
 
 	See the [Blob Examples](./examples/README.md).
+
+## Event Hub Blocks
+The Event Hub blocks (source and sink) provide an interface to send and receive events to [Azure Event Hubs](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about) using the message passing interface in GNU Radio.
+
+It is expected that the user will create an Event Hubs namespace, Event Hub entity and consumer group prior to using the Event Hub source and sink blocks. To create an Event Hub, see [Create an Event Hub](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create).
+
+### Event Hub Block Descriptions
+ * EventHub Source Block\
+	The EventHub source block receives a JSON formatted event message from Azure Event Hub and converts it to GNU Radio PMT format.
+
+ * EventHub Sink Block\
+	The EventHub sink block converts a PMT message to JSON and sends it to Azure Event Hub.
+
+	These blocks support multiple ways to authenticate to the Azue Event Hub backend, such as using a connection string, a SAS token, or use credentials supported by the DefaultAzureCredential class.
+
+	See the [Event Hub Examples](./examples/README.md).
 
 ## IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard (DIFI)
 This is a set of GNU Radio blocks based on IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard version 1.0.
@@ -136,28 +166,28 @@ This is a set of GNU Radio blocks based on IEEE-ISTO Std 4900-2021: Digital IF I
 There are two DIFI blocks (source and sink) as part of this out of tree module. The Bit Depths currently supported are 8 and 16 with support for the full range of bit depths specified in the DIFI standard coming later.
 
 ### DIFI Block Descriptions
- * DIFI Source Block
+ * DIFI Source Block\
 	The DIFI source block receives UDP DIFI packets from a given IP address and port. It then forwards them to GNU Radio as a complex64 (gr_complex) or signed complex 8 (std::complex<char>).
 	This block emits the following tags in the following situations:
 	  pck_n tag: Emitted when a missed packet occurs, will update the upstream blocks with the current packet number to expect and the current time stamps
 	  context tag: Emitted when a new DIFI context packet is received with the context packet dynamic information
 	  static_change: Emitted when the static parts of the DIFI context packet changes
   DIFI Advanced:
-  This tab contains more advanced settings for the DIFI block and should be used by users who know the devices and network in use. 
+  This tab contains more advanced settings for the DIFI block and should be used by users who know the devices and network in use.
 
    Context Packet Mismatch Behavior
       - Default: Throws exceptions if context packet is incorrect or non-compliant
       - Ignore Mismatches - Forward data, no warnings: Entirely ignore the context packet, only forwards data
-      - Throw Warnings - Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but still forward DIFI data. 
+      - Throw Warnings - Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but still forward DIFI data.
       - Throw Warnings - No Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but won't forward data until a correct context packet is received or one that matches the given settings
 
- * DIFI Sink Block
+ * DIFI Sink Block\
 	The DIFI sink block forwards packets to a given IP address and port number and packets the data with the given bit depth. This block operates in two modes, standalone and paired.
 
 	Pair Mode: The block expects to be paired with a DIFI source block that sends context packets, timing information, and packet count information. The sink block forwards context packets received via tags. For data packets, it adds the correct timestamps and packet number. The data format is packeted as complex64 (gr_complex) or complex signed 8 (std::complex<char>)) samples.
 
 	Standalone Mode: In standalone mode, it is expected the user will supply the context packet information via GRC or the constructor of the class. For now, the context packet payload data are static once specified by the user. Like paired mode, the data format to pack is, complex64 (gr_complex) or complex signed 8 (std::complex<char>)) samples.
-	
+
 	Scaling Mode: To help mitigate quantization error, the DIFI Sink has an optional helper feature to apply a gain & offset to the input signal. The first mode "Manual" allows a user to manually set gain & offset. In Min-Max mode the user supplies the max and min expected I & Q values and the block solves for a gain & offset based on these and the specified bit depth.
 
 	Note: this block converts from float 32 I and Q down to the specified bit depth for I and Q, which can cause significant quantization error for small signals.
