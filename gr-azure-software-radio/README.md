@@ -3,18 +3,20 @@
 The Azure software radio Out of Tree (OOT) Module allows users to leverage and easily use cloud resources in GNU Radio directly within a flowgraph. This OOT module can be used in a VM in the cloud or a local machine.
 
 ## Table of Contents
-- [Getting Started](#getting-started)
+- [Azure software radio Out of Tree Module](#azure-software-radio-out-of-tree-module)
+  - [Table of Contents](#table-of-contents)
+  - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
-    - [Installation](#installing-azure-software-radio-oot)
-    - [Running the unit tests](#running-the-unit-tests)
-    - [Running the integration tests](#running-the-integration-tests)
-- [Frequently Asked Questions](./docs/FAQ.md)
+    - [Installing Azure software radio OOT](#installing-azure-software-radio-oot)
+    - [Running the Unit Tests](#running-the-unit-tests)
+    - [Running the Integration Tests](#running-the-integration-tests)
+  - [Frequently Asked Questions](#frequently-asked-questions)
 - [Azure software radio Out of Tree Module Blocks](#azure-software-radio-out-of-tree-module-blocks)
-    - [Key Vault Block](#key-vault-block)
-    - [Blob Blocks](#blob-blocks)
-        - [Blob Block Descriptions](#blob-block-descriptions)
-    - [IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard (DIFI)](#ieee-isto-std-4900-2021-digital-if-interoperability-standard-difi)
-        - [DIFI Block Descriptions](#difi-block-descriptions)
+  - [Key Vault Block](#key-vault-block)
+  - [Blob Blocks](#blob-blocks)
+    - [Blob Block Descriptions](#blob-block-descriptions)
+  - [IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard (DIFI)](#ieee-isto-std-4900-2021-digital-if-interoperability-standard-difi)
+    - [DIFI Block Descriptions](#difi-block-descriptions)
 
 
 ## Getting Started
@@ -140,6 +142,14 @@ There are two DIFI blocks (source and sink) as part of this out of tree module. 
 	  pck_n tag: Emitted when a missed packet occurs, will update the upstream blocks with the current packet number to expect and the current time stamps
 	  context tag: Emitted when a new DIFI context packet is received with the context packet dynamic information
 	  static_change: Emitted when the static parts of the DIFI context packet changes
+  DIFI Advanced:
+  This tab contains more advanced settings for the DIFI block and should be used by users who know the devices and network in use. 
+
+   Context Packet Mismatch Behavior
+      - Default: Throws exceptions if context packet is incorrect or non-compliant
+      - Ignore Mismatches - Forward data, no warnings: Entirely ignore the context packet, only forwards data
+      - Throw Warnings - Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but still forward DIFI data. 
+      - Throw Warnings - No Forward: Displays Warnings about context packet mismatch or non-compliant context packets, but won't forward data until a correct context packet is received or one that matches the given settings
 
  * DIFI Sink Block
 	The DIFI sink block forwards packets to a given IP address and port number and packets the data with the given bit depth. This block operates in two modes, standalone and paired.
@@ -147,6 +157,8 @@ There are two DIFI blocks (source and sink) as part of this out of tree module. 
 	Pair Mode: The block expects to be paired with a DIFI source block that sends context packets, timing information, and packet count information. The sink block forwards context packets received via tags. For data packets, it adds the correct timestamps and packet number. The data format is packeted as complex64 (gr_complex) or complex signed 8 (std::complex<char>)) samples.
 
 	Standalone Mode: In standalone mode, it is expected the user will supply the context packet information via GRC or the constructor of the class. For now, the context packet payload data are static once specified by the user. Like paired mode, the data format to pack is, complex64 (gr_complex) or complex signed 8 (std::complex<char>)) samples.
+	
+	Scaling Mode: To help mitigate quantization error, the DIFI Sink has an optional helper feature to apply a gain & offset to the input signal. The first mode "Manual" allows a user to manually set gain & offset. In Min-Max mode the user supplies the max and min expected I & Q values and the block solves for a gain & offset based on these and the specified bit depth.
 
 	Note: this block converts from float 32 I and Q down to the specified bit depth for I and Q, which can cause significant quantization error for small signals.
 
