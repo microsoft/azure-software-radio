@@ -11,16 +11,16 @@ templates:
   imports:  |-
     import azure_software_radio
     import numpy as np
-  make: azure_software_radio.blob_sink(${type.np_type},
-                                       ${vlen},
-                                       ${authentication_method},
-                                       ${connection_str},
-                                       ${url},
-                                       ${container_name},
-                                       ${blob_name},
-                                       ${block_len},
-                                       ${queue_size},
-                                       ${retry_total})
+  make: azure_software_radio.BlobSource(${type.np_type},
+                                        ${vlen},
+                                        ${authentication_method},
+                                        ${connection_str},
+                                        ${url},
+                                        ${container_name},
+                                        ${blob_name},
+                                        ${block_len},
+                                        ${queue_size},
+                                        ${retry_total})
 
 parameters:
 - id: type
