@@ -8,7 +8,7 @@ label: DIFI Sink
 category: '[Azure software radio]'
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.difi_sink_cpp_${type.fcn}(${reference_time_full}, ${reference_time_frac}, ${ip_addr}, ${port}, ${protocol}, bool(${mode}), 
+  make: azure_software_radio.difi_sink_cpp_${type.fcn}(${reference_time_full}, ${reference_time_frac}, ${ip_addr}, ${port}, bool(${mode}), 
                                                        ${data_size}, ${stream_id}, int(${reference_point}), ${sample_rate}, int(${packet_class}), ${oui}, 
                                                        ${context_packet_send_count}, int(${context_pack_size}), int(${bit_depth}), int(${scaling}), ${gain}, 
                                                        ${offset}, ${max_iq}, ${min_iq})
@@ -38,12 +38,6 @@ parameters:
   label: Port Number
   dtype: int
   default: 0
-- id: protocol
-  label: Protocol
-  dtype: enum
-  options: ['1', '2']
-  option_labels: ['TCP', 'UDP']
-  default: '2'
 - id: sample_rate
   label: Sample Rate
   dtype: int

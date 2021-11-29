@@ -30,7 +30,6 @@ void bind_difi_sink_cpp_template(py::module& m, const char* classname)
            py::arg("reference_time_frac"),
            py::arg("ip_addr"),
            py::arg("port"),
-           py::arg("protocol"),
            py::arg("mode"),
            py::arg("samples_per_packet"),
            py::arg("stream_number"),

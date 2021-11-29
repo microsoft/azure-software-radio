@@ -8,7 +8,7 @@ label: DIFI Source
 category: '[Azure software radio]'
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${protocol}, ${stream_num}, int(${bit_depth}), int(${context_behavior}))
+  make: azure_software_radio.difi_source_cpp_${type.fcn}(${ip_addr}, ${port}, ${stream_num}, int(${bit_depth}), int(${context_behavior}))
 
 parameters:
 - id: type
@@ -30,12 +30,6 @@ parameters:
 - id: port
   label: Port
   dtype: int
-- id: protocol
-  label: Protocol
-  dtype: enum
-  options: ['1', '2']
-  option_labels: ['TCP', 'UDP']
-  default: '2'
 - id: stream_num
   label: DIFI Stream Number
   dtype: int
