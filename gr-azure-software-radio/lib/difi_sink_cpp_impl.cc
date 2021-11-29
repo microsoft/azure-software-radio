@@ -12,19 +12,19 @@ namespace gr {
 
     template <class T>
     typename difi_sink_cpp<T>::sptr
-    difi_sink_cpp<T>::make(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, uint32_t port, uint8_t socket_type,
+    difi_sink_cpp<T>::make(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, uint32_t port,
                           bool mode, uint32_t samples_per_packet, int stream_number, int reference_point, u_int64_t samp_rate, 
                           int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth,
                           int scaling, float gain, gr_complex offset, float max_iq, float min_iq)
     {
-      return gnuradio::make_block_sptr<difi_sink_cpp_impl<T>>(reference_time_full, reference_time_frac, ip_addr, port, socket_type, mode, 
+      return gnuradio::make_block_sptr<difi_sink_cpp_impl<T>>(reference_time_full, reference_time_frac, ip_addr, port, mode, 
                                                               samples_per_packet, stream_number, reference_point, samp_rate, packet_class, oui, context_interval, context_pack_size, bit_depth,
                                                               scaling, gain, offset, max_iq, min_iq);
     }
 
     template <class T>
     difi_sink_cpp_impl<T>::difi_sink_cpp_impl(u_int32_t reference_time_full, u_int64_t reference_time_frac, std::string ip_addr, 
-                                              uint32_t port, uint8_t socket_type, bool mode, uint32_t samples_per_packet, int stream_number, int reference_point, 
+                                              uint32_t port, bool mode, uint32_t samples_per_packet, int stream_number, int reference_point, 
                                               u_int64_t samp_rate, int packet_class, int oui, int context_interval, int context_pack_size, int bit_depth,
                                               int scaling, float gain, gr_complex offset, float max_iq, float min_iq)
       : gr::sync_block("difi_sink_cpp_impl",
@@ -37,7 +37,7 @@ namespace gr {
       d_servaddr.sin_family = AF_INET;
       d_servaddr.sin_port = htons(port);
       d_servaddr.sin_addr.s_addr = inet_addr(ip_addr.c_str());
-      d_socket_type = (socket_type == 1) ?  SOCK_STREAM : SOCK_DGRAM;
+      d_socket_type = SOCK_DGRAM;
 
       d_tv.tv_sec = 0;
       d_tv.tv_usec = 10000;
