@@ -178,7 +178,7 @@ class qa_testcpp(gr_unittest.TestCase):
         send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
                                                       vita_data_time_change))
         socket_rec_time = Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p),
-                                                                       1344000000 // 2, 0))
+                                                                        1344000000 // 2, 0))
         socket_rec_time.start()
         send_proc.start()
         send_proc.join()
@@ -206,7 +206,7 @@ class qa_testcpp(gr_unittest.TestCase):
         time.sleep(1)
         base_pkt_n = 6
         rec_proc = Process(target=rec_socket_multi_packet, args=(('127.0.0.1', sink_p),
-                                                                to_one, frac_base))
+                                                                 to_one, frac_base))
         rec_proc.start()
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         i = 0
@@ -242,7 +242,7 @@ class qa_testcpp(gr_unittest.TestCase):
         vita_data_time_change[20:28] = bytearray(frac)
         # first msg
         send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
-                                                     vita_data_time_change))
+                                                      vita_data_time_change))
         tb_proc = Process(target=run_tb, args=(tb,))
         tb_proc.start()
         send_proc.start()
@@ -255,10 +255,10 @@ class qa_testcpp(gr_unittest.TestCase):
         # second msg
         # send out of order packet
         send_proc = Process(target=socket_send, args=(('127.0.0.1', source_p),
-                                                     vita_data_time_change))
+                                                      vita_data_time_change))
         # confirm time was zeroed out when out of order packet came in
         socket_rec_time = Process(target=socket_rec_confirm_time, args=(('127.0.0.1', sink_p),
-                                                                       0, 0))
+                                                                        0, 0))
         socket_rec_time.start()
         # need to send 2 to get 1 since keeping 1 in 2
         send_proc.start()
@@ -529,7 +529,7 @@ class qa_testcpp(gr_unittest.TestCase):
         to_one = math.ceil(1e12 / frac_base)
 
         rec_proc = Process(target=rec_socket_multi_packet, args=(('127.0.0.1', sink_p),
-                                                                to_one, frac_base))
+                                                                 to_one, frac_base))
         rec_proc.start()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(('127.0.0.1', source_p))
@@ -791,10 +791,12 @@ class qa_testcpp(gr_unittest.TestCase):
         bit_depth = 16
         full_scale = 1 << bit_depth
         gain = full_scale / (maxiq - miniq)
-        offset = complex(-1.0*((maxiq - miniq)/2.0 + miniq), - 1.0*((maxiq - miniq)/2.0 + miniq))
+        offset = complex(-1.0*((maxiq - miniq)/2.0 + miniq), -
+                         1.0*((maxiq - miniq)/2.0 + miniq))
         ran_vec = []
         for i in range(512):
-            ran_vec.append(complex(np.random.random()*(maxiq-miniq) + miniq, np.random.random()*(maxiq-miniq) + miniq))
+            ran_vec.append(complex(np.random.random()*(maxiq-miniq) +
+                           miniq, np.random.random()*(maxiq-miniq) + miniq))
         expected = []
         for i in ran_vec:
             scaled = gain * (i + offset)
@@ -908,7 +910,7 @@ class qa_testcpp(gr_unittest.TestCase):
 #
 
 def socket_rec_confirm_standalone_data(server, size):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
@@ -943,7 +945,7 @@ def socket_rec_confirm_standalone_data(server, size):
 
 
 def socket_rec_confirm_standalone_data_16(server, size):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
@@ -978,7 +980,7 @@ def socket_rec_confirm_standalone_data_16(server, size):
 
 
 def socket_rec_confirm_standalone_data_16_vec(server, vec, diff_allowed=None):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
@@ -1025,7 +1027,7 @@ def socket_rec_confirm_standalone_data_16_vec(server, vec, diff_allowed=None):
 
 
 def socket_rec_confirm_context_correct_alt(server, sample_rate, packet_class_id, oui, expect_bit_depth):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
@@ -1052,7 +1054,7 @@ def socket_rec_confirm_context_correct_alt(server, sample_rate, packet_class_id,
 
 
 def socket_rec_pack_n(server, pkt_n, vita_source):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
@@ -1069,7 +1071,7 @@ def socket_rec_pack_n(server, pkt_n, vita_source):
 
 
 def socket_rec(server, vita_data):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
@@ -1086,7 +1088,7 @@ def socket_rec(server, vita_data):
 
 
 def socket_rec_multi_packets(server, num_pkts):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_DGRAM:
@@ -1116,7 +1118,7 @@ def socket_rec_multi_packets(server, num_pkts):
 
 
 def socket_rec_confirm_time(server, frac, full, num_to_receive=1):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(server)
@@ -1155,7 +1157,7 @@ def socket_rec_confirm_time(server, frac, full, num_to_receive=1):
 
 def socket_send(server, data):
     time.sleep(.05)
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     if socket_type == socket.SOCK_DGRAM:
         sock.sendto(data, server)
@@ -1178,7 +1180,7 @@ def get_open_ports():
 
 
 def socket_send_multi_packets(server, data, num_pkts, base_pkt_n):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     if socket_type == socket.SOCK_STREAM:
         sock.connect(server)
@@ -1196,7 +1198,7 @@ def socket_send_multi_packets(server, data, num_pkts, base_pkt_n):
 
 
 def rec_socket_multi_packet(server, num_packets, frac_base):
-    socket_type  = socket.SOCK_DGRAM
+    socket_type = socket.SOCK_DGRAM
     sock = socket.socket(socket.AF_INET, socket_type)
     sock.bind(server)
     if socket_type == socket.SOCK_STREAM:
