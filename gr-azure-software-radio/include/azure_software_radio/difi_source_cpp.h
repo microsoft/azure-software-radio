@@ -43,14 +43,13 @@ namespace gr {
    * \brief
    *  \param ip_addr The ip address for the socket to expect DIFI packets from
    *  \param port the port number for the socket
-   *  \param socket_type The socket type (TCP or UDP)
    *  \param stream_number The DIFI (VITA) stream number to expect for this stream
    *                     If stream number is -1, the stream number will be ignored, else it will be checked
    *                     against the stream number in the DIFI (VITA) packets. If they do match, the packets will be dropped.
    *  \param bit_depth The bit depth
    *  \param context_pkt_behavior Set the behavior of handling non-compliant context packets. 
    */
-    static sptr make(std::string ip_addr, uint32_t port, uint8_t socket_type, uint32_t stream_number, int bit_depth, int context_pkt_behavior);
+    static sptr make(std::string ip_addr, uint32_t port, uint32_t stream_number, int bit_depth, int context_pkt_behavior);
 
     };
     typedef difi_source_cpp<gr_complex> difi_source_cpp_fc32;
