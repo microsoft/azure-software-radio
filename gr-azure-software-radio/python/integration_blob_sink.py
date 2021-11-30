@@ -17,7 +17,6 @@ from azure.storage.blob import BlobServiceClient
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import numpy as np
-import urllib3.exceptions
 
 from azure_software_radio import BlobSink
 
