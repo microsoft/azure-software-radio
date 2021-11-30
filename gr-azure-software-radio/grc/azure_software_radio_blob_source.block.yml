@@ -8,16 +8,18 @@ label: Blob Source
 category: '[Azure software radio]'
 
 templates:
-  imports: import azure_software_radio
-  make: azure_software_radio.blob_source(${type.np_type},
-                                         ${vlen},
-                                         ${authentication_method},
-                                         ${connection_str},
-                                         ${url},
-                                         ${container_name},
-                                         ${blob_name},
-                                         ${queue_size},
-                                         ${retry_total})
+  imports:  |-
+    import azure_software_radio
+    import numpy as np
+  make: azure_software_radio.BlobSink(${type.np_type},
+                                      ${vlen},
+                                      ${authentication_method},
+                                      ${connection_str},
+                                      ${url},
+                                      ${container_name},
+                                      ${blob_name},
+                                      ${queue_size},
+                                      ${retry_total})
 
 parameters:
 - id: type
