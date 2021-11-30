@@ -94,7 +94,7 @@ unit test data requiring interactions with actual Azure infrastructure.
 In order to run the integration tests for the event hub blocks, you must first create an event hub resource on Azure, create a consumer group in the event hub, obtain the connection string and event hub entity name.
 
 The event hub integration test code require the following environment variables:
-- AZURE_EVENTHUB_STORAGE_CONNECTION_STRING: Connection string for the event hub namespace you created for testing.
+- AZURE_EVENTHUB_CONNECTION_STRING: Connection string for the event hub namespace you created for testing.
 - AZURE_EVENTHUB_NAME: The event hub entity name in the namespace.
 - AZURE_EVENTHUB_CONSUMER_GROUP: The consumer group entity name in the event hub.
 
