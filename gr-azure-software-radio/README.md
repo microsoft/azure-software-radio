@@ -89,7 +89,15 @@ sufficient to provide this.
 The integration test code will create a randomly generated container to store
 unit test data requiring interactions with actual Azure infrastructure.
 
+#### Key Vault Integration Tests
+To run the Key Vault integration tests, you'll need to first create a Key Vault and store a secret with a value of
+"3.14". Make note of the key you used to store the secret. Next, you'll need to export the following environment
+variables:
 
+- AZURE_KEYVAULT_NAME: Environment variable containing the name of the Key Vault which contains the test data. If the
+  full URL to your Key Vault is "https://my-key-vault-name.vault.azure.net", you would use "my-key-vault-name".
+- AZURE_KEYVAULT_TEST_KEY: Environment variable containing the key of the secret required for the test. Again, the value
+  of the secret must be "3.14" for the test to pass.
 #### Event Hub Integration Tests
 In order to run the integration tests for the event hub blocks, you must first create an event hub resource on Azure, create a consumer group in the event hub, obtain the connection string and event hub entity name.
 
