@@ -32,13 +32,13 @@ class IntegrationKeyvault(gr_unittest.TestCase):
         """
         Test with DefaultAzureCredential() supplied.
         """
-        creds = default_credentials.get_default_creds(enable_cli_credential=True,
-                                                      enable_environment=True,
-                                                      enable_managed_identity=True,
-                                                      enable_powershell=True,
-                                                      enable_visual_studio_code=True,
-                                                      enable_shared_token_cache=True,
-                                                      enable_interactive_browser=False)
+        creds = default_credentials.get_DefaultAzureCredential(enable_cli_credential=True,
+                                                               enable_environment=True,
+                                                               enable_managed_identity=True,
+                                                               enable_powershell=True,
+                                                               enable_visual_studio_code=True,
+                                                               enable_shared_token_cache=True,
+                                                               enable_interactive_browser=False)
         val = keyvault.pull_key(KEYVAULT_NAME, KEY_NAME, creds)
         self.assertEqual(val, SECRET_VAL, f"Val: {val}, SECRET_VAL: {SECRET_VAL} are not equal!")
 
