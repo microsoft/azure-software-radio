@@ -19,13 +19,13 @@ class IntegrationDefaultCredentials(gr_unittest.TestCase):
         """
         Test authentication using environment vars only.
         """
-        instance = azure_software_radio.default_credentials.get_default_creds(enable_cli_credential=False,
-                                                                              enable_environment=True,
-                                                                              enable_managed_identity=False,
-                                                                              enable_powershell=False,
-                                                                              enable_visual_studio_code=False,
-                                                                              enable_shared_token_cache=False,
-                                                                              enable_interactive_browser=False)
+        instance = azure_software_radio.default_credentials.get_DefaultAzureCredential(enable_cli_credential=False,
+                                                                                       enable_environment=True,
+                                                                                       enable_managed_identity=False,
+                                                                                       enable_powershell=False,
+                                                                                       enable_visual_studio_code=False,
+                                                                                       enable_shared_token_cache=False,
+                                                                                       enable_interactive_browser=False)
         n_creds = len(instance.credentials)
         self.assertEqual(
             n_creds, 1, f"Expected 1 credential, got: {n_creds} !")
@@ -36,13 +36,13 @@ class IntegrationDefaultCredentials(gr_unittest.TestCase):
         """
         Test authentication using managed identity only.
         """
-        instance = azure_software_radio.default_credentials.get_default_creds(enable_cli_credential=False,
-                                                                              enable_environment=False,
-                                                                              enable_managed_identity=True,
-                                                                              enable_powershell=False,
-                                                                              enable_visual_studio_code=False,
-                                                                              enable_shared_token_cache=False,
-                                                                              enable_interactive_browser=False)
+        instance = azure_software_radio.default_credentials.get_DefaultAzureCredential(enable_cli_credential=False,
+                                                                                       enable_environment=False,
+                                                                                       enable_managed_identity=True,
+                                                                                       enable_powershell=False,
+                                                                                       enable_visual_studio_code=False,
+                                                                                       enable_shared_token_cache=False,
+                                                                                       enable_interactive_browser=False)
         n_creds = len(instance.credentials)
         self.assertEqual(
             n_creds, 1, f"Expected 1 credential, got: {n_creds} !")
