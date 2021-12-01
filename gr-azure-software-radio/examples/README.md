@@ -10,6 +10,9 @@
 
 The DIFI Source block is based on IEEE-ISTO Std 4900-2021: Digital IF Interoperability 1.0 Standard. The example shows the use of the block in both paired and standalone mode. In paired mode, the DIFI sink is expected to be paired with a DIFI source block, else it will have unexpected behavior. If no DIFI source block is used, the DIFI sink block should be used in standalone mode. In standalone mode one must specify the fields that would have been in a context packet in paired mode. The examples show both of these situations.
 
+- difi_paried_example: This will need an external DIFI source, either hardware or software that sends DIFI packets
+- difi_standalone: This is expected to be run with samples coming from GNURadio and not an external DIFI source
+
 # Key Vault Example
 
 The Key Vault block pulls given keys from a Azure Key Vault given the vault name. If a list element is a string, that string is the key that will be pulled and the key is also the name of the variable set in GRC. If a list element is a tuple, the first item of the tuple is the key that will be pulled and the second element is the name of variable in GRC.
