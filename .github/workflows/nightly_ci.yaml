@@ -36,9 +36,14 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_EVENTHUB_CONNECTION_STRING: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+          AZURE_EVENTHUB_NAME: ${{ secrets.AZURE_EVENTHUB_NAME }}
+          AZURE_EVENTHUB_CONSUMER_GROUP: ${{ secrets.AZURE_EVENTHUB_CONSUMER_GROUP }}
+          AZURE_KEYVAULT_NAME: ${{ secrets.AZURE_KEYVAULT_NAME }}
+          AZURE_KEYVAULT_TEST_KEY: ${{ secrets.AZURE_KEYVAULT_TEST_KEY }}
         run: |
           cd gr-azure-software-radio/build
-          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test;
+          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test; python3 -m unittest integration_*;
         shell: bash
       - name: pylint
         continue-on-error: false
