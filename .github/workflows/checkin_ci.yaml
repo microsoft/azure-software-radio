@@ -3,6 +3,13 @@ name: CHECKIN_CI
 # Run this workflow every time a commit is pushed to main or a pull request is opened against main
 on:
   workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'
   push:
     branches:
       - main
@@ -11,7 +18,7 @@ on:
     branches: 
       - main
       - dev  
-      
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
