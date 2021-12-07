@@ -1,9 +1,12 @@
 name: Nightly_CI
 on:
   workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Test scenario tags'
   schedule:
     - cron: '30 0 * * *'  
-            
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
