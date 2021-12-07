@@ -1,7 +1,11 @@
 name: Nightly_CI
 on:
   schedule:
-    - cron: '30 0 * * *'           
+    - cron: '30 0 * * *'  
+
+  workflow_dispatch:
+    tags:
+      description: 'Mannualy Run'           
 jobs:
   build-and-test:
     runs-on: ubuntu-latest

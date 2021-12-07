@@ -11,7 +11,8 @@ on:
       - main
       - dev
  workflow_dispatch:
-         
+    tags:
+      description: 'Mannualy Run'  
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
