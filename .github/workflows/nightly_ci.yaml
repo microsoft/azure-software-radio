@@ -47,7 +47,8 @@ jobs:
           AZURE_KEYVAULT_TEST_KEY: ${{ secrets.AZURE_KEYVAULT_TEST_KEY }}
         run: |
           cd gr-azure-software-radio/build
-          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test; python3 -m unittest integration_*;
+          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test; 
+          cd ..; cd python; python3 -m unittest integration_*;
         shell: bash
       - name: pylint
         continue-on-error: false
