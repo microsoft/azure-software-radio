@@ -49,6 +49,7 @@ jobs:
           cd gr-azure-software-radio/build
           export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test; 
           echo "running integration..."
+          pip3 install unittest
           cd ..; cd python; python3 -m unittest integration_*;
         shell: bash
       - name: pylint
