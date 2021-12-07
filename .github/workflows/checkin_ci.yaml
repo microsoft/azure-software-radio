@@ -10,7 +10,7 @@ on:
     branches: 
       - main
       - dev
-on: workflow_dispatch
+ workflow_dispatch:
          
 jobs:
   build-and-test:
