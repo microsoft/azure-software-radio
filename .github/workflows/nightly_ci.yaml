@@ -49,7 +49,7 @@ jobs:
           cd gr-azure-software-radio/build
           export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test; 
           echo "running integration..."
-          cd ..; cd python; python3 -m unittest integration_*;
+          cd ..; cd python; python3 -m unittest integration_blob_source.py; python3 -m unittest integration_blob_sink.py; python3 -m unittest integration_default_credentials.py; python3 -m unittest integration_eventhub_sink.py;
         shell: bash
       - name: pylint
         continue-on-error: false
