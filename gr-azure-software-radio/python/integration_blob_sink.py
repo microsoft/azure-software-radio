@@ -162,6 +162,5 @@ class IntegrationBlobSink(gr_unittest.TestCase):
             op_block.create_blob()
 
 
-
 if __name__ == '__main__':
     gr_unittest.run(IntegrationBlobSink)

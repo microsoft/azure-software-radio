@@ -1,4 +1,4 @@
-name: CI
+name: CHECKIN_CI
 
 # Run this workflow every time a commit is pushed to main or a pull request is opened against main
 on:
@@ -9,8 +9,9 @@ on:
   pull_request:
     branches: 
       - main
-      - dev
-           
+      - dev  
+  workflow_dispatch:
+  
 jobs:
   build-and-test:
     runs-on: ubuntu-latest

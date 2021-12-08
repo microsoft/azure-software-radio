@@ -1,0 +1,61 @@
+name: NIGHTLY_CI
+on:
+  schedule:
+    - cron: '30 0 * * *' 
+  workflow_dispatch: 
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: rfsxbuild.azurecr.io/gnuradiopipeline:3.9.2.0-3
+      credentials:
+        username: ${{  secrets.ACR_PRINCIPAL_ID }}
+        password: ${{  secrets.ACR_PRINCIPAL_PWD }}
+    timeout-minutes: 20
+           
+    steps:
+      - uses: actions/checkout@master
+      - name: Build
+        run: |
+          cd gr-azure-software-radio; pip install -r python/requirements.txt
+          mkdir build; cd build; cmake ..; cmake --build . -j --config Release
+      - name: Install
+        run: |
+          cd gr-azure-software-radio/build
+          sudo make install -j
+      - name: Update GNURadio preferences
+        run: |
+          mkdir -p "${HOME}/.gnuradio/prefs/"
+          echo "gr::vmcircbuf_sysv_shm_factory" > "${HOME}/.gnuradio/prefs/vmcircbuf_default_factory"
+      - name: Run Tests
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          AZURE_STORAGE_URL:  ${{ secrets.AZURE_STORAGE_URL }}
+          AZURE_STORAGE_SAS: ${{ secrets.AZURE_STORAGE_SAS }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_EVENTHUB_CONNECTION_STRING: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+          AZURE_EVENTHUB_NAME: ${{ secrets.AZURE_EVENTHUB_NAME }}
+          AZURE_EVENTHUB_CONSUMER_GROUP: ${{ secrets.AZURE_EVENTHUB_CONSUMER_GROUP }}
+          AZURE_KEYVAULT_NAME: ${{ secrets.AZURE_KEYVAULT_NAME }}
+          AZURE_KEYVAULT_TEST_KEY: ${{ secrets.AZURE_KEYVAULT_TEST_KEY }}
+          AZURE_STORAGE_READONLY_SAS: ${{ secrets.AZURE_STORAGE_READONLY_SAS }}
+        run: |
+          cd gr-azure-software-radio/build
+          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test; 
+          echo " "
+          echo "Now running integration..."
+          cd ..; cd python; python3 -m unittest integration_blob_source.py; python3 -m unittest integration_blob_sink.py; python3 -m unittest integration_default_credentials.py; python3 -m unittest integration_eventhub_sink.py;
+        shell: bash
+      - name: pylint
+        continue-on-error: false
+        run: |
+          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};
+          cd ..
+          pylint azure-software-radio --rcfile azure-software-radio/.pylintrc
+      - name: check step
+        if: success()
+        run: echo pylint has passed all checks
