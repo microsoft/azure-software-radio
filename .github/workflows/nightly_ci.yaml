@@ -45,6 +45,7 @@ jobs:
           AZURE_EVENTHUB_CONSUMER_GROUP: ${{ secrets.AZURE_EVENTHUB_CONSUMER_GROUP }}
           AZURE_KEYVAULT_NAME: ${{ secrets.AZURE_KEYVAULT_NAME }}
           AZURE_KEYVAULT_TEST_KEY: ${{ secrets.AZURE_KEYVAULT_TEST_KEY }}
+          AZURE_STORAGE_READONLY_SAS: ${{ secrets.AZURE_STORAGE_READONLY_SAS }}
         run: |
           cd gr-azure-software-radio/build
           export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test; 
