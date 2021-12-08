@@ -1,4 +1,4 @@
-name: Nightly_CI
+name: NIGHTLY_CI
 on:
   schedule:
     - cron: '30 0 * * *' 
