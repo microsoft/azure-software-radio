@@ -1,8 +1,5 @@
 name: Nightly_CI
 on:
-  push:
-    branches:
-      - add_nightly_run
   schedule:
     - cron: '30 0 * * *' 
   workflow_dispatch: 
