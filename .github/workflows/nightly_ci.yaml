@@ -1,7 +1,7 @@
 name: NIGHTLY_CI
 on:
   schedule:
-    - cron: '30 0 * * *' 
+    - cron: '30 0-23 * * *' 
   workflow_dispatch: 
 
 jobs:
