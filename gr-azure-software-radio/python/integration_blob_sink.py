@@ -137,7 +137,7 @@ class IntegrationBlobSink(gr_unittest.TestCase):
                                     src=blocks.vector_source_c([], vlen=vlen),
                                     vlen=vlen)
 
-    def test_write_to_read_only_container(self):
+    def not_test_write_to_read_only_container(self):
         """
         Confirm we get the failure we expect when trying to write a blob to a container where we do not have
         write access
