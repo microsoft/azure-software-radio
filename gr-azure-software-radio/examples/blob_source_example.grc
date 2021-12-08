@@ -93,12 +93,16 @@ blocks:
     container_name: blob_container_name
     maxoutbuf: '0'
     minoutbuf: '0'
+    queue_size: '4'
+    retry_total: '0'
+    type: fc32
     url: blob_url
+    vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 196.0]
+    coordinate: [40, 244.0]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -117,7 +121,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [256, 212.0]
+    coordinate: [296, 276.0]
     rotation: 0
     state: true
 - name: qtgui_sink_x_0
@@ -146,7 +150,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 180.0]
+    coordinate: [480, 244.0]
     rotation: 0
     state: true
 

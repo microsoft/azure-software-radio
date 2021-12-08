@@ -17,7 +17,6 @@ from azure.storage.blob import BlobServiceClient
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import numpy as np
-import urllib3.exceptions
 
 from azure_software_radio import BlobSink
 
@@ -137,7 +136,7 @@ class IntegrationBlobSink(gr_unittest.TestCase):
                                     src=blocks.vector_source_c([], vlen=vlen),
                                     vlen=vlen)
 
-    def not_test_write_to_read_only_container(self):
+    def test_write_to_read_only_container(self):
         """
         Confirm we get the failure we expect when trying to write a blob to a container where we do not have
         write access
@@ -161,35 +160,6 @@ class IntegrationBlobSink(gr_unittest.TestCase):
 
         with self.assertRaises(az_exceptions.HttpResponseError):
             op_block.create_blob()
-
-    def not_test_write_to_malformed_container_url(self):
-        """
-        Confirm we fail in create_blob if trying to use a malformed URL, such as
-        using a URL ending in a slash when using url_with_sas authentication
-        """
-
-        url = os.getenv('AZURE_STORAGE_URL')
-        read_only_sas = os.getenv('AZURE_STORAGE_READONLY_SAS')
-
-        # trigger a failure by including multiple slashes in the URL
-        bad_url = url + '//' + read_only_sas
-
-        blob_name = 'test-blob.npy'
-        block_len = 500
-
-        op_block = BlobSink(np_dtype=np.complex64,
-                            vlen=1,
-                            authentication_method="url_with_sas",
-                            url=bad_url,
-                            container_name=self.test_blob_container_name,
-                            blob_name=blob_name,
-                            block_len=block_len,
-                            queue_size=4,
-                            retry_total=0)
-
-        with self.assertRaises(urllib3.exceptions.LocationParseError):
-            op_block.create_blob()
-
 
 
 if __name__ == '__main__':

@@ -3,4 +3,4 @@
 # See License.txt in the project root for license information.
 #
 
-from .default_credentials import get_default_creds
+from .default_credentials import get_DefaultAzureCredential
