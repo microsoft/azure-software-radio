@@ -1,5 +1,9 @@
 name: NIGHTLY_CI
 on:
+  push:
+    branches:
+      - main
+      - dev
   schedule:
     - cron: '*/10 * * * *'
 
