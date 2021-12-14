@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member, eval-used, unused-variable
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member, eval-used, unused-variable, attribute-defined-outside-init
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -6,12 +6,11 @@
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
 #
-
-from gnuradio import gr, gr_unittest
-from rest_api import RestApi
 import requests
 import time
 from socket import socket
+from rest_api import RestApi
+from gnuradio import gr_unittest
 
 
 class QaRestApi(gr_unittest.TestCase):
