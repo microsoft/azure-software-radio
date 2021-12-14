@@ -6,12 +6,12 @@
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
 #
-import requests
+
 import time
 from socket import socket
-from rest_api import RestApi
+import requests
 from gnuradio import gr_unittest
-
+from rest_api import RestApi
 
 class QaRestApi(gr_unittest.TestCase):
 
