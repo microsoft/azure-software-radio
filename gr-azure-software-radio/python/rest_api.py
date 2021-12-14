@@ -5,7 +5,7 @@
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
 #
-# pylint: disable=no-member
+# pylint: disable=no-member, abstract-method, broad-except, unusable-variable
 #
 
 import threading

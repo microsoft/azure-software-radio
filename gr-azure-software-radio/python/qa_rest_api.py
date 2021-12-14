@@ -54,12 +54,12 @@ class qa_rest_api(gr_unittest.TestCase):
         instance = RestApi(self, port)
         # give server a second to startup
         time.sleep(1)
-        p = "name=pi"
+        para = "name=pi"
         addr_str = 'http://127.0.0.1:' + str(port) + '/get-by-name'
-        r = requests.get(addr_str, params=p)
+        r = requests.get(addr_str, params=para)
         res = eval(r.text)
         self.assertEqual(res['pi'], 3.14)
-    
+
     def test_set_by_name(self):
         self.pi = 0
         port = self.get_free_port()
