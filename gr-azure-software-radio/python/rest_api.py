@@ -18,9 +18,9 @@ class RestApi(gr.basic_block):
     """
     def __init__(self, tbself, port):
         gr.basic_block.__init__(self,
-            name="rest_api",
-            in_sig=[],
-            out_sig=[])
+                                name="rest_api",
+                                in_sig=[],
+                                out_sig=[])
         app = FastAPI()
         @app.get("/get-locals")
         def get_locals():

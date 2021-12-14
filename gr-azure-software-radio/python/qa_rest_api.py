@@ -19,7 +19,7 @@ class qa_rest_api(gr_unittest.TestCase):
     '''
     def get_free_port(self):
         with socket() as s:
-            s.bind(('',0))
+            s.bind(('', 0))
             return s.getsockname()[1]
 
     def test_instance(self):
@@ -37,7 +37,7 @@ class qa_rest_api(gr_unittest.TestCase):
         time.sleep(1)
         addr_str = 'http://127.0.0.1:' + str(port) + '/get-locals'
         r = requests.get(addr_str)
-        for i in range(1,4):
+        for i in range(1, 4):
             check_str = f'check_var{i}'
             self.assertEqual(check_str in r.text, True)
         self.assertEqual('fake_var' in r.text, False)
@@ -52,7 +52,7 @@ class qa_rest_api(gr_unittest.TestCase):
         addr_str = 'http://127.0.0.1:' + str(port) + '/get-by-name'
         r = requests.get(addr_str, params=p)
         res = eval(r.text)
-        self.assertEqual(res['pi'],3.14)
+        self.assertEqual(res['pi'], 3.14)
     
     def test_set_by_name(self):
         self.pi = 0
@@ -61,11 +61,11 @@ class qa_rest_api(gr_unittest.TestCase):
         # give server a second to startup
         time.sleep(1)
         addr_str = 'http://127.0.0.1:' + str(port) + '/set-by-name'
-        r = requests.put(addr_str, json={"pi":3.14})
+        r = requests.put(addr_str, json={"pi": 3.14})
         #print(r.text)
         res = eval(r.text)
-        self.assertEqual(self.pi,3.14)
-        self.assertEqual(res['All'],'set')
+        self.assertEqual(self.pi, 3.14)
+        self.assertEqual(res['All'], 'set')
 
     def set_var(self, val):
         self.val = val
@@ -77,10 +77,10 @@ class qa_rest_api(gr_unittest.TestCase):
         # give server a second to startup
         time.sleep(1)
         addr_str = 'http://127.0.0.1:' + str(port) + '/call-by-name'
-        r = requests.put(addr_str, json={"set_var":99})
+        r = requests.put(addr_str, json={"set_var": 99})
         res = eval(r.text)
-        self.assertEqual(self.val,99)
-        self.assertEqual(res['Ran'],'ok')
+        self.assertEqual(self.val, 99)
+        self.assertEqual(res['Ran'], 'ok')
 
 if __name__ == '__main__':
     gr_unittest.run(qa_rest_api)
