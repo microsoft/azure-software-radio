@@ -31,16 +31,32 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-You will need to install and configure the following before installing the Azure software radio OOT module:
+You will need to install and configure the following before installing the Azure software radio OOT moduler[^1]:
 
 ```
 GnuRadio 3.9.0 or greater
 python 3.8 or greater
+python3-pip
+pytest (pip) 
+cmake
+liborc-dev
 ```
 NOTE: If you have installed the Azure CLI with the default apt package on Ubuntu 20, the install may fail or the module may crash at runtime. See [Ubuntu 20 CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)
+
+[^1]: [GnuRadio installation instructions](https://wiki.gnuradio.org/index.php/InstallingGR#From_Binaries)
+
 ### Installing Azure software radio OOT
 
+
+
 ```
+
+git clone https://github.com/microsoft/azure-software-radio.git 
+
+cd azure-software-radio
+
+cd gr-azure-software-radio
+
 pip install -r python/requirements.txt
 
 mkdir build
