@@ -73,6 +73,26 @@ and obtain the connection string.
 Also generate a SAS token for the storage account with at least read and list permissions so we can
 test out all the auth options for the blob blobs.
 
+First, you must log in to azure, you can use [az login](https://github.com/MicrosoftDocs/azure-docs-cli/blob/main/cli/azure/reference-index#az_login)
+
+```azurecli-interactive
+az login
+```
+First, we must create a resource group:
+```azurecli-interactive
+az group create --name azsr-sdk-test-sa --location westus
+```
+
+To create the storage account you can run the following command:
+```azurecli-interactive
+az storage account create \
+  --name azsr-sdk-test-sa \
+  --resource-group azsr-sdk-test-rg \
+  --location westus \
+  --sku Standard_LRS \
+  --kind StorageV2
+```
+
 The blob integration test code require the following environment variables:
 - AZURE_STORAGE_CONNECTION_STRING: Connection string for the storage account you created for testing.
 - AZURE_STORAGE_URL: must contain the the URL to the storage account with no trailing '/'
@@ -91,16 +111,42 @@ unit test data requiring interactions with actual Azure infrastructure.
 
 #### Key Vault Integration Tests
 To run the Key Vault integration tests, you'll need to first create a Key Vault and store a secret with a value of
-"3.14". Make note of the key you used to store the secret. Next, you'll need to export the following environment
+"3.14". 
+
+To create the Key Vault you can use the following commands:
+```
+az keyvault create --location westus --name <your unique kv name here> --resource-group azsr-sdk-test-rg
+```
+And the secret can be created with:
+```
+az keyvault secret set --name azsr-sdk-test-secret --vault-name <your unique kv name here> --value 3.14
+```
+
+Make note of the secret you used to store the variable. Next, you'll need to export the following environment
 variables:
 
 - AZURE_KEYVAULT_NAME: Environment variable containing the name of the Key Vault which contains the test data. If the
   full URL to your Key Vault is "https://my-key-vault-name.vault.azure.net", you would use "my-key-vault-name".
-- AZURE_KEYVAULT_TEST_KEY: Environment variable containing the key of the secret required for the test. Again, the value
+- AZURE_KEYVAULT_TEST_KEY: Environment variable containing the name of the secret required for the test. Again, the value
   of the secret must be "3.14" for the test to pass.
 #### Event Hub Integration Tests
 In order to run the integration tests for the event hub blocks, you must first create an event hub resource on Azure, create a consumer group in the event hub, obtain the connection string and event hub entity name.
 
+To create the Event Hub, first create an Event Hub namespace:
+```azurecli-interactive
+az eventhubs namespace create --name azsr-sdk-test-ehns --resource-group azsr-sdk-test-rg -l westus
+```
+Then create the Event Hub:
+To create the Event Hub, first create an Event Hub namespace:
+```azurecli-interactive
+az eventhubs eventhub create --name azsr-sdk-test-eh --resource-group azsr-sdk-test-rg --namespace-name azsr-sdk-test-ehns
+```
+
+Finally, create a consumer group:
+
+```azurecli-interactive
+az eventhubs eventhub consumer-group create --resource-group --name azsr-sdk-test-rg --namespace-name --name azsr-sdk-test-ehns --eventhub-name --name azsr-sdk-test-eh --name --name azsr-sdk-test-cg
+```
 The event hub integration test code require the following environment variables:
 - AZURE_EVENTHUB_CONNECTION_STRING: Connection string for the event hub namespace you created for testing.
 - AZURE_EVENTHUB_NAME: The event hub entity name in the namespace.
@@ -122,7 +168,10 @@ Tests can be run with any of the following methods:
     ```
     python3 -m unittest integration_*
     ```
-
+Once all tests have passed, you can delete all resources by running:
+```azurecli-interactive
+az group delete --name azsr-sdk-test-rg
+```
 ## Frequently Asked Questions
 For a list of common questions, including problems and resolutions, please check our [FAQ](./docs/FAQ.md)
 
