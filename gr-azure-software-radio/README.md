@@ -145,7 +145,7 @@ az eventhubs eventhub create --name azsr-sdk-test-eh --resource-group azsr-sdk-t
 Finally, create a consumer group:
 
 ```azurecli-interactive
-az eventhubs eventhub consumer-group create --resource-group --name azsr-sdk-test-rg --namespace-name --name azsr-sdk-test-ehns --eventhub-name --name azsr-sdk-test-eh --name --name azsr-sdk-test-cg
+az eventhubs eventhub consumer-group create --resource-group azsr-sdk-test-rg --namespace-name azsr-sdk-test-ehns --eventhub-name azsr-sdk-test-eh --name azsr-sdk-test-cg
 ```
 The event hub integration test code require the following environment variables:
 - AZURE_EVENTHUB_CONNECTION_STRING: Connection string for the event hub namespace you created for testing.
