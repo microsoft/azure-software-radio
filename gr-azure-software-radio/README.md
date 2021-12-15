@@ -80,7 +80,7 @@ az login
 ```
 First, we must create a resource group:
 ```azurecli-interactive
-az group create --name azsr-sdk-test-sa --location westus
+az group create --name azsr-sdk-test-rg --location westus
 ```
 
 To create the storage account you can run the following command:
