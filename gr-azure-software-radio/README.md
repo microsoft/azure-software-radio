@@ -86,7 +86,7 @@ az group create --name azsr-sdk-test-rg --location westus
 To create the storage account you can run the following command:
 ```azurecli-interactive
 az storage account create \
-  --name azsr-sdk-test-sa \
+  --name azsrsdktestsa \
   --resource-group azsr-sdk-test-rg \
   --location westus \
   --sku Standard_LRS \
