@@ -14,30 +14,13 @@ Integration tests for functions from eventhub_sink.py
 import datetime
 import json
 import os
+import time
 import pmt
 
 from azure_software_radio import EventHubSource
 from azure.eventhub import EventHubProducerClient, EventData
+from gnuradio import blocks
 from gnuradio import gr, gr_unittest
-
-# pylint: disable=abstract-method
-class PmtMessageConsumer(gr.sync_block):
-    def __init__(self):
-        gr.sync_block.__init__(
-            self,
-            name="pmt message consumer",
-            in_sig=[],
-            out_sig=[]
-        )
-        self.msg_list = []
-        self.message_port_register_in(pmt.intern('in_port'))
-        self.set_msg_handler(pmt.intern('in_port'),
-                             self.handle_msg)
-
-    def handle_msg(self, msg):
-        self.msg_list.append(msg)
-        print('Received PMT message %s' % msg)
-
 
 class IntegrationEventhubSource(gr_unittest.TestCase):
 
@@ -80,7 +63,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
             pmt.from_double(4))
         pmsg = pmt.dict_add(
             pmsg,
-            pmt.string_to_symbol("eventhub"),
+            pmt.string_to_symbol("eventhub source"),
             pmt.from_long(5))
 
         msg = json.dumps(pmt.to_python(pmsg))
@@ -88,7 +71,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
         event_batch.add(EventData(msg))
         self.eventhub_producer.send_batch(event_batch)
 
-        pmt_msg_rec = PmtMessageConsumer()
+        msg_debug_block = blocks.message_debug()
 
         source_block = EventHubSource(
             authentication_method="connection_string",
@@ -97,19 +80,24 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
             consumer_group=self.eventhub_consumer_group,
             starting_position=test_start_time)
 
-        self.tb.msg_connect(source_block, 'out', pmt_msg_rec, 'in_port')
+        self.tb.msg_connect(source_block, 'out', msg_debug_block, 'print')
+        self.tb.msg_connect(source_block, 'out', msg_debug_block, 'store')
 
         self.assertEqual(
             pmt.to_python(
                 source_block.message_ports_out())[0],
             'out')
         self.assertEqual(
-            'in_port' in pmt.to_python(
-                pmt_msg_rec.message_ports_in()), True)
+            msg_debug_block.num_messages(), 0)
 
-        self.tb.run()
-        print('after run')
-        self.assertEqual(len(pmt_msg_rec.msg_list), 1)
+        self.tb.start()
+        time.sleep(1)
+        self.assertEqual(
+            msg_debug_block.num_messages(), 1)
+        source_block.stop()
+        self.tb.stop()
+        self.tb.wait()
+
 
 
 if __name__ == '__main__':
