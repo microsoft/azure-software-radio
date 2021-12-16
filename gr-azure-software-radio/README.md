@@ -31,30 +31,30 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-You will need to install and configure the following before installing the Azure software radio OOT moduler[^1]:
+You will need to install and configure the following before installing the Azure software radio OOT module[^1]:
 
 ```
-GnuRadio 3.9.0 or greater
+GnuRadio 3.9.x
 python 3.8 or greater
 python3-pip
 cmake
 liborc-dev
-doxygen 
+doxygen
 
 pytest (pip)
 pybind11 (pip)
 ```
-NOTE: If you have installed the Azure CLI with the default apt package on Ubuntu 20, the install may fail or the module may crash at runtime. See [Ubuntu 20 CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)
 
-[^1]: [GnuRadio installation instructions](https://wiki.gnuradio.org/index.php/InstallingGR#From_Binaries)
+**NOTE:** This module is not compatible with the Azure CLI availabile in the default apt repository on Ubuntu 20. If this older version of the Azure CLI is present on your system, the installation of this OOT module may fail or the module may crash at runtime. Please install the Azure CLI according to the recommendations found in [AZ CLI Installation in Linux](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)
+
+
+### Resolutions to Common Problems During Installation and Tests
+For a list common problems and resolutions, please check our [FAQ](./docs/FAQ.md) to see if your issue has been addressed.
 
 ### Installing Azure software radio OOT
 
-
-
 ```
-
-git clone https://github.com/microsoft/azure-software-radio.git 
+git clone https://github.com/microsoft/azure-software-radio.git
 
 cd azure-software-radio
 
@@ -67,6 +67,7 @@ cd build
 cmake ..
 make
 sudo make install
+sudo ldconfig
 ```
 
 ### Running the Unit Tests
@@ -130,7 +131,7 @@ unit test data requiring interactions with actual Azure infrastructure.
 
 #### Key Vault Integration Tests
 To run the Key Vault integration tests, you'll need to first create a Key Vault and store a secret with a value of
-"3.14". 
+"3.14".
 
 To create the Key Vault you can use the following commands:
 ```
@@ -272,7 +273,7 @@ There are two DIFI blocks (source and sink) as part of this out of tree module. 
 
 
 
-
+[^1]: [GnuRadio installation instructions](https://wiki.gnuradio.org/index.php/InstallingGR#From_Binaries)
 
 
 
