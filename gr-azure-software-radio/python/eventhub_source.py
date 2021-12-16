@@ -37,6 +37,7 @@ class EventHubSource(gr.sync_block):
     Consumer Group: The consumer group to receive events from Event Hub.
     Partition ID: The partition ID to receive events from.
     Starting Position: The position of an event in the Event Hub partition.
+    DefaultAzureCredential: The credential to use. Ignored if Auth Method is not "default" or not specified.
     """
     # pylint:  disable=too-many-arguments, no-member
     def __init__(
@@ -48,7 +49,8 @@ class EventHubSource(gr.sync_block):
             eventhub_name: str = None,
             consumer_group: str = None,
             partition_id: str = None,
-            starting_position=None):
+            starting_position=None,
+            default_cred=None):
 
         gr.sync_block.__init__(self,
                                name="eventhub_source",
@@ -68,6 +70,7 @@ class EventHubSource(gr.sync_block):
             eventhub_host_name=eventhub_host_name,
             eventhub_name=eventhub_name,
             consumer_group=consumer_group,
+            default_cred=default_cred
         )
 
         self.message_port_register_out(pmt.intern('out'))
@@ -106,7 +109,8 @@ def get_eventhub_consumer_client(
         sas_token: str = None,
         eventhub_host_name: str = None,
         eventhub_name: str = None,
-        consumer_group: str = None):
+        consumer_group: str = None,
+        default_credential = None):
     """ Initialize the Event Hub Consumer client
 
     Args:
@@ -121,6 +125,7 @@ def get_eventhub_consumer_client(
 
         eventhub_name (str): The path to the specified Event Hub to connect to.
         consumer_group (str): The consumer group to receive events from Event Hub.
+        DefaultAzureCredential: The credential to use. Ignored if Auth Method is not "default" or not specified.
     Raises:
         ValueError: Raised if an unsupported authentication method is used
 
@@ -140,7 +145,8 @@ def get_eventhub_consumer_client(
             credential=credential)
 
     elif authentication_method == "default":
-        default_credential = DefaultAzureCredential()
+        if not default_credential:
+            default_credential = DefaultAzureCredential()
         eventhub_consumer_client = EventHubConsumerClient(
             fully_qualified_namespace=eventhub_host_name,
             eventhub_name=eventhub_name,
