@@ -136,7 +136,7 @@ def get_eventhub_consumer_client(
         eventhub_consumer_client = EventHubConsumerClient.from_connection_string(
             connection_str, eventhub_name=eventhub_name, consumer_group=consumer_group)
 
-    elif authentication_method == "sas_token":
+    elif authentication_method == "sas":
         credential = AzureSasCredential(sas_token)
         eventhub_consumer_client = EventHubConsumerClient(
             fully_qualified_namespace=eventhub_host_name,
