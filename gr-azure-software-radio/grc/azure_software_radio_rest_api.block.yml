@@ -19,20 +19,4 @@ templates:
 
         self.${id} = ${id} = azure_software_radio.RestApi(self,${port})
 
-documentation: |
-    
-    This block starts a basic Rest API server at 127.0.0.1:{port}, presenting the following API's:
-    /get-locals: Returns a list of all variables/functions at the topblock level (returns dir(tb.self)).
-    /get-by-name: Returns the value of the variable specified by the required parameter 'name'.
-    /set-by-name: Sets the variable(s) specified by the input dictionary assuming keys are variable names and values
-                  are desired settings.
-    /call-by-name: Calls the functions(s) specified by the input dictionary assuming keys are function names and values
-                  are inputs.
-    
-   Args:
-        port: The desired server port, defaults to 8000.
-
-    Note: Documentation and http request formatters can be accessed for ease of use at 127.0.0.1:{port}/docs# once the block
-          is running.
-    
 file_format: 1
