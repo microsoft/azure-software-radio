@@ -45,7 +45,7 @@ class EventHubSink(gr.sync_block):
             eventhub_host_name: str = None,
             eventhub_name: str = None,
             partition_id: str = None,
-            default_cred=None):
+            default_credential=None):
 
         gr.sync_block.__init__(self,
                                name="eventhub_sink",
@@ -63,7 +63,7 @@ class EventHubSink(gr.sync_block):
             connection_str=connection_str,
             sas_token=sas_token,
             eventhub_host_name=eventhub_host_name,
-            default_cred=default_cred
+            default_credential=default_credential
         )
 
         self.message_port_register_in(pmt.intern('in'))

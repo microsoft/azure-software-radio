@@ -16,7 +16,7 @@ import json
 import os
 import pmt
 
-from azure_software_radio import EventHubSource
+from azure_software_radio import EventHubSource, default_credentials
 from azure.eventhub import EventHubProducerClient, EventData
 from gnuradio import gr, gr_unittest
 
@@ -96,6 +96,70 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
             eventhub_name=self.eventhub_name,
             consumer_group=self.eventhub_consumer_group,
             starting_position=test_start_time)
+
+        self.tb.msg_connect(source_block, 'out', pmt_msg_rec, 'in_port')
+
+        self.assertEqual(
+            pmt.to_python(
+                source_block.message_ports_out())[0],
+            'out')
+        self.assertEqual(
+            'in_port' in pmt.to_python(
+                pmt_msg_rec.message_ports_in()), True)
+
+        self.tb.run()
+        print('after run')
+        self.assertEqual(len(pmt_msg_rec.msg_list), 1)
+    
+    def test_round_trip_data_through_eventhub_default_cred(self):
+
+        creds = default_credentials.get_DefaultAzureCredential(enable_cli_credential=True,
+                                                               enable_environment=True,
+                                                               enable_managed_identity=True,
+                                                               enable_powershell=True,
+                                                               enable_visual_studio_code=True,
+                                                               enable_shared_token_cache=True,
+                                                               enable_interactive_browser=False)
+
+        test_start_time = datetime.datetime.utcnow()
+
+        pmsg = pmt.make_dict()
+        pmsg = pmt.dict_add(
+            pmsg,
+            pmt.string_to_symbol("this"),
+            pmt.from_long(0))
+        pmsg = pmt.dict_add(pmsg, pmt.string_to_symbol("is"), pmt.from_long(1))
+        pmsg = pmt.dict_add(
+            pmsg,
+            pmt.string_to_symbol("a"),
+            pmt.from_double(2))
+        pmsg = pmt.dict_add(
+            pmsg,
+            pmt.string_to_symbol("test"),
+            pmt.from_long(3))
+        pmsg = pmt.dict_add(
+            pmsg,
+            pmt.string_to_symbol("for"),
+            pmt.from_double(4))
+        pmsg = pmt.dict_add(
+            pmsg,
+            pmt.string_to_symbol("eventhub"),
+            pmt.from_long(5))
+
+        msg = json.dumps(pmt.to_python(pmsg))
+        event_batch = self.eventhub_producer.create_batch()
+        event_batch.add(EventData(msg))
+        self.eventhub_producer.send_batch(event_batch)
+
+        pmt_msg_rec = PmtMessageConsumer()
+
+        source_block = EventHubSource(
+            authentication_method="default",
+            connection_str=self.eventhub_connection_string,
+            eventhub_name=self.eventhub_name,
+            consumer_group=self.eventhub_consumer_group,
+            starting_position=test_start_time,
+            default_cred=creds)
 
         self.tb.msg_connect(source_block, 'out', pmt_msg_rec, 'in_port')
 

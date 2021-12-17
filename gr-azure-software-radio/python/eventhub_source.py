@@ -50,7 +50,7 @@ class EventHubSource(gr.sync_block):
             consumer_group: str = None,
             partition_id: str = None,
             starting_position=None,
-            default_cred=None):
+            default_credential=None):
 
         gr.sync_block.__init__(self,
                                name="eventhub_source",
@@ -70,7 +70,7 @@ class EventHubSource(gr.sync_block):
             eventhub_host_name=eventhub_host_name,
             eventhub_name=eventhub_name,
             consumer_group=consumer_group,
-            default_cred=default_cred
+            default_credential=default_credential
         )
 
         self.message_port_register_out(pmt.intern('out'))
