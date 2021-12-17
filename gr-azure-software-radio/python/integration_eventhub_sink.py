@@ -105,6 +105,7 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
             self.eventhub_consumer.close()
 
     def test_round_trip_data_through_eventhub(self):
+        print("getting started")
         test_start_time = datetime.datetime.utcnow()
         msg_interval = 1000
         msg_list = [pmt.from_long(i) for i in range(NUM_MSGS)]
@@ -115,12 +116,12 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
             src_data.append(float(i))
         src = blocks.vector_source_f(src_data, False)
         pmt_msg_gen = PmtMessageGenerator(msg_list, msg_interval)
-
+        print("sink...")
         sink_block = EventHubSink(
             authentication_method="connection_string",
             connection_str=self.eventhub_connection_string,
             eventhub_name=self.eventhub_name)
-
+        print("created")
         # Connect vector source to message gen
         self.tb.connect(src, pmt_msg_gen)
 
@@ -152,7 +153,7 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
                                                                enable_visual_studio_code=True,
                                                                enable_shared_token_cache=True,
                                                                enable_interactive_browser=False)
-        print(creds)
+        print(dir(creds))
         test_start_time = datetime.datetime.utcnow()
         msg_interval = 1000
         msg_list = [pmt.from_long(i) for i in range(NUM_MSGS)]

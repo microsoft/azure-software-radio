@@ -58,6 +58,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
         self.eventhub_producer.close()
 
     def test_round_trip_data_through_eventhub(self):
+        print("starting now")
         test_start_time = datetime.datetime.utcnow()
 
         pmsg = pmt.make_dict()
@@ -89,14 +90,14 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
         self.eventhub_producer.send_batch(event_batch)
 
         pmt_msg_rec = PmtMessageConsumer()
-
+        print("about to create source block")
         source_block = EventHubSource(
             authentication_method="connection_string",
             connection_str=self.eventhub_connection_string,
             eventhub_name=self.eventhub_name,
             consumer_group=self.eventhub_consumer_group,
             starting_position=test_start_time)
-
+        print("block created")
         self.tb.msg_connect(source_block, 'out', pmt_msg_rec, 'in_port')
 
         self.assertEqual(
@@ -159,7 +160,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
             eventhub_name=self.eventhub_name,
             consumer_group=self.eventhub_consumer_group,
             starting_position=test_start_time,
-            default_cred=creds)
+            default_credential=creds)
 
         self.tb.msg_connect(source_block, 'out', pmt_msg_rec, 'in_port')
 
