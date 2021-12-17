@@ -134,12 +134,13 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
             'in' in pmt.to_python(
                 sink_block.message_ports_in()), True)
 
-        self.tb.run()
+        self.tb.start()
         with self.eventhub_consumer:
             self.eventhub_consumer.receive(
                 on_event=self.on_event,
                 starting_position=test_start_time)
         self.assertEqual(NUM_MSGS, self.num_rx_msgs)
+        self.tb.stop()
 
 
 if __name__ == '__main__':
