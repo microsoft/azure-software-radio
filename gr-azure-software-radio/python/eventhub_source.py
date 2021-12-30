@@ -132,11 +132,13 @@ def get_eventhub_consumer_client(
     Returns:
         EventHubConsumerClient: An Event Hub consumer client ready to be used
     """
+
+    print(f'METHOD {authentication_method}')
     if authentication_method == "connection_string":
         eventhub_consumer_client = EventHubConsumerClient.from_connection_string(
             connection_str, eventhub_name=eventhub_name, consumer_group=consumer_group)
 
-    elif authentication_method == "sas_token":
+    elif authentication_method == "sas":
         credential = AzureSasCredential(sas_token)
         eventhub_consumer_client = EventHubConsumerClient(
             fully_qualified_namespace=eventhub_host_name,
@@ -152,6 +154,7 @@ def get_eventhub_consumer_client(
             eventhub_name=eventhub_name,
             consumer_group=consumer_group,
             credential=default_credential)
+        print('finished client')
     else:
         raise ValueError("Unsupported authentication method specified")
 
