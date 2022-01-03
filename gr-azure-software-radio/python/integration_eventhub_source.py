@@ -27,6 +27,8 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
     def setUp(self):
         self.tb = gr.top_block()
 
+        self.eventhub_host_name = os.getenv(
+            'AZURE_EVENTHUB_HOST_NAME')
         self.eventhub_connection_string = os.getenv(
             'AZURE_EVENTHUB_CONNECTION_STRING')
         self.eventhub_consumer_group = os.getenv(
@@ -203,7 +205,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
         print("about to instant")
         source_block = EventHubSource(
             authentication_method="default",
-            connection_str=self.eventhub_connection_string,
+            eventhub_host_name=self.eventhub_host_name,
             eventhub_name=self.eventhub_name,
             consumer_group=self.eventhub_consumer_group,
             starting_position=test_start_time,
@@ -220,7 +222,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
             msg_debug_block.num_messages(), 0)
 
         self.tb.start()
-        time.sleep(1)
+        time.sleep(5)
         self.assertEqual(
             msg_debug_block.num_messages(), 1)
         source_block.stop()
