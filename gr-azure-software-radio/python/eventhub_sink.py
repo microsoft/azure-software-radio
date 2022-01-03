@@ -9,10 +9,10 @@
 import json
 import pmt
 
-from gnuradio import gr
 from azure.eventhub import EventHubProducerClient, EventData
 from azure.core.credentials import AzureSasCredential
 from azure.identity import DefaultAzureCredential
+from gnuradio import gr
 
 
 # pylint: disable=abstract-method

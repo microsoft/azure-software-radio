@@ -10,12 +10,12 @@ import json
 import threading
 import pmt
 
-from gnuradio import gr
 from azure.eventhub import EventHubConsumerClient
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureSasCredential
+from gnuradio import gr
 
-# pylint: disable=abstract-method
+# pylint: disable=abstract-method,too-many-arguments
 class EventHubSource(gr.sync_block):
     """ Receives and converts JSON events from Azure Event Hub to GNU Radio PMT format.
 
@@ -72,7 +72,6 @@ class EventHubSource(gr.sync_block):
             consumer_group=consumer_group,
             default_credential=default_credential
         )
-        print(f'evc: {self.eventhub_consumer}')
         self.message_port_register_out(pmt.intern('out'))
 
         self.rec_thread = threading.Thread(target=self.receive)
@@ -133,7 +132,6 @@ def get_eventhub_consumer_client(
         EventHubConsumerClient: An Event Hub consumer client ready to be used
     """
 
-    print(f'METHOD {authentication_method}')
     if authentication_method == "connection_string":
         eventhub_consumer_client = EventHubConsumerClient.from_connection_string(
             connection_str, eventhub_name=eventhub_name, consumer_group=consumer_group)
@@ -154,7 +152,6 @@ def get_eventhub_consumer_client(
             eventhub_name=eventhub_name,
             consumer_group=consumer_group,
             credential=default_credential)
-        print('finished client')
     else:
         raise ValueError("Unsupported authentication method specified")
 

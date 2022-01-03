@@ -98,8 +98,8 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
         self.tb = None
 
     def on_event(self, _partition_context, event):
-        msg = json.loads(list(event.body)[0])
-        print('Received the event: %s' % msg)
+        _ = json.loads(list(event.body)[0])
+        #print('Received the event: %s' % msg)
         self.num_rx_msgs += 1
         if self.num_rx_msgs == NUM_MSGS:
             self.eventhub_consumer.close()
