@@ -72,7 +72,7 @@ class EventHubSource(gr.sync_block):
             consumer_group=consumer_group,
             default_credential=default_credential
         )
-
+        print(f'evc: {self.eventhub_consumer}')
         self.message_port_register_out(pmt.intern('out'))
 
         self.rec_thread = threading.Thread(target=self.receive)
