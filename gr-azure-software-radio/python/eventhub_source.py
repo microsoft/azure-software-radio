@@ -109,7 +109,7 @@ def get_eventhub_consumer_client(
         eventhub_host_name: str = None,
         eventhub_name: str = None,
         consumer_group: str = None,
-        default_credential = None):
+        default_credential=None):
     """ Initialize the Event Hub Consumer client
 
     Args:

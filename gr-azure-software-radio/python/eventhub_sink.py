@@ -92,7 +92,7 @@ def get_eventhub_producer_client(
         sas_token: str = None,
         eventhub_host_name: str = None,
         eventhub_name: str = None,
-        default_credential = None):
+        default_credential=None):
     """ Initialize the Event Hub Producer client
 
     Args:
