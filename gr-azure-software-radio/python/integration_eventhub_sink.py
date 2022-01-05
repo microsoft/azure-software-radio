@@ -81,10 +81,11 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
     def setUp(self):
         self.tb = gr.top_block()
 
-        self.eventhub_host_name = os.getenv(
-            'AZURE_EVENTHUB_HOST_NAME')
         self.eventhub_connection_string = os.getenv(
             'AZURE_EVENTHUB_CONNECTION_STRING')
+
+        self.eventhub_host_name = os.getenv(
+            'AZURE_EVENTHUB_HOST_NAME')
         self.eventhub_consumer_group = os.getenv(
             'AZURE_EVENTHUB_CONSUMER_GROUP')
         self.eventhub_name = os.getenv('AZURE_EVENTHUB_NAME')
