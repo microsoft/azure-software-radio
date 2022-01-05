@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member, duplicate-code
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -21,6 +21,7 @@ from azure_software_radio import EventHubSource, default_credentials
 from azure.eventhub import EventHubProducerClient, EventData
 from gnuradio import blocks
 from gnuradio import gr, gr_unittest
+
 
 class IntegrationEventhubSource(gr_unittest.TestCase):
 

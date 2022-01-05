@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member
+# pylint: disable=missing-function-docstring, no-self-use, missing-class-docstring, no-member, duplicate-code, abstract-method
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -24,7 +24,7 @@ from gnuradio import blocks
 
 NUM_MSGS = 10
 
-#pylint: disable=abstract-method
+
 class PmtMessageGenerator(gr.sync_block):
     """
     This is a PMT Message Generating class for testing purposes
