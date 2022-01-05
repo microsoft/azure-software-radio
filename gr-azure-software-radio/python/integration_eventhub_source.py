@@ -43,7 +43,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
         self.tb = None
         self.eventhub_producer.close()
 
-    def dont_test_round_trip_data_through_eventhub(self):
+    def test_round_trip_data_through_eventhub(self):
         test_start_time = datetime.datetime.utcnow()
         pmsg = pmt.make_dict()
         pmsg = pmt.dict_add(

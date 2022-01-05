@@ -99,13 +99,11 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
 
     def on_event(self, _partition_context, event):
         _ = json.loads(list(event.body)[0])
-        #print('Received the event: %s' % msg)
         self.num_rx_msgs += 1
         if self.num_rx_msgs == NUM_MSGS:
             self.eventhub_consumer.close()
 
     def test_round_trip_data_through_eventhub(self):
-        print("getting started")
         test_start_time = datetime.datetime.utcnow()
         msg_interval = 1000
         msg_list = [pmt.from_long(i) for i in range(NUM_MSGS)]
@@ -116,7 +114,6 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
             src_data.append(float(i))
         src = blocks.vector_source_f(src_data, False)
         pmt_msg_gen = PmtMessageGenerator(msg_list, msg_interval)
-        print("sink...")
         sink_block = EventHubSink(
             authentication_method="connection_string",
             connection_str=self.eventhub_connection_string,
