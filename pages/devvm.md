@@ -32,8 +32,9 @@ Follow the deployment instructions to validate access to the developer vm and be
 
 ## Validating Access to the Developer VM
 
-1. Open your browser and navigate to [AzurePortal](https://portal.azure.com) and sign-in 
-2. In the search bar type "MarketPlace" and Click MarketPlace 
+1. Open your browser and navigate to [AzurePortal](https://portal.azure.com) and sign-in
+2. Make sure that your "Default subscription filter" is set to the subscription you requested to whitelist
+3. In the search bar type "MarketPlace" and Click MarketPlace 
    
    ![Marketplace](./../images/marketplace.jpg)
 
@@ -46,7 +47,7 @@ Follow the deployment instructions to validate access to the developer vm and be
    
    ![SDRDevVM](./../images/azuresoftwareradiodevvmoffer.jpg)
 
-   **if you dont see the offering listed and it is more than 48 hours since you filled in the form contact the Azure software radio developer VM team via email azuresoftwareradio@microsoft.com**
+   **if you dont see the offering listed and it is more than 48 hours since you filled in the form contact the Azure software radio developer VM team via email azuresoftwareradio@microsoft.com** 
 
 ## Validate Qouta Requirements
 
