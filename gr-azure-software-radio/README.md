@@ -112,7 +112,12 @@ First, you must log in to azure, you can use [az login](https://github.com/Micro
 ```azurecli-interactive
 az login
 ```
-First, we must create a resource group:
+Set the subscription for which you want to create the VM
+```azurecli-interactive
+az account set --subscription "<subscription ID>
+```
+
+Create a resource group:
 ```azurecli-interactive
 az group create --name azsr-sdk-test-rg --location westus
 ```
