@@ -30,8 +30,9 @@ To get started, first please follow the install guides below.
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
-
-You will need to install and configure the following before installing the Azure software radio OOT module[^1]:
+This project depends on the GNU Radio runtime and development dependencies. See the [GnuRadio installation instructions](https://wiki.gnuradio.org/index.php/InstallingGR#From_Binaries) for steps on
+installing GnuRadio from binaries. Some package managers do not automatically install all of the development dependencies,
+so you may need to separately install and configure some of them. The Azure software radio OOT module requires the following:
 
 ```
 GnuRadio 3.9.x
@@ -45,13 +46,19 @@ pytest (pip)
 pybind11 (pip)
 ```
 
-**NOTE:** This module is not compatible with the Azure CLI availabile in the default apt repository on Ubuntu 20. If this older version of the Azure CLI is present on your system, the installation of this OOT module may fail or the module may crash at runtime. Please install the Azure CLI according to the recommendations found in [AZ CLI Installation in Linux](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)
+**NOTE:** If using the Azure CLI, you will need a recent version, (2.17.1 or newer) .This module is not compatible with
+the Azure CLI availabile in the default apt repository on Ubuntu 20. If this older version of the Azure CLI is present
+on your system, the installation of this OOT module may fail or the module may crash at runtime. Please install the
+Azure CLI according to the recommendations found in [AZ CLI Installation in Linux](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)
 
 
 ### Resolutions to Common Problems During Installation and Tests
 For a list common problems and resolutions, please check our [FAQ](./docs/FAQ.md) to see if your issue has been addressed.
 
 ### Installing Azure software radio OOT
+
+If you see error messages after running any of the following steps, stop and check our [FAQ](./docs/FAQ.md) for how to
+resolve the problem.
 
 ```
 git clone https://github.com/microsoft/azure-software-radio.git
@@ -79,12 +86,19 @@ Run the QA tests with any of the following methods:
     make test
     ```
 
+    You can review detailed test ouptput (including any failures) in Testing/Temporary/LastTest.log
+
  - Or from the python directory:
     ```
     python -m pytest qa_*
     ```
 
+    Pytest will show detailed test results directly in the output of this command.
+
+
 ### Running the Integration Tests
+Note: Most users won't need to run the integration tests if the unit tests are passing. The integration tests can be
+used for end-to-end testing but are significantly more complicated to set up and run than the unit tests.
 
 #### Blob Integration Tests
 To run the integration tests for the blob blocks, you must first create a storage account on Azure

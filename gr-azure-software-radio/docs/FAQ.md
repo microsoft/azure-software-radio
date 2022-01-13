@@ -6,6 +6,16 @@ See our guidelines on [How to file issues and get help](../../SUPPORT.md) or [Re
 ## How can I contribute to this project?
 See our [Contributing](../../README.md#contributing) guide for more details.
 
+## I'm getting a CMAKE error that says it cannot find Gnuradio. What do I do?
+If you see an error like the following:
+
+```
+CMake Error at CMakeLists.txt:77 (find_package):
+    Could not find a configuration file for package "Gnuradio" that is compatible with requested version "3.9".
+```
+
+It's likely that either GNU Radio isn't installed, or your environment isn't set up properly for CMAKE to be able to find where it was installed. Please check the [GNU Radio Installation Instructions](https://wiki.gnuradio.org/index.php/InstallingGR) for suggestions on ways to properly install and configure GNU Radio appropriately for your environment.
+
 ## Why is cmake failing to find Azure components?
 If you are having issues installing gr-azure-software-radio, the first troubleshooting step is to make sure the python requirements have been successfully installed. To install the requirements use ``` pip install -r python/requirements.txt ```  (or follow the [Installation Instructions](../../README.md/#installing-azure-software-radio-oot)).
 Then, verify the installed package versions using ``` pip freeze -r python/requirements.txt ```.
@@ -29,6 +39,28 @@ sudo apt install liborc-0.4-dev
 ```
 
 You should now be able to compile gr-azure-software-radio.
+
+## I just compiled and installed the OOT Module, but all of the unit tests are failing. What now?
+Check the test output for the specific errors that were thrown. If you ran the tests with `make test`, the error logs should be in Testing/Temporary/LastTest.log, starting from the build directory.
+
+If you ran the tests using python and pytest, the errors should be in the output of the test command.
+
+
+## I'm getting an ImportError for libgnuradio-azure_software_radio when running the unit tests
+If you see an error that looks like the following:
+
+```
+ImportError: libgnuradio-azure_software_radio.so.1.0.0git: cannot open shared object file: No such file or directory
+```
+
+If you were able to run `make` and `make install` with no errors, try running the following:
+
+```
+sudo ldconfig
+```
+
+This should enable the Linux dynamic library loader to find your newly installed shared object file.
+
 ## I'm getting a ModuleNotFoundError
 If you see the following error,
 
