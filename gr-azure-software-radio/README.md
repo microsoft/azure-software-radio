@@ -30,12 +30,13 @@ To get started, first please follow the install guides below.
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
-This project depends on the GNU Radio runtime and development dependencies. See the [GnuRadio installation instructions](https://wiki.gnuradio.org/index.php/InstallingGR#From_Binaries) for steps on
+This project depends on the GNU Radio 3.9.x runtime and development dependencies. This project does not
+support GNU Radio 3.10.x at this time. See the [GnuRadio installation instructions](https://wiki.gnuradio.org/index.php/InstallingGR#From_Binaries) for steps on
 installing GnuRadio from binaries. Some package managers do not automatically install all of the development dependencies,
 so you may need to separately install and configure some of them. The Azure software radio OOT module requires the following:
 
 ```
-GnuRadio 3.9.x
+GnuRadio 3.9.x (Note: not 3.10.x)
 python 3.8 or greater
 python3-pip
 cmake
