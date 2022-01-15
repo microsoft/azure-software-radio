@@ -119,7 +119,6 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
             authentication_method="connection_string",
             connection_str=self.eventhub_connection_string,
             eventhub_name=self.eventhub_name)
-        print("created")
         # Connect vector source to message gen
         self.tb.connect(src, pmt_msg_gen)
 
@@ -151,7 +150,6 @@ class IntegrationEventhubSink(gr_unittest.TestCase):
                                                                enable_visual_studio_code=True,
                                                                enable_shared_token_cache=True,
                                                                enable_interactive_browser=False)
-        print(dir(creds))
         test_start_time = datetime.datetime.utcnow()
         msg_interval = 1000
         msg_list = [pmt.from_long(i) for i in range(NUM_MSGS)]
