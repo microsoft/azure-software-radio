@@ -9,10 +9,10 @@
 import json
 import pmt
 
-from gnuradio import gr
 from azure.eventhub import EventHubProducerClient, EventData
 from azure.core.credentials import AzureSasCredential
 from azure.identity import DefaultAzureCredential
+from gnuradio import gr
 
 
 # pylint: disable=abstract-method
@@ -44,7 +44,8 @@ class EventHubSink(gr.sync_block):
             sas_token: str = None,
             eventhub_host_name: str = None,
             eventhub_name: str = None,
-            partition_id: str = None):
+            partition_id: str = None,
+            default_credential=None):
 
         gr.sync_block.__init__(self,
                                name="eventhub_sink",
@@ -61,7 +62,8 @@ class EventHubSink(gr.sync_block):
             eventhub_name=eventhub_name,
             connection_str=connection_str,
             sas_token=sas_token,
-            eventhub_host_name=eventhub_host_name
+            eventhub_host_name=eventhub_host_name,
+            default_credential=default_credential
         )
 
         self.message_port_register_in(pmt.intern('in'))
@@ -89,7 +91,8 @@ def get_eventhub_producer_client(
         connection_str: str = None,
         sas_token: str = None,
         eventhub_host_name: str = None,
-        eventhub_name: str = None):
+        eventhub_name: str = None,
+        default_credential=None):
     """ Initialize the Event Hub Producer client
 
     Args:
@@ -102,6 +105,7 @@ def get_eventhub_producer_client(
         eventhub_host_name (optional, str): The fully qualified host name for the Event Hub namespace. This
             is required if using "sas" and "default" authentication.
         eventhub_name (str): The path to the specified Event Hub to connect to.
+        DefaultAzureCredential: The credential to use. Ignored if Auth Method is not "default" or not specified.
     Raises:
         ValueError: Raised if an unsupported authentication method is used
 
@@ -112,7 +116,7 @@ def get_eventhub_producer_client(
         eventhub_producer_client = EventHubProducerClient.from_connection_string(
             connection_str, eventhub_name=eventhub_name)
 
-    elif authentication_method == "sas_token":
+    elif authentication_method == "sas":
         credential = AzureSasCredential(sas_token)
         eventhub_producer_client = EventHubProducerClient(
             fully_qualified_namespace=eventhub_host_name,
@@ -120,7 +124,8 @@ def get_eventhub_producer_client(
             credential=credential)
 
     elif authentication_method == "default":
-        default_credential = DefaultAzureCredential()
+        if not default_credential:
+            default_credential = DefaultAzureCredential()
         eventhub_producer_client = EventHubProducerClient(
             fully_qualified_namespace=eventhub_host_name,
             eventhub_name=eventhub_name,
