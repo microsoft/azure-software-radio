@@ -85,7 +85,7 @@ Follow the deployment instructions to validate access to the developer vm and be
    
    ![VMCreateP2](./../images/vmcreate2.jpg)
 
-    **The System Managed Identity can be assigned permissions to Azure Resources Post Deployment to allow the Azure Client and AzCopy to login to directly to Azure and access resources it has been authorized to**
+    **The System Managed Identity can be assigned permissions to Azure Resources Post Deployment to allow the Azure Client and AzCopy to login directly to Azure and access resources it has been authorized <we might need to expand on this step concerning storage acct and keyvault> to** 
     
 7. Click Review+Create and then Click Create
 8. Confirm the deployment is successful as shown and click Go To Resource
