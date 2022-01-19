@@ -117,7 +117,7 @@ The blob integration test code require the following environment variables:
 - AZURE_STORAGE_CONNECTION_STRING: Connection string for the blob storage account you created for testing.
 - AZURE_STORAGE_URL: must contain the the URL to the blob storage account with no trailing '/'
 - AZURE_STORAGE_SAS: must contain a SAS token string for the blob storage account specified in AZURE_STORAGE_URL. The
-  SAS token must have full permissions to the blob storage account.
+  SAS token must have <specify here> permissions to the blob storage account.
 - AZURE_STORAGE_READONLY_SAS: must contain a SAS token string for the blob storage account specified in
   AZURE_STORAGE_URL, but with read-only permissions to the blob storage account.
 
