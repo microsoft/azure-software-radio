@@ -219,7 +219,7 @@ It is expected that the user will setup a storage account and a container prior 
 
 	There are several ways to authenticate to the Azue blob backend, these blocks support authentication using a connection string, a URL with an embedded SAS token, or use credentials supported by the DefaultAzureCredential class.
 
-	See the [Blob Examples](./examples/README.md).
+	See the [Blob Examples](./examples/README.md#blob-source-and-sink-examples).
 
 ## Event Hub Blocks
 The Event Hub blocks (source and sink) provide an interface to send and receive events to [Azure Event Hubs](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about) using the message passing interface in GNU Radio.
@@ -235,7 +235,7 @@ It is expected that the user will create an Event Hubs namespace, Event Hub enti
 
 	These blocks support multiple ways to authenticate to the Azue Event Hub backend, such as using a connection string, a SAS token, or use credentials supported by the DefaultAzureCredential class.
 
-	See the [Event Hub Examples](./examples/README.md).
+	See the [Event Hub Examples](./examples/README.md#event-hub-examples).
 
 ## IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard (DIFI)
 This is a set of GNU Radio blocks based on IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard version 1.0.
@@ -269,7 +269,7 @@ There are two DIFI blocks (source and sink) as part of this out of tree module. 
 
 	Note: this block converts from float 32 I and Q down to the specified bit depth for I and Q, which can cause significant quantization error for small signals.
 
-    See [DIFI Examples](./examples/README.md), [DIFI Paired](./examples/difi_paired_example.grc) and [DIFI Standalone](./examples/difi_standalone.grc) for block examples.
+    See [DIFI Examples](./examples/README.md#DIFI-Examples), [DIFI Paired](./examples/difi_paired_example.grc) and [DIFI Standalone](./examples/difi_standalone.grc) for block examples.
 
 
 
