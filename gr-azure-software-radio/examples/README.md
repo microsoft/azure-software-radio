@@ -44,6 +44,8 @@ To run [blob-sink-example.grc](../examples/blob-sink-example.grc) or [blob-sourc
         your storage account. See https://docs.microsoft.com/en-us/azure/storage/blobs/assign-azure-role-data-access
 
 ## Blob Sink Example
+Click the button below to deploy a new storage account and blob container for testing with the blob sink and source examples:
+
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpomeroy3%2Fazure-software-radio%2Ffeature%2Fautodeploy%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json)
 
 If you plan to use the Azure CLI to authenticate to the blob back end, please run
