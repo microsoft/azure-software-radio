@@ -54,7 +54,8 @@ If you are not using the Azure Cloud Shell, you will first need to log in to the
 az login
 ```
 
-- If running on a VM in Azure, you may use the VM's Managed Identity for authentication. See https://docs.microsoft.com/en-us/azure/storage/blobs/authorize-managed-identity for more details on working with blobs and managed identities. 
+- If running on a VM in Azure, you may use the VM's Managed Identity for authentication. See https://docs.microsoft.com/en-us/azure/storage/blobs/authorize-managed-identity for more details on working with blobs and managed identities. This only needs to be set up for a given VM and storage account pairing once. Afterwards, the VM will have permissions to access any current or new blob containers in that storage account. 
+
     -  Check if your VM has a Manageed Identity by running:
         ```
         az vm identity show --name MyVirtualMachine --resource-group MyResourceGroup
@@ -101,7 +102,7 @@ az login
 
         See https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/howto-assign-access-cli for more details on using the Azure CLI to manage access to resources. 
 
-- If the VM in Azure has managed identity disabled, or you are not running on an Azure VM, you may use the Azure CLI to log in to Azure and authenticate to blob storage. 
+- If the VM in Azure has managed identity disabled, or you are not running on an Azure VM, you may use the Azure CLI to log in to Azure and authenticate to blob storage. This only needs to be done once per user and storage account pairing. Afterwards, the user will have permissions to access any current or new blob containers in that storage account. 
 
     1. To log in to Azure, run:
         ``` 
