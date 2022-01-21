@@ -160,7 +160,7 @@ To run the flowgraph, you must:
 
 Run the flowgraph and you should see the QT GUI Sink block showing the contents of your blob object.
 
-Once you are done with running the examples, delete your blob object to stop being charged for storage.
+Once you are done with running the examples, delete the resources you created to ensure you do not incur ongoing charges for storage.
 
 # Event Hub Examples
 ## Event Hub Example Prerequisites
