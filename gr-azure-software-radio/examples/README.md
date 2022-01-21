@@ -30,23 +30,104 @@ If you want to enable the Azure Blob sink block, you will need to also setup a s
 
 # Blob Source and Sink Examples
 ## Blob Example Prerequisites
-To run [blob-sink-example.grc](../examples/blob-sink-example.grc) or [blob-source-example.grc](../examples/blob-source-example.grc), you must first:
+To run [blob-sink-example.grc](../examples/blob-sink-example.grc) or [blob-source-example.grc](../examples/blob-source-example.grc), you must first create resources in Azure for the example files to interact with. 
+
+You can either click the button below to deploy a new storage account and blob container for testing, or you can follow Azure tutorials on how to deploy the blob resources manually.
+
+### Deploy Resources Automatically
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpomeroy3%2Fazure-software-radio%2Ffeature%2Fautodeploy%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json)
+
+### Manual Resource Deployment Instructions
 1. Set up a storage account in your Azure subscription
     - See: https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create
 2. Add a container in that storage account.
     - See: https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal#create-a-container
-3. Choose how to authenticate to the blob storage account. This example uses the "default" authentication option, which uses the [DefaultAzureCredential class](https://docs.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential) to attempt to authenticate to the blob storage backend with a list of credential types in priority order.
-    - If running on a VM in Azure, you may use the VM's Managed Identity for authentication. See https://docs.microsoft.com/en-us/azure/storage/blobs/authorize-managed-identity for instructions on how to work with blobs and managed identities.
-    - If the VM in Azure has managed identity disabled, or not running on an Azure VM, you may use the Azure CLI to log in to Azure and authenticate to blob storage.
-        - See https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli to get started
-        with the Azure CLI.
-        - Ensure that you have assigned yourself the "Storage Blob Data Contributor" permission for
-        your storage account. See https://docs.microsoft.com/en-us/azure/storage/blobs/assign-azure-role-data-access
+
+### Blob Authentication Options
+You will need to choose how to authenticate to the blob storage account. This example is set up to use the "default" authentication option, which uses the [DefaultAzureCredential class](https://docs.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential) to attempt to authenticate to the blob storage backend with a list of credential types in priority order.
+
+The instructions below use the Azure CLI to configure access to Azure storage. See https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli to get started with the Azure CLI, or use the browser accessible Azure Cloud Shell to start using the AZ CLI without installing any dependencies: https://docs.microsoft.com/en-us/azure/cloud-shell/overview
+
+If you are not using the Azure Cloud Shell, you will first need to log in to the Azure CLI:
+
+```
+az login
+```
+
+- If running on a VM in Azure, you may use the VM's Managed Identity for authentication. See https://docs.microsoft.com/en-us/azure/storage/blobs/authorize-managed-identity for more details on working with blobs and managed identities. 
+    -  Check if your VM has a Manageed Identity by running:
+        ```
+        az vm identity show --name MyVirtualMachine --resource-group MyResourceGroup
+        ```
+        If there is a system assigned managed identity associated with the VM, you should see results that resemble the output below. 
+        ```
+        {
+        "principalId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+        "tenantId": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+        "type": "SystemAssigned",
+        "userAssignedIdentities": null
+        }
+        ```
+        
+        If the VM has no associated managed identity, the command will not produce any output. In this case, you can enable a system-assigned managed identity on an existing Azure VM by running:
+
+        ```
+        az vm identity assign --name MyVirtualMachine --resource-group myResourceGroup
+        ```
+        If the command was successful, you should see results like the following:
+
+        ```
+        {
+          "systemAssignedIdentity": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+          "userAssignedIdentities": {}
+        }
+        ```
+        See https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/qs-configure-cli-windows-vm for more details on working with managed identities using the Azure CLI.
+
+    -  Once you have confirmed that your VM has an associated managed identity, you can give the VM permissions to use the storage account.
+
+        1. Get the service principal ID for the VM's managed identity by running:
+            ```
+            spID=$(az vm identity show --name MyVirtualMachine --resource-group myResourceGroup --query principalId --out tsv)
+            ```
+        2. Get the Azure ID of your storage account by running:
+            ```
+            storageID=$(az resource list --name MyStorageAccountName --query [*].id --out tsv)
+            ```
+        3. Give the VM full permissions to read and write to the storage account by assigning it the "Storage Blob Data Owner" role:
+            ```
+            az role assignment create --assignee $spID --role 'Storage Blob Data Owner' --scope $storageID
+            ```
+
+        See https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/howto-assign-access-cli for more details on using the Azure CLI to manage access to resources. 
+
+- If the VM in Azure has managed identity disabled, or you are not running on an Azure VM, you may use the Azure CLI to log in to Azure and authenticate to blob storage. 
+
+    1. To log in to Azure, run:
+        ``` 
+        az login
+        ```
+    2. Ensure that you have assigned yourself the "Storage Blob Data Contributor" or "Storage Blob Data Owner" role for your storage account. Get the currently logged in user ID by running:
+        ```
+        userName=$(az ad signed-in-user show --query userPrincipalName --out tsv)
+        ```
+    3. Get the Azure ID of your storage account by running:
+        ```
+        storageID=$(az resource list --name MyStorageAccountName --query [*].id --out tsv)
+        ```
+    4. List what roles you have assigned for your storage account by running:
+        ```
+        az role assignment list --assignee $userName --scope $storageID --query [*].roleDefinitionName --out tsv
+        ```
+    5. If you do not see either the "Storage Blob Data Contributor" or "Storage Blob Data Owner" role for your storage account, add the "Storage Blob Data Owner" role by running:
+        ```
+        az role assignment create --assignee $userName --role 'Storage Blob Data Owner' --scope $storageID
+        ```
+    See https://docs.microsoft.com/en-us/azure/storage/blobs/assign-azure-role-data-access for more information on assigning roles to enable access to Azure storage resources.
+
 
 ## Blob Sink Example
-Click the button below to deploy a new storage account and blob container for testing with the blob sink and source examples:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpomeroy3%2Fazure-software-radio%2Ffeature%2Fautodeploy%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json)
 
 If you plan to use the Azure CLI to authenticate to the blob back end, please run
 
