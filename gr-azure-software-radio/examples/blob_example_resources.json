@@ -3,32 +3,50 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageAccountName": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "[format('store{0}', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "The name of the Storage Account"
+            }
         },
         "accountType": {
             "type": "string",
-            "defaultValue": "Standard_LRS"
-        },
-        "kind": {
-            "type": "string",
-            "defaultValue": "StorageV2",
-            "allowedValues": ["BlockBlobStorage", "StorageV2"]
-        },
-        "accessTier": {
-            "type": "string",
-            "defaultValue": "Hot"
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "Premium_ZRS",
+                "Standard_GRS",
+                "Standard_GZRS",
+                "Standard_LRS",
+                "Standard_RAGRS",
+                "Standard_RAGZRS",
+                "Standard_ZRS"
+            ],
+            "metadata": {
+                "description": "Storage Account type (pricing tier and redundancy options)"
+            }
         },
         "blobContainerName": {
-            "type": "string"
+            "type": "string",
+            "metadata": {
+                "description": "Name of the blob container to create in the storage account"
+            }
         },
         "allowBlobPublicAccess": {
             "type": "bool",
-            "defaultValue": "false"
+            "defaultValue": "false",
+            "metadata": {
+                "description": "When blob public access is enabled, one is permitted to configure container ACLs to allow anonymous access to blobs within the storage account. When disabled, no anonymous access to blobs within the storage account is permitted, regardless of underlying ACL configurations"
+            }
         },
         "allowSharedKeyAccess": {
             "type": "bool",
-            "defaultValue": "true"
+            "defaultValue": "true",
+            "metadata": {
+                "description": "When storage account key access is disabled, any requests to the account that are authorized with Shared Key, including shared access signatures (SAS), will be denied. Client applications that currently access the storage account using shared key will no longer work"
+            }
         }
+
     },
     "variables": {},
     "resources": [
@@ -38,9 +56,6 @@
             "apiVersion": "2021-08-01",
             "location": "[resourceGroup().location]",
             "properties": {
-                "accessTier": "[parameters('accessTier')]",
-                "minimumTlsVersion": "TLS1_2",
-                "supportsHttpsTrafficOnly": true,
                 "allowBlobPublicAccess": "[parameters('allowBlobPublicAccess')]",
                 "allowSharedKeyAccess": "[parameters('allowSharedKeyAccess')]",
                 "allowCrossTenantReplication": true,
@@ -64,7 +79,7 @@
             "sku": {
                 "name": "[parameters('accountType')]"
             },
-            "kind": "[parameters('kind')]",
+            "kind": "StorageV2",
             "tags": {}
         },
         {

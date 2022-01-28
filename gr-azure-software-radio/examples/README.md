@@ -72,7 +72,7 @@ Click the following button to deploy a Key Vault with Role Based Access Controls
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](fixme-url-encoded-path.json)
 
-## Manually Deploy Resources
+## Deploy Resources Manually
 If you'd prefer to get started with Key Vault by manually configuring your resources, see https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli. When creating the Key Vault, make sure to enable RBAC by using the `--enable-rbac-authorization` flag, like:
 
 ```
@@ -141,7 +141,7 @@ You can either click the button below to deploy a new storage account and blob c
 ### Deploy Resources Automatically
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json)
 
-### Manual Resource Deployment Instructions
+### Deploy Resources Manually
 1. Set up a storage account in your Azure subscription
     - See: https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create
 2. Add a container in that storage account.
@@ -232,7 +232,12 @@ Once you are done with running the examples, delete the resources you created to
 
 # Event Hub Examples
 ## Event Hub Example Prerequisites
-To run [eventhub_sink_example.grc](../examples/eventhub_sink_example.grc) or [eventhub_source_example.grc](../examples/eventhub-source-example.grc), you must first do the following:
+To run [eventhub_sink_example.grc](../examples/eventhub_sink_example.grc) or [eventhub_source_example.grc](../examples/eventhub-source-example.grc), you must first create an Event Hub namespace, an Event Hub, and a consumer group. To deploy these resources, either click the 'Deploy to Azure' button or follow the manual deployment instructions below:
+
+### Deploy Resources Automatically
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](fixme-url-encoded-path.json)
+
+### Deploy Resources Manually
 1. Create an Event Hub in your Azure subscription
     - See: [Create an Event Hub](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-create) for instructions.
 2. Create a Consumer Group in the Event Hub
@@ -253,6 +258,8 @@ To run the flowgraph, you must:
 - change the connection_str variable to use your connection string
 - change the eventhub_name variable to use the event hub entity you created as part of the [Event Hub Prerequisites section above](#event-hub-example-prerequisites)
 
+See the instructions on how to [Get an Event Hubs connection string](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string) for more details.
+
 Run the flowgraph for a few seconds and then close it. Navigate to your event hub in the Azure portal and you should see the events in the 'overview' tab. To process the events, enable the real-time insights under 'process data'.
 
 ## Event Hub Source Example
@@ -267,7 +274,9 @@ and then launch GNU Radio Companion from the same terminal. This will ensure you
 To run the flowgraph, you must:
 - change the connection_str variable to use your connection string
 - change the eventhub_name variable to use the event hub entity you created as part of the [Event Hub Prerequisites section above](#event-hub-example-prerequisites)
-- change the consumer_grp variable to use the default or use the created consumer group as part of the [Event Hub Prerequisites section above](#event-hub-example-prerequisites)
+- change the consumer_grp variable to use consumer group created as part of the [Event Hub Prerequisites section above](#event-hub-example-prerequisites)
+
+See the instructions on how to [Get an Event Hubs connection string](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string) for more details.
 
 Run the flowgraph and you should see the Message Debug block showing the contents of the received events.
 
