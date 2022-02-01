@@ -171,7 +171,7 @@ There are two DIFI blocks (source and sink) as part of this out of tree module. 
 
 	Note: this block converts from float 32 I and Q down to the specified bit depth for I and Q, which can cause significant quantization error for small signals.
 
-    See [DIFI Examples](./examples/README.md), [DIFI Paired](./examples/difi_paired_example.grc) and [DIFI Standalone](./examples/difi_standalone.grc) for block examples.
+    See [DIFI Examples](./examples/README.md), for examples using the DIFI blocks.
 
 
 
