@@ -8,6 +8,7 @@ The Azure software radio Out of Tree (OOT) Module allows users to easily leverag
   - [Installing Azure software radio OOT](#installing-azure-software-radio-oot)
   - [Running the Unit Tests](#running-the-unit-tests)
   - [Resolutions to Common Problems During Installation and Tests](#resolutions-to-common-Problems-During-Installation-and-Tests)
+- [Examples](#examples)
 - [Blocks Documentation](#azure-software-radio-out-of-tree-module-blocks)
   - [Key Vault Block](#key-vault-block)
   - [Blob Blocks](#blob-blocks)
@@ -85,6 +86,10 @@ If you would like to run the QA tests, there are two methods:
 ### Resolutions to Common Problems During Installation and Tests
 For a list common problems and resolutions, please check our [FAQ](./docs/FAQ.md) to see if your issue has been addressed.
 
+## Examples
+The [examples](./examples) folder has a collection of flowgraphs and supporting files that illustrate common ways of
+using the blocks provided in this module. See the [README in the examples folder](./examples/README.md) to get started.
+
 ## Azure software radio Out of Tree Module Blocks
 
 ### Key Vault Block
@@ -133,7 +138,7 @@ There are two DIFI blocks (source and sink) as part of this OOT module. The Bit 
 	  - pck_n tag: Emitted when a missed packet occurs, will update the upstream blocks with the current packet number to expect and the current time stamps
 	  - context tag: Emitted when a new DIFI context packet is received with the context packet dynamic information
 	  - static_change: Emitted when the static parts of the DIFI context packet changes
-  
+
     The DIFI Advanced tab contains more advanced settings for the DIFI block and should be used by users who know the devices and network in use.
 
    Context Packet Mismatch Behavior:
@@ -154,6 +159,7 @@ There are two DIFI blocks (source and sink) as part of this OOT module. The Bit 
 	Note: this block converts from float 32 I and Q down to the specified bit depth for I and Q, which can cause significant quantization error for small signals.
 
 For a brief tutorial on using these blocks, see the [DIFI Examples](./examples/README.md#difi-examples).
+
 
 ## Frequently Asked Questions
 For a list of common questions, including problems and resolutions, please check our [FAQ](./docs/FAQ.md)
