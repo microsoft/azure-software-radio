@@ -3,7 +3,7 @@
 Here we are sharing two assets we have developed to-date. Click on either link to dive in further!
 
 
-1. [GNURadio - Azure Out of Tree Module](./gr-azure-software-radio/README.md)
+1. [GNU Radio - Azure Out of Tree Module](./gr-azure-software-radio/README.md)
 2. [Azure software radio Developer Virtual Machine](./pages/devvm.md)
 
 
