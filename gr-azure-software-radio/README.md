@@ -104,10 +104,10 @@ The two Blob blocks (source and sink) provide an interface to read and write sam
 It is expected that the user will setup a storage account and a container prior to accessing Blob storage with the Blob source and sink blocks. To create a storage account, see [Create Storage Account](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal).
 
  * __Blob Source Block__\
-	The Blob source block reads samples from Azure Blob storage. This block currently supports complex64 inputs and block blobs (Page blobs and append blobs are not supported at this time).
+	The Blob source block reads samples from Azure Blob storage. This block currently supports block blobs and the following outputs: Complex float32, Complex int16, Complex int8, float, int, short and byte (Page blobs and append blobs are not supported at this time).
 
  * __Blob Sink Block__\
-	The Blob sink block writes samples to Azure Blob storage. This block currently supports complex64 inputs and block blobs (Page blobs and append blobs are not supported at this time).
+	The Blob sink block writes samples to Azure Blob storage. This block currently supports block blobs and the following inputs:  Complex float32, Complex int16, Complex int8, float, int, short and byte (Page blobs and append blobs are not supported at this time).
 
 There are several ways to authenticate to the Azue blob backend, these blocks support authentication using a connection string, a URL with an embedded SAS token, or use credentials supported by the DefaultAzureCredential class.
 
