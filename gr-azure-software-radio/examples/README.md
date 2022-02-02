@@ -1,6 +1,6 @@
 # Azure software radio examples
 
-TODO: succinct intro paragraph
+Below you will find examples for each block within this OOT module. 
 
 ## Table of Contents
 - [DIFI Examples](#difi-source-and-sink-examples)

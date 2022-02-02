@@ -4,12 +4,14 @@
     "parameters": {
         "eventHubNamespaceName": {
             "type": "String",
+            "defaultValue": "mynamespace",
             "metadata": {
                 "description": "The name of the Event Hub namespace"
             }
         },
         "eventHubName": {
             "type": "String",
+            "defaultValue": "myeventhub",
             "metadata": {
                 "description": "The name of the Event Hub inside the Event Hub namespace"
             }
@@ -31,6 +33,7 @@
         },
         "consumerGroupName": {
             "type": "String",
+            "defaultValue": "myconsumergroup",
             "metadata": {
                 "description": "Name of the consumer group to create in the Event Hub"
             }
