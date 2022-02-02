@@ -118,7 +118,7 @@
         {
             "type": "Microsoft.EventHub/namespaces/eventhubs/consumergroups",
             "apiVersion": "2021-11-01",
-            "name": "[concat(parameters('eventHubNamespaceName'), '/',  parameters('eventHubName'), parameters('consumerGroupName'))]",
+            "name": "[concat(parameters('eventHubNamespaceName'), '/',  parameters('eventHubName'), '/', parameters('consumerGroupName'))]",
             "location": "East US",
             "dependsOn": [
                 "[resourceId('Microsoft.EventHub/namespaces/eventhubs', parameters('eventHubNamespaceName'), parameters('eventHubName'))]",
