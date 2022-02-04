@@ -4,7 +4,7 @@
     "parameters": {
         "storageAccountName": {
             "type": "string",
-            "defaultValue": "[format('store{0}', uniqueString(resourceGroup().id))]",
+            "defaultValue": "[format('storageaccount{0}', uniqueString(resourceGroup().id))]",
             "metadata": {
                 "description": "The name of the Storage Account"
             }
@@ -28,6 +28,7 @@
         },
         "blobContainerName": {
             "type": "string",
+            "defaultValue": "mycontainer",
             "metadata": {
                 "description": "Name of the blob container to create in the storage account"
             }

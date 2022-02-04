@@ -33,21 +33,22 @@ running on that VM can authenticate to other Azure resources.
 
 - [Azure Managed Identity Configuration with the Azure CLI](managed_identity_cli_quickstart.md)
 ## Key Vault
-TODO: succinct intro paragraph
+
+The Key Vault block is used to retrieve secrets stored in Azure Key Vault, and these two quickstarts show how they can be used within GNU Radio.
 
 - [Quickstart: Key Vault with Role Based Access Controls and Azure CLI Credentials](key_vault_rbac_az_login_quickstart.md)
 - [Quickstart: Key Vault with Role Based Access Controls and Managed Identities](key_vault_rbac_managed_id_quickstart.md)
+
 ## Blob Storage
-TODO: succinct intro paragraph
+Many GNU Radio applications involve working with files, and the Blob Source and Sink blocks allow files to be stored and retrieved from Azure with ease.  The following quickstarts show how to use these blocks, depending on whether you are on a VM with Managed ID enabled, or are using `az login`.
 
-- blob managed id - not done
-- blob az login - not done
+- [Quickstart: Running the Blob Source and Sink blocks with Managed ID](blob_managed_id_quickstart.md)
+- [Quickstart: Running the Blob Source and Sink blocks with `az login`](blob_az_login_quickstart.md)
+
 ## Event Hub
-TODO: succinct intro paragraph
+The Event Hub blocks provide an interface to send and receive events to Azure Event Hubs using the message passing interface in GNU Radio. The article below walks through examamples of both the Source and Sink blocks.
 
-- eventhub - not done
-
-
+- [Quickstart: Using Azure Event Hubs in GNU Radio](event_hubs_quickstart_cli.md)
 
 # Everything below this line to be deleted in final copy
 

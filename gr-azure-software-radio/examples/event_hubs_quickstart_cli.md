@@ -74,6 +74,8 @@ Run the flowgraph and you should see the Message Debug block showing the content
 
 The flowgraph grabs the messages that were sent to your event hub in the previous example, and then displays them in a terminal.  You will notice they all show up immediately, and then nothing else happens, because it reached the end of the list of messages in event hub.
 
+Once you are done with running the examples, delete the resources you created to ensure you do not incur ongoing charges for storage.
+
 ----
 ## Recommended content
 
