@@ -75,7 +75,7 @@ Follow the deployment instructions to validate access to the developer VM and be
    
    ![PrivateProductVMCreation](./../images/vmcreation.jpg)
 
-3. On the Create VM Page 1, select the subscription which has been authorized for developer VM and allow for a dynamic resource group to be created or select an existing one. Enter a Name for the virtual machine, select the same region to which you have applied and have available quota, leave the remaining settings as is except for use Password or SSH Key.  Change Availability options to "No infrastructure redundancy required" (this is needed to be able to use the NV series VMs).  Select the appropriate one for your deployment and Click Next: Disks
+3. On the Create VM Page 1, select the subscription which has been authorized for developer VM and allow for a dynamic resource group to be created or select an existing one. Enter a Name for the virtual machine, select the same region to which you have applied and have available quota.  Change Availability options to "No infrastructure redundancy required" (this is needed to be able to use the NV series VMs).  Click Next: Disks
    
    ![VMCreateP1](./../images/vmcreate1.jpg)
 
