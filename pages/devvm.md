@@ -2,7 +2,7 @@
 
 The Azure software radio developer VM is the start of major investments by the Azure Spectrum Team to facilitate software defined radio development on Azure. This will accelerate development of SDR applications and harness the power of Azure to expand potential opportunities in this industry.
 
-To launch our first set of offerings we have built a developer vm on Ubuntu 20.04 which is ready to go with the most common tools for developing SDR. These include
+To launch our first set of offerings we have built a developer VM on Ubuntu 20.04 which is ready to go with the most common tools for developing SDR. These include
 
 1. GNU Radio 
 2. Fosphor
@@ -27,7 +27,7 @@ To sign up for the Developer VM click [Here](https://forms.office.com/r/sbZqBUVU
 
 Fill in the required details and our team will ensure you get authorized within 24 hours for the service.
 
-Follow the deployment instructions to validate access to the developer vm and begin deployment
+Follow the deployment instructions to validate access to the developer VM and begin deployment
 
 
 ## Validating Access to the Developer VM
@@ -62,7 +62,7 @@ Follow the deployment instructions to validate access to the developer vm and be
 
    ![Usage&Quotas](./../images/usageqouta.jpg)
 
-4. Type NV in the search bar and verify as shown that you have sufficient quota (at least 12 free cores) for the region you want to deploy into.
+4. Type NV in the search bar and verify as shown that you have sufficient quota (at least 12 free cores) for the region you want to deploy into.  We recommend using the region with the lowest latency, which you can easily determine using [this web app](https://azurespeedtest.azurewebsites.net/).
 
    ![VerifyNVQouta](./../images/verifyqouta.jpg)
 
