@@ -37,7 +37,7 @@ To run the examples in this quickstart you must first create the necessary resou
 
 1. Deploy Resources Automatically
 
-    1. Click [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json)
+    1. Click <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"></a>
     2. You will have to pick a new or existing resource group to assign the new resources to
     3. The default value for Storage Account Name might look confusing but if you leave it as is, it will create a new one with a globally unique name to avoid conflicts, such as storageaccountgeh5jwaddf7tc.  You are welcome to replace the entire string with your own unique name, it may contain numbers and lowercase letters only because it will be part of a URL.
     4. The container name does not have to be unique, but make note of what you called it.

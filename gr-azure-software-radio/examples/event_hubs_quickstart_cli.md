@@ -15,7 +15,7 @@ To run the examples in this tutorial you must first create an Event Hub namespac
 
 1. Deploy Resources Automatically
 
-    1. Click [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fevent_hub_example_resources.json)
+    1. Click <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fevent_hub_example_resources.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"></a>
     2. You will have to pick a new or existing resource group to assign the new resources to
     3. Change namespace to be unique (e.g., add your favorite 5 digit number to the end)
     4. For the rest of the parameters you can leave the defaults or fill in your own names

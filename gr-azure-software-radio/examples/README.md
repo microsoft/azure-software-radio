@@ -123,7 +123,7 @@ You can either click the button below to deploy a new Key Vault for testing, or 
 ## Deploy Resources Automatically
 Click the following button to deploy a Key Vault with Role Based Access Controls (RBAC) and populate secrets for the example:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fkey_vault_example_resources.json)
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fkey_vault_example_resources.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"></a>
 
 ## Deploy Resources Manually
 If you'd prefer to get started with Key Vault by manually configuring your resources, see https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli. When creating the Key Vault, make sure to enable RBAC by using the `--enable-rbac-authorization` flag, like:
@@ -192,7 +192,8 @@ To run [blob-sink-example.grc](../examples/blob-sink-example.grc) or [blob-sourc
 You can either click the button below to deploy a new storage account and blob container for testing, or you can follow Azure tutorials on how to deploy the blob resources manually.
 
 ### Deploy Resources Automatically
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json)
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"></a>
 
 ### Deploy Resources Manually
 1. Set up a storage account in your Azure subscription
@@ -288,7 +289,8 @@ Once you are done with running the examples, delete the resources you created to
 To run [eventhub_sink_example.grc](../examples/eventhub_sink_example.grc) or [eventhub_source_example.grc](../examples/eventhub-source-example.grc), you must first create an Event Hub namespace, an Event Hub, and a consumer group. To deploy these resources, either click the 'Deploy to Azure' button or follow the manual deployment instructions below:
 
 ### Deploy Resources Automatically
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fkey_vault_example_resources.json)
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdocumentation%2Fcli-updates%2Fgr-azure-software-radio%2Fexamples%2Fblob_example_resources.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"></a>
 
 ### Deploy Resources Manually
 1. Create an Event Hub in your Azure subscription
