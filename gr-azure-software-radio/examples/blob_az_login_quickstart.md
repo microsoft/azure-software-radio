@@ -85,4 +85,32 @@ gnuradio-companion
 
 This will ensure your authentication tokens are available when running the flowgraph. 
 
-ONCE THE MANAGED ID QUICKSTART IS IN BETTER SHAPE, COPY THE LAST TWO SECTIONS INTO THIS ONE, THEY SHOULD MATCH
+## Run the Blob Sink Example
+
+Open [blob-sink-example.grc](../examples/blob-sink-example.grc).
+
+To run the flowgraph, you must:
+- Change the blob_url variable to use your actual storage account URL
+- Change the blob_container_name variable to use the container name you created
+
+Run the flowgraph for a few seconds, then stop it (e.g., by closing the window that popped up).  Navigate to your blob container in the Azure portal and you should see a new blob object named "test-signal.dat".  The number of samples simulated and stored depends on how long you ran the flowgraph, but the `blob_block_length` defines the maximum (defaults to 10M samples).
+
+## Run the Blob Source Example
+
+Open [blob-source-example.grc](../examples/blob-source-example.grc).
+
+To run the flowgraph, you must:
+- Change the blob_url variable to use your actual storage account URL
+- Change the blob_container_name variable to use the container name you created
+- Change the blob_name to point to an existing blob object, which is test-signal.dat assuming you did the previous section to completion. 
+
+Run the flowgraph and you should see the QT GUI Sink block showing the contents of your blob object, which is the signal we simulated in the previous section.
+
+Once you are done with running the examples, delete the resources you created to ensure you do not incur ongoing charges for storage.
+
+----
+
+
+## Recommended content
+
+### [Azure Blob storage overview](https://azure.microsoft.com/en-us/services/storage/blobs/)

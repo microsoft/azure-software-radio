@@ -105,4 +105,4 @@ Once you are done with running the examples, delete the resources you created to
 ----
 ## Recommended content
 
-### [asdasd](adsasdsad.com)
+### [Azure Blob storage overview](https://azure.microsoft.com/en-us/services/storage/blobs/)
