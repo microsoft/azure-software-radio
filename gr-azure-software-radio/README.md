@@ -74,7 +74,7 @@ If you would like to run the QA tests, there are two methods:
     make test
     ```
 
-    You can review detailed test ouptput (including any failures) in Testing/Temporary/LastTest.log.
+    You can review detailed test output (including any failures) in Testing/Temporary/LastTest.log.
 
  2. From within the python directory, run:
     ```
@@ -109,7 +109,7 @@ It is expected that the user will setup a storage account and a container prior 
  * __Blob Sink Block__\
 	The Blob sink block writes samples to Azure Blob storage. This block currently supports block blobs and the following inputs:  Complex float32, Complex int16, Complex int8, float, int, short and byte (Page blobs and append blobs are not supported at this time).
 
-There are several ways to authenticate to the Azue blob backend, these blocks support authentication using a connection string, a URL with an embedded SAS token, or use credentials supported by the DefaultAzureCredential class.
+There are several ways to authenticate to the Azure blob backend, these blocks support authentication using a connection string, a URL with an embedded SAS token, or use credentials supported by the DefaultAzureCredential class.
 
 For a brief tutorial on using these blocks, see the [Blob Examples](./examples/README.md#Blob-Source-and-Sink-Examples).
 
@@ -123,7 +123,7 @@ It is expected that the user will create an Event Hubs namespace, Event Hub enti
  * __EventHub Sink Block__\
 	The EventHub sink block converts a PMT message to JSON and sends it to Azure Event Hub.
 
-These blocks support multiple ways to authenticate to the Azue Event Hub backend, such as using a connection string, a SAS token, or use credentials supported by the DefaultAzureCredential class.
+These blocks support multiple ways to authenticate to the Azure Event Hub backend, such as using a connection string, a SAS token, or use credentials supported by the DefaultAzureCredential class.
 
 For a brief tutorial on using these blocks, see the [Event Hub Examples](./examples/README.md#Event-Hub-Examples).
 
