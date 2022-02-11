@@ -34,7 +34,7 @@ To run the flowgraph correctly, you must setup a Key Vault resource in Azure and
 ### Deploy Resources Automatically
 Click the following button to deploy a Key Vault with Role Based Access Controls (RBAC) and populate secrets for the example:
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fmain%2Fgr-azure-software-radio%2Fexamples%2Fkey_vault_example_resources.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"></a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fazure-software-radio%2Fdev%2Fgr-azure-software-radio%2Fexamples%2Fkey_vault_example_resources.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"></a>
 
 ### Deploy Resources Manually
 If you'd prefer to get started with Key Vault by manually configuring your resources, you can follow this guide to [set and retrieve a secret from Azure Key Vault using Azure CLI](https://docs.microsoft.com/en-us/azure/key-vault/secrets/quick-create-cli). When creating the Key Vault, you must make sure to enable RBAC by using the `--enable-rbac-authorization` flag, like:
