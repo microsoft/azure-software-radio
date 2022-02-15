@@ -33,7 +33,7 @@ Follow the deployment instructions to validate access to the developer VM and be
 ## Validating Access to the Developer VM
 
 1. Open your browser and navigate to [AzurePortal](https://portal.azure.com) and sign-in 
-2. In the search bar type "MarketPlace" and Click MarketPlace 
+2. In the search bar type "Marketplace" and Click Marketplace 
    
    ![Marketplace](./../images/marketplace.jpg)
 
