@@ -131,7 +131,6 @@ def get_eventhub_consumer_client(
     Returns:
         EventHubConsumerClient: An Event Hub consumer client ready to be used
     """
-
     if authentication_method == "connection_string":
         eventhub_consumer_client = EventHubConsumerClient.from_connection_string(
             connection_str, eventhub_name=eventhub_name, consumer_group=consumer_group)

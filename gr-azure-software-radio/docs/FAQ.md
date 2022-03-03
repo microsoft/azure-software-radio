@@ -16,9 +16,23 @@ CMake Error at CMakeLists.txt:77 (find_package):
 
 It's likely that either GNU Radio isn't installed, or your environment isn't set up properly for CMAKE to be able to find where it was installed. Please check the [GNU Radio Installation Instructions](https://wiki.gnuradio.org/index.php/InstallingGR) for suggestions on ways to properly install and configure GNU Radio appropriately for your environment.
 
-## Why is cmake failing to find Azure components?
-If you are having issues installing gr-azure-software-radio, the first troubleshooting step is to make sure the python requirements have been successfully installed. To install the requirements use ``` pip install -r python/requirements.txt ```  (or follow the [Installation Instructions](../../README.md/#installing-azure-software-radio-oot)).
-Then, verify the installed package versions using ``` pip freeze -r python/requirements.txt ```.
+## Why is my build complaining about liborc and failing?
+  If you get a failure related to liborc when trying to compile the OOT module that looks like this:
+  ```
+  make[2]: *** No rule to make target '/usr/lib/x86_64-linux-gnu/liborc-0.4.so', needed by 'lib/libgnuradio-azure_software_radio.so.v1.0-compat-xxx-xunknown'.  Stop.
+  make[1]: *** [CMakeFiles/Makefile2:251: lib/CMakeFiles/gnuradio-azure_software_radio.dir/all] Error 2
+  make: *** [Makefile:141: all] Error 2
+  ```
+
+  You'll need to install the liborc package. On Ubuntu 20.04, you can install the missing package by running:
+  ```
+  sudo apt install liborc-0.4-dev
+  ```
+
+  You should now be able to compile gr-azure-software-radio.
+
+## Failures importing azure_software_radio in the flowgraph
+  By default Azure software radio will be installed in the ``` /usr/local/ ``` directory. Use the ``` CMAKE_INSTALL_PREFIX ``` to install elsewhere.
 
 ## I'm seeing version conflict errors when I try to install the Python dependencies, what should I do?
 If there are version conflicts with the Azure packages, consider using a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to manage package dependencies.
