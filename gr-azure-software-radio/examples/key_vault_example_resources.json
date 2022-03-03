@@ -1,0 +1,100 @@
+
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the name of the key vault."
+            }
+        },
+        "skuName": {
+            "type": "string",
+            "defaultValue": "standard",
+            "allowedValues": [
+                "standard",
+                "premium"
+            ],
+            "metadata": {
+                "description": "Specifies whether the key vault is a standard vault or a premium vault."
+            }
+        },
+        "seedSecretValue": {
+            "type": "secureString",
+            "metadata": {
+                "description": "Specifies the integer value of the seed secret that you want to create."
+            }
+        },
+        "scrambleSecretValue": {
+            "type": "secureString",
+            "metadata": {
+                "description": "Specifies the integer value of the scramble secret that you want to create."
+            }
+        },
+        "mySecretStringSecretValue": {
+            "type": "secureString",
+            "metadata": {
+                "description": "Specifies the value of the connection string secret that you want to create."
+            }
+        }
+    },
+    "functions": [],
+    "resources": [
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2021-04-01-preview",
+            "name": "[parameters('keyVaultName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "enabledForDeployment": false,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": false,
+                "enableRbacAuthorization": true,
+                "accessPolicies": [],
+                "tenantId": "[subscription().tenantId]",
+                "sku": {
+                    "name": "[parameters('skuName')]",
+                    "family": "A"
+                },
+                "networkAcls": {
+                    "defaultAction": "Allow",
+                    "bypass": "AzureServices"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2021-04-01-preview",
+            "name": "[format('{0}/{1}', parameters('keyVaultName'), 'seed')]",
+            "properties": {
+                "value": "[parameters('seedSecretValue')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2021-04-01-preview",
+            "name": "[format('{0}/{1}', parameters('keyVaultName'), 'scramble')]",
+            "properties": {
+                "value": "[parameters('scrambleSecretValue')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2021-04-01-preview",
+            "name": "[format('{0}/{1}', parameters('keyVaultName'), 'mysecretstring')]",
+            "properties": {
+                "value": "[parameters('mySecretStringSecretValue')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ]
+        }
+    ]
+}

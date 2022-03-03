@@ -39,7 +39,8 @@ class BlobSource(gr.sync_block):
         authentication if Auth Method is "connection_string".
     URL: Storage account URL string. This is required if using "default" or
         "url_with_sas" authentication. If using "url_with_sas", the URL must include a SAS
-        token.
+        token to access private blobs. If using a blob in a container with public permissions, the
+        SAS token is not necessary.
     Container Name: Name of the container where the blob of interest is stored.
     Blob Name: The name of the block blob to read from.
     Retry Total: Total number of Azure API retries to allow before throwing an exception. Higher

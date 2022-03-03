@@ -1,4 +1,4 @@
-name: CI
+name: CHECKIN_CI
 
 # Run this workflow every time a commit is pushed to main or a pull request is opened against main
 on:
@@ -7,10 +7,10 @@ on:
       - main
       - dev
   pull_request:
-    branches: 
+    branches:
       - main
       - dev
-           
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -20,7 +20,7 @@ jobs:
         username: ${{  secrets.ACR_PRINCIPAL_ID }}
         password: ${{  secrets.ACR_PRINCIPAL_PWD }}
     timeout-minutes: 15
-           
+
     steps:
       - uses: actions/checkout@master
       - name: Build

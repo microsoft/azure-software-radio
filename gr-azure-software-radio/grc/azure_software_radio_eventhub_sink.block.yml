@@ -10,7 +10,7 @@ category: '[Azure software radio]'
 
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.EventHubSink(${authentication_method}, ${connection_str}, ${sas}, ${eventhub_host_name}, ${eventhub_name}, ${partition_id})
+  make: azure_software_radio.EventHubSink(${authentication_method}, ${connection_str}, ${sas}, ${eventhub_host_name}, ${eventhub_name}, ${partition_id}, ${default_cred})
 
 parameters:
 - id: authentication_method
@@ -40,6 +40,10 @@ parameters:
 - id: partition_id
   label: Partition ID
   dtype: string
+  default: ''
+- id: default_cred
+  label: DefaultAzureCredential
+  dtype: raw
   default: ''
 
 inputs:

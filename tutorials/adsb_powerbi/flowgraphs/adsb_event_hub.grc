@@ -1,0 +1,378 @@
+options:
+  parameters:
+    author: Marc
+    catch_exceptions: 'True'
+    category: Custom
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: adsb_rx
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: ADS-B Receiver
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 12]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: fc
+  id: variable
+  parameters:
+    comment: ''
+    value: 1090e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [176, 12]
+    rotation: 0
+    state: enabled
+- name: fs
+  id: variable
+  parameters:
+    comment: ''
+    value: 2e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 12]
+    rotation: 0
+    state: enabled
+- name: gain
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: 0,0,1,1
+    label: Gain (dB)
+    type: real
+    value: '100'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [336, 12]
+    rotation: 0
+    state: enabled
+- name: threshold
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: 0,1,1,1
+    label: Detection Threshold
+    type: real
+    value: '0.010'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 12]
+    rotation: 0
+    state: enabled
+- name: adsb_decoder_0
+  id: adsb_decoder
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    error_corr: '"None"'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg_filter: '"Extended Squitter Only"'
+    print_level: '"Brief"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [920, 284.0]
+    rotation: 0
+    state: enabled
+- name: adsb_demod_0
+  id: adsb_demod
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    fs: 2e6
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [576, 312.0]
+    rotation: 0
+    state: true
+- name: adsb_framer_1
+  id: adsb_framer
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    fs: fs
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    threshold: threshold
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 316.0]
+    rotation: 0
+    state: enabled
+- name: analog_const_source_x_0
+  id: analog_const_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: threshold
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [648, 460.0]
+    rotation: 0
+    state: enabled
+- name: azure_software_radio_blob_source_0
+  id: azure_software_radio_blob_source
+  parameters:
+    affinity: ''
+    alias: ''
+    authentication_method: url_with_sas
+    blob_name: adsb_capture.iq
+    comment: ''
+    connection_str: BlobEndpoint=https://softwareradiohelloworld.blob.core.windows.net/;QueueEndpoint=https://softwareradiohelloworld.queue.core.windows.net/;FileEndpoint=https://softwareradiohelloworld.file.core.windows.net/;TableEndpoint=https://softwareradiohelloworld.table.core.windows.net/;SharedAccessSignature=sv=2020-08-04&ss=b&srt=sco&sp=rltf&se=2023-02-02T04:11:08Z&st=2022-01-21T20:11:08Z&spr=https&sig=kgp2ovWg3As21SWyZYL%2Fuk0%2FsutYSJQIq5XbIpMbXW8%3D
+    container_name: adsb
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    queue_size: '4'
+    retry_total: '10'
+    type: fc32
+    url: https://softwareradiohelloworld.blob.core.windows.net
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [64, 164.0]
+    rotation: 0
+    state: true
+- name: azure_software_radio_eventhub_sink_0
+  id: azure_software_radio_eventhub_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    authentication_method: connection_string
+    comment: ''
+    connection_str: ''
+    eventhub_host_name: ''
+    eventhub_name: ''
+    partition_id: ''
+    sas: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1584, 260.0]
+    rotation: 0
+    state: disabled
+- name: blocks_complex_to_mag_squared_0
+  id: blocks_complex_to_mag_squared
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [80, 328.0]
+    rotation: 0
+    state: enabled
+- name: blocks_throttle_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: fs
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 212.0]
+    rotation: 0
+    state: true
+- name: epy_block_2
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
+      from gnuradio import gr\nimport pmt\n\nclass blk(gr.sync_block):  # other base\
+      \ classes are basic_block, decim_block, interp_block\n    \"\"\"designed to\
+      \ go after gr-adsb's Decoder, it strips away the bits and leaves metadata\"\"\
+      \"\n\n    def __init__(self):  # only default arguments here\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='Pass Only ADS-B Meta',   # will show up\
+      \ in GRC\n            in_sig=None,\n            out_sig=None\n        )\n  \
+      \      self.message_port_register_out(pmt.intern('msg_out'))\n        self.message_port_register_in(pmt.intern('msg_in'))\n\
+      \        self.set_msg_handler(pmt.intern('msg_in'), self.handle_msg)\n \n  \
+      \  def handle_msg(self, msg):\n        meta = pmt.car(msg) # first part of the\
+      \ cons, which in our case is the meta (see decoder.py within gr-adsb)\n    \
+      \    self.message_port_pub(pmt.intern('msg_out'), meta)\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('Pass Only ADS-B Meta', 'blk', [], [('msg_in', 'message', 1)], [('msg_out',
+      'message', 1)], "designed to go after gr-adsb's Decoder, it strips away the
+      bits and leaves metadata", [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1280, 280.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'True'
+    gui_hint: 1,0,1,2
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'False'
+    marker1: '0'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '2'
+    size: int(fs*150e-6)
+    srate: int(fs)
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '1.25e-6'
+    tr_level: '0'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '"burst"'
+    type: float
+    update_time: 1.0/100.0
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '0'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [928, 436.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [adsb_decoder_0, decoded, epy_block_2, msg_in]
+- [adsb_demod_0, '0', qtgui_time_sink_x_0, '0']
+- [adsb_demod_0, demodulated, adsb_decoder_0, demodulated]
+- [adsb_framer_1, '0', adsb_demod_0, '0']
+- [analog_const_source_x_0, '0', qtgui_time_sink_x_0, '1']
+- [azure_software_radio_blob_source_0, '0', blocks_throttle_0, '0']
+- [blocks_complex_to_mag_squared_0, '0', adsb_framer_1, '0']
+- [blocks_throttle_0, '0', blocks_complex_to_mag_squared_0, '0']
+- [epy_block_2, msg_out, azure_software_radio_eventhub_sink_0, in]
+
+metadata:
+  file_format: 1
