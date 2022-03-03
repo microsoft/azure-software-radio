@@ -24,7 +24,6 @@ from gnuradio import blocks
 
 NUM_MSGS = 10
 
-
 class PmtMessageGenerator(gr.sync_block):
     """
     This is a PMT Message Generating class for testing purposes

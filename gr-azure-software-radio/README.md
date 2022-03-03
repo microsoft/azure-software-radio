@@ -73,14 +73,14 @@ At this point the OOT module should have been installed, and you should see addi
 If you would like to run the QA tests, there are two methods:
  1. From within the build directory, run:
     ```
-    make test
+    az login
     ```
 
     You can review detailed test output (including any failures) in Testing/Temporary/LastTest.log.
 
  2. From within the python directory, run:
     ```
-    python -m pytest qa_*
+    python -m pytest integration_*
     ```
 
     Pytest will show detailed test results directly in the output of this command.

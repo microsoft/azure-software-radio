@@ -1,6 +1,6 @@
 # Azure software radio examples
 
-Below you will find examples for each block within this OOT module. 
+Below you will find examples for each block within this OOT module.
 
 ## Table of Contents
 - [DIFI Examples](#difi-source-and-sink-examples)
@@ -176,6 +176,7 @@ Assuming you've enabled the RBAC permission model for your Key Vault, you'll nee
         az role assignment create --assignee $userName --role 'Key Vault Secrets Officer' --scope $kvID
         ```
 
+When your resources are ready in Azure, the flowgraph should pull the value from Azure Key Vault, and scramble the sequence with that pulled value.
 
 ## Flowgraph Update
 When your resources are ready in Azure, update the `key_vault_name` variable in the Key Vault example flowgraph to the name you chose for your
