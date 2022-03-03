@@ -8,8 +8,9 @@
 #
 
 import uuid
-from gnuradio import gr, gr_unittest
 from azure_software_radio import EventHubSink
+from gnuradio import gr, gr_unittest
+
 
 
 class qa_EventHubSink(gr_unittest.TestCase):

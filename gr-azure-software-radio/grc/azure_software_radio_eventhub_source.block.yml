@@ -10,7 +10,7 @@ category: '[Azure software radio]'
 
 templates:
   imports: import azure_software_radio
-  make: azure_software_radio.EventHubSource(${authentication_method}, ${connection_str}, ${sas}, ${eventhub_host_name}, ${eventhub_name}, ${consumer_grp}, ${partition_id}, ${starting_position})
+  make: azure_software_radio.EventHubSource(${authentication_method}, ${connection_str}, ${sas}, ${eventhub_host_name}, ${eventhub_name}, ${consumer_grp}, ${partition_id}, ${starting_position}, ${default_cred})
 
 parameters:
 - id: authentication_method
@@ -49,6 +49,10 @@ parameters:
   label: Starting Position
   dtype: raw
   default: '@latest'
+- id: default_cred
+  label: DefaultAzureCredential
+  dtype: raw
+  default: ''
 
 outputs:
 -   domain: message

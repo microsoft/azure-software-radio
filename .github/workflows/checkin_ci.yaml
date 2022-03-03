@@ -1,0 +1,60 @@
+name: CHECKIN_CI
+
+# Run this workflow every time a commit is pushed to main or a pull request is opened against main
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: rfsxbuild.azurecr.io/gnuradiopipeline:3.9.2.0-3
+      credentials:
+        username: ${{  secrets.ACR_PRINCIPAL_ID }}
+        password: ${{  secrets.ACR_PRINCIPAL_PWD }}
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@master
+      - name: Build
+        run: |
+          cd gr-azure-software-radio; pip install -r python/requirements.txt
+          mkdir build; cd build; cmake ..; cmake --build . -j --config Release
+      - name: Install
+        run: |
+          cd gr-azure-software-radio/build
+          sudo make install -j
+      - name: Update GNURadio preferences
+        run: |
+          mkdir -p "${HOME}/.gnuradio/prefs/"
+          echo "gr::vmcircbuf_sysv_shm_factory" > "${HOME}/.gnuradio/prefs/vmcircbuf_default_factory"
+      - name: Run Tests
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          AZURE_STORAGE_URL:  ${{ secrets.AZURE_STORAGE_URL }}
+          AZURE_STORAGE_SAS: ${{ secrets.AZURE_STORAGE_SAS }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        run: |
+          cd gr-azure-software-radio/build
+          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};ctest -V -T test;
+        shell: bash
+      - name: pylint
+        continue-on-error: false
+        run: |
+          export PYTHONPATH=${{ secrets.PYTHONPATH }}; export LD_LIBRARY_PATH=${{ secrets.LD_LIBRARY_PATH }};
+          cd ..
+          pylint azure-software-radio --rcfile azure-software-radio/.pylintrc
+      - name: check step
+        if: success()
+        run: echo pylint has passed all checks

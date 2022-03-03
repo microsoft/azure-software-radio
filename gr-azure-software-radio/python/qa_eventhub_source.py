@@ -8,8 +8,8 @@
 #
 
 import uuid
-from gnuradio import gr, gr_unittest
 from azure_software_radio import EventHubSource
+from gnuradio import gr, gr_unittest
 
 
 class qa_EventHubSource(gr_unittest.TestCase):

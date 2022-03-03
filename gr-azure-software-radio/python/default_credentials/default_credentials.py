@@ -3,7 +3,7 @@
 # Licensed under the GNU General Public License v3.0 or later.
 # See License.txt in the project root for license information.
 #
-#  pylint: disable=too-many-arguments
+#  pylint: disable=too-many-arguments, duplicate-code
 
 from azure.identity import DefaultAzureCredential
 

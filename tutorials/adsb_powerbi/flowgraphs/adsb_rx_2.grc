@@ -1,0 +1,424 @@
+options:
+  parameters:
+    author: Marc
+    catch_exceptions: 'True'
+    category: Custom
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: adsb_rx
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: ADS-B Receiver
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 12]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: fs
+  id: variable
+  parameters:
+    comment: ''
+    value: 2e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [200, 12.0]
+    rotation: 0
+    state: enabled
+- name: threshold
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: 0,1,1,1
+    label: Detection Threshold
+    type: real
+    value: '0.010'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 12.0]
+    rotation: 0
+    state: enabled
+- name: adsb_decoder_0
+  id: adsb_decoder
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    error_corr: '"None"'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg_filter: '"Extended Squitter Only"'
+    print_level: '"Brief"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [680, 324.0]
+    rotation: 0
+    state: enabled
+- name: adsb_framer_1
+  id: adsb_framer
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    fs: fs
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    threshold: threshold
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [96, 316.0]
+    rotation: 0
+    state: enabled
+- name: analog_const_source_x_0
+  id: analog_const_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: threshold
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [432, 260.0]
+    rotation: 0
+    state: enabled
+- name: azure_software_radio_blob_source_0
+  id: azure_software_radio_blob_source
+  parameters:
+    affinity: ''
+    alias: ''
+    authentication_method: connection_string
+    blob_name: adsb_capture.iq
+    comment: ''
+    connection_str: BlobEndpoint=https://helloworldiq.blob.core.windows.net/;QueueEndpoint=https://helloworldiq.queue.core.windows.net/;FileEndpoint=https://helloworldiq.file.core.windows.net/;TableEndpoint=https://helloworldiq.table.core.windows.net/;SharedAccessSignature=sv=2020-08-04&ss=b&srt=sco&sp=rtf&se=2023-06-01T00:04:58Z&st=2022-01-19T17:04:58Z&spr=https&sig=iLm%2BaYgz6OaEtqmSYwr5vTccl%2FA4BZISvM1G3bMHSlY%3D
+    container_name: adsb
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    queue_size: '4'
+    retry_total: '10'
+    type: fc32
+    url: https://helloworldiq.blob.core.windows.net/?sv=2020-08-04&ss=b&srt=sco&sp=rtf&se=2022-01-20T01:04:58Z&st=2022-01-19T17:04:58Z&spr=https,http&sig=FYf%2B3cZB9yKQFYo%2BYAaTmy4d%2BgU%2BDByhrRYf6ocGgzs%3D
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [24, 124.0]
+    rotation: 0
+    state: enabled
+- name: azure_software_radio_eventhub_sink_0
+  id: azure_software_radio_eventhub_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    authentication_method: connection_string
+    comment: ''
+    connection_str: Endpoint=sb://marceventhub.servicebus.windows.net/;SharedAccessKeyName=sendandlisten;SharedAccessKey=owZzZvyt1IAK5eIQ0mmySbMT3lWhwdO75V+7Oo7Skbc=
+    eventhub_host_name: ''
+    eventhub_name: eventhub1
+    partition_id: ''
+    sas: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 308.0]
+    rotation: 0
+    state: enabled
+- name: blocks_complex_to_mag_squared_0
+  id: blocks_complex_to_mag_squared
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 160.0]
+    rotation: 0
+    state: enabled
+- name: blocks_throttle_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: fs
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 156.0]
+    rotation: 0
+    state: true
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\n\nimport datetime\nimport\
+      \ numpy as np\n\nimport pmt\nfrom gnuradio import gr\n\nSYMBOL_RATE = 1e6  #\
+      \ symbols/second\nMAX_NUM_BITS = 112\n\nclass blk(gr.sync_block):  # other base\
+      \ classes are basic_block, decim_block, interp_block\n    def __init__(self,\
+      \ fs=1.0):  # only default arguments here\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='ADS-B Demod (Marc)',   # will show up\
+      \ in GRC\n            in_sig=[np.float32],\n            out_sig=[np.float32]\n\
+      \        )\n\n        # Calculate the samples/symbol\n        # ADS-B is modulated\
+      \ at 1 Msym/s with Pulse Position Modulation, so the effective\n        # required\
+      \ fs is 2 Msps\n        self.fs = fs\n        #assert self.fs % SYMBOL_RATE\
+      \ == 0, \"ADS-B Demodulator is designed to operate on an integer number of samples\
+      \ per symbol, not %f sps\" % (self.fs / SYMBOL_RATE)\n        self.sps = int(fs\
+      \ // SYMBOL_RATE)\n\n        # Calculate current UTC time at block startup.\
+      \ Then we'll use burst sample offset to derive burst time.\n        self.start_timestamp\
+      \ = (datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds()\n\
+      \n        # Array of data bits\n        self.bits = []\n        self.bit_idx\
+      \ = 0\n        self.straddled_packet = 0\n\n        self.set_tag_propagation_policy(gr.TPP_ONE_TO_ONE)\n\
+      \        self.message_port_register_out(pmt.to_pmt(\"demodulated\"))\n\n\n \
+      \   def work(self, input_items, output_items):\n        in0 = input_items[0]\n\
+      \        out0 = output_items[0]\n\n        # If there was a packet that straddled\
+      \ the previous block and this\n        # block, finish decoding it\n       \
+      \ if self.straddled_packet == 1:\n            self.straddled_packet = 0\n\n\
+      \        # Get tags from ADS-B Framer block\n        #tags = self.get_tags_in_window(0,\
+      \ 0, len(in0), pmt.to_pmt(\"burst\"))\n        tags = self.get_tags_in_range(0,\
+      \ self.nitems_read(0), self.nitems_read(0) + len(in0), pmt.to_pmt(\"burst\"\
+      )) # get_tags_in_window broken in 3.9.2 and 3.9.3\n        \n        for tag\
+      \ in tags:\n            # Grab metadata for this tag\n            value = pmt.to_python(tag.value)\n\
+      \            snr = value[1] # SNR in power dBs\n\n            # Calculate the\
+      \ SOB and EOB offsets\n            sob_offset = tag.offset + (8)*self.sps #\
+      \ Start of burst index (middle of the \"bit 1 pulse\")\n            eob_offset\
+      \ = tag.offset + (8+112-1)*self.sps + self.sps/2 # End of burst index (middle\
+      \ of the \"bit 0 pulse\")\n\n            # Find the SOB and EOB indices in this\
+      \ block of samples\n            sob_idx = sob_offset - self.nitems_written(0)\n\
+      \            eob_idx = eob_offset - self.nitems_written(0)\n\n            if\
+      \ eob_idx < len(input_items[0]):\n                # The packet is fully within\
+      \ this block of samples, so demod\n                # the entire burst\n\n  \
+      \              # Grab the amplitudes where the \"bit 1 pulse\" should be\n \
+      \               bit1_idxs = range(sob_idx, sob_idx + self.sps*MAX_NUM_BITS,\
+      \ self.sps)\n                bit1_amps = in0[bit1_idxs]\n\n                #\
+      \ Grab the amplitudes where the \"bit 0 pulse\" should be\n                bit0_idxs\
+      \ = range(sob_idx + self.sps // 2, sob_idx + self.sps // 2 + self.sps*MAX_NUM_BITS,\
+      \ self.sps)\n                bit0_amps = in0[bit0_idxs]\n\n                self.bits\
+      \ = np.zeros(MAX_NUM_BITS, dtype=np.uint8)\n                self.bits[bit1_amps\
+      \ > bit0_amps] = 1\n\n                # Get a log-likelihood type function for\
+      \ probability of a\n                # bit being a 0 or 1.  Confidence of 0 is\
+      \ equally likely 0 or 1.\n                # Positive confidence levels are more\
+      \ likely 1 and negative values\n                # are more likely 0.\n     \
+      \           self.bit_confidence = 10.0*np.log10(bit1_amps/bit0_amps)\n\n   \
+      \             # Send PDU message to decoder\n                meta = pmt.to_pmt({\n\
+      \                    \"timestamp\": self.start_timestamp + tag.offset/self.fs,\n\
+      \                    \"snr\": snr,\n                })\n                vector\
+      \ = pmt.to_pmt(self.bits)\n                pdu = pmt.cons(meta, vector)\n  \
+      \              self.message_port_pub(pmt.to_pmt(\"demodulated\"), pdu)\n\n \
+      \               if False:\n                    # Tag the 0 and 1 bits markers\
+      \ for debug\n                    for ii in range(0,len(bit1_idxs)):\n      \
+      \                  self.add_item_tag(\n                            0,\n    \
+      \                        self.nitems_written(0)+bit1_idxs[ii],\n           \
+      \                 pmt.to_pmt(\"bits\"),\n                            pmt.to_pmt((1,\
+      \ ii, float(self.bit_confidence[ii]))),\n                            pmt.to_pmt(\"\
+      demod\")\n                        )\n                        self.add_item_tag(\n\
+      \                            0,\n                            self.nitems_written(0)+bit0_idxs[ii],\n\
+      \                            pmt.to_pmt(\"bits\"),\n                       \
+      \     pmt.to_pmt((0, ii, float(self.bit_confidence[ii]))),\n               \
+      \             pmt.to_pmt(\"demod\")\n                        )\n\n         \
+      \   else:\n                # The packet is only partially contained in this\
+      \ block of\n                # samples, decode as much as possible\n        \
+      \        self.straddled_packet = 1\n\n        out0[:] = in0\n        return\
+      \ len(output_items[0])\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    fs: fs
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('ADS-B Demod (Marc)', 'blk', [('fs', '1.0')], [('0', 'float', 1)],
+      [('0', 'float', 1), ('demodulated', 'message', 1)], '', ['fs'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [336, 312.0]
+    rotation: 0
+    state: true
+- name: epy_block_2
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
+      from gnuradio import gr\nimport pmt\n\nclass blk(gr.sync_block):  # other base\
+      \ classes are basic_block, decim_block, interp_block\n    \"\"\"designed to\
+      \ go after gr-adsb's Decoder, it strips away the bits and leaves metadata\"\"\
+      \"\n\n    def __init__(self):  # only default arguments here\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='Pass Only ADS-B Meta',   # will show up\
+      \ in GRC\n            in_sig=None,\n            out_sig=None\n        )\n  \
+      \      self.message_port_register_out(pmt.intern('msg_out'))\n        self.message_port_register_in(pmt.intern('msg_in'))\n\
+      \        self.set_msg_handler(pmt.intern('msg_in'), self.handle_msg)\n \n  \
+      \  def handle_msg(self, msg):\n        meta = pmt.car(msg) # first part of the\
+      \ cons, which in our case is the meta (see decoder.py within gr-adsb)\n    \
+      \    self.message_port_pub(pmt.intern('msg_out'), meta)\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('Pass Only ADS-B Meta', 'blk', [], [('msg_in', 'message', 1)], [('msg_out',
+      'message', 1)], "designed to go after gr-adsb's Decoder, it strips away the
+      bits and leaves metadata", [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1048, 328.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'True'
+    gui_hint: 1,0,1,2
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'False'
+    marker1: '0'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '2'
+    size: int(fs*150e-6)
+    srate: int(fs)
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '1.25e-6'
+    tr_level: '0'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '"burst"'
+    type: float
+    update_time: 1.0/100.0
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '0'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [656, 228.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [adsb_decoder_0, decoded, epy_block_2, msg_in]
+- [adsb_framer_1, '0', epy_block_0, '0']
+- [analog_const_source_x_0, '0', qtgui_time_sink_x_0, '1']
+- [azure_software_radio_blob_source_0, '0', blocks_throttle_0, '0']
+- [blocks_complex_to_mag_squared_0, '0', adsb_framer_1, '0']
+- [blocks_throttle_0, '0', blocks_complex_to_mag_squared_0, '0']
+- [epy_block_0, '0', qtgui_time_sink_x_0, '0']
+- [epy_block_0, demodulated, adsb_decoder_0, demodulated]
+- [epy_block_2, msg_out, azure_software_radio_eventhub_sink_0, in]
+
+metadata:
+  file_format: 1
