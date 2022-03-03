@@ -93,7 +93,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
             msg_debug_block.num_messages(), 0)
 
         self.tb.start()
-        time.sleep(1)
+        time.sleep(10)
         self.assertEqual(
             msg_debug_block.num_messages(), 1)
         source_block.stop()
@@ -155,7 +155,7 @@ class IntegrationEventhubSource(gr_unittest.TestCase):
         self.assertEqual(
             msg_debug_block.num_messages(), 0)
         self.tb.start()
-        time.sleep(5)
+        time.sleep(10)
         source_block.stop()
         self.tb.stop()
         self.tb.wait()
