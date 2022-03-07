@@ -84,7 +84,7 @@ The first step is to create a new Event Hub. There is documentation for doing so
 
 After you have completed this, your new Event Hub should be listed in the Resource Group you are using. You now need to get the Connection String of the Event Hub instance (not the namespace) for it so the flowgraph can send messages to the Event Hub. Follow [these steps](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string) to get the Connection String and copy it to your clipboard. 
 
-Now return to the GRC window and find the Event Hub Sink block in the far right side of the flowgraph.
+Now return to the GRC window and find the Event Hub Sink block in the far right side of the flowgraph.  If it's still grayed out, enable it by clicking it and hitting E.
 
 <center><img src="images/event-hub-sink-block.png"/></center>
  
