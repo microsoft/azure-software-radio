@@ -50,7 +50,7 @@ class BlobSource(gr.sync_block):
     # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
     def __init__(self, np_dtype: np.dtype, vlen: int = 1, authentication_method: str = "default",
                  connection_str: str = None, url: str = None, container_name: str = None, blob_name: str = None,
-                 queue_size: int = 4, retry_total: int = 10):
+                 queue_size: int = 4, retry_total: int = 10, repeat: bool = False):
         """ Initialize the blob_source block
 
         Args:
@@ -65,6 +65,8 @@ class BlobSource(gr.sync_block):
                 buffer up before blocking. Larger numbers require more memory overhead
             retry_total (int, optional): Total number of Azure API retries to allow before throwing
                 an exception
+            repeat (bool): To repeat the file or not.  Currently does not cache locally so repeating
+                will cause additional traffic.
         """
         # work-around the following deprecation in numpy:
         # FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated
@@ -81,6 +83,7 @@ class BlobSource(gr.sync_block):
         self.queue = queue.Queue(maxsize=queue_size)
         self.buf = np.zeros((0, ), dtype=np.byte)
         self.num_buf_bytes_read = 0
+        self.repeat = repeat
 
         self.blob_service_client = get_blob_service_client(
             authentication_method=authentication_method,
@@ -183,9 +186,7 @@ class BlobSource(gr.sync_block):
 
         # connect to the blob service the first time we run
         if self.first_run:
-
             self.blob_auth_and_container_info_is_valid()
-
             self.blob_iter = self.setup_blob_iterator()
             self.first_run = False
 
@@ -201,6 +202,12 @@ class BlobSource(gr.sync_block):
 
         # check if we're done
         if self.queue.empty() and num_remaining_bytes == 0 and self.blob_complete:
+            if self.repeat:
+                self.blob_iter = self.setup_blob_iterator()
+                self.num_buf_bytes_read = 0
+                self.buf = np.zeros((0, ), dtype=np.byte)
+                self.blob_complete = False
+                return 0 # will cause work function to start over
             shutdown_blob_service_client(self.blob_service_client)
             return -1
 

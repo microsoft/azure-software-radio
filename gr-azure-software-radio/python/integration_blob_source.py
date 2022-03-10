@@ -156,6 +156,41 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         self.round_trip_test_helper(dtype=np.complex64,
                                     sink=blocks.vector_sink_c(vlen=vlen),
                                     vlen=vlen)
+    def test_repeat(self):
+        """
+        Test the repeat feature of blob source using a head block to limit the output length
+        """
+        blob_name = 'test-blob.npy'
+        num_samples = 100000
+        repeat_N_times = 3 # we limit the blob source when in repeat mode using a head block
+
+        # set up a vector source with known complex data
+        src_data = np.arange(0, num_samples, 1, dtype=np.float32)
+
+        # connect to the test blob container and upload our test data
+        blob_client = self.blob_service_client.get_blob_client(
+            container=self.test_blob_container_name,
+            blob=blob_name)
+        blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
+
+        op_block = BlobSource(np_dtype=np.float32,
+                              vlen=1,
+                              authentication_method="connection_string",
+                              connection_str=self.blob_connection_string,
+                              container_name=self.test_blob_container_name,
+                              blob_name=blob_name,
+                              queue_size=4,
+                              retry_total=0,
+                              repeat=True) # Note we are repeating this time, the default is False
+
+        vector_sink = blocks.vector_sink_f()
+        head = blocks.head(4, num_samples*repeat_N_times)
+        self.top_block.connect(op_block, head)
+        self.top_block.connect(head, vector_sink)
+        self.top_block.run()
+
+        repeated_src_data = np.tile(src_data, repeat_N_times) # numpy tile will emulate what we're doing here
+        self.assertEqual(repeated_src_data.tolist(), vector_sink.data())
 
 if __name__ == '__main__':
     gr_unittest.run(IntegrationBlobSource)

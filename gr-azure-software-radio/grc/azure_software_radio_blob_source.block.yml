@@ -19,7 +19,8 @@ templates:
                                         ${container_name},
                                         ${blob_name},
                                         ${queue_size},
-                                        ${retry_total})
+                                        ${retry_total},
+                                        ${repeat})
 
 parameters:
 - id: type
@@ -67,6 +68,12 @@ parameters:
   label: Retry Total
   dtype: int
   default: 10
+- id: repeat
+  label: Repeat
+  dtype: enum
+  default: 'False'
+  options: ['True', 'False']
+  option_labels: ['Yes', 'No']
 
 outputs:
 - label: out
