@@ -207,10 +207,9 @@ class BlobSource(gr.sync_block):
                 self.num_buf_bytes_read = 0
                 self.buf = np.zeros((0, ), dtype=np.byte)
                 self.blob_complete = False
-                return 0
-            else:
-                shutdown_blob_service_client(self.blob_service_client)
-                return -1
+                return 0 # will cause work function to start over
+            shutdown_blob_service_client(self.blob_service_client)
+            return -1
 
         # do we have anything to produce?
         nitems_produced = min(int(num_remaining_bytes/self.item_size), noutput_items)
