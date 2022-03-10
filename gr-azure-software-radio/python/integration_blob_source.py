@@ -157,6 +157,9 @@ class IntegrationBlobSource(gr_unittest.TestCase):
                                     sink=blocks.vector_sink_c(vlen=vlen),
                                     vlen=vlen)
     def test_repeat(self):
+        """
+        Test the repeat feature of blob source using a head block to limit the output length
+        """
         blob_name = 'test-blob.npy'
         num_samples = 100000
         repeat_N_times = 3 # we limit the blob source when in repeat mode using a head block
