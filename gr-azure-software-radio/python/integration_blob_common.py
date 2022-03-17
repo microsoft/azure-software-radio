@@ -159,9 +159,10 @@ class IntegrationBlobCommon(gr_unittest.TestCase):
             authentication_method="none",
             url=url
         )
-        
+
         self.assertIsNone(blob_service_client.credential)
         blob_service_client.close()
+
 
 if __name__ == '__main__':
     gr_unittest.run(IntegrationBlobCommon)

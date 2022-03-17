@@ -34,10 +34,12 @@ class IntegrationBlobSource(gr_unittest.TestCase):
 
         Use this to set up a separate blob service client for testing.
         """
-        self.blob_connection_string = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
-        
+        self.blob_connection_string = os.getenv(
+            'AZURE_STORAGE_CONNECTION_STRING')
+
         if not self.blob_connection_string:
-            print("Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
+            print(
+                "Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
             exit()
 
         self.blob_service_client = BlobServiceClient.from_connection_string(
@@ -103,13 +105,13 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
 
         op_block = BlobSource(np_dtype=dtype,
-                            vlen=vlen,
-                            authentication_method="connection_string",
-                            connection_str=self.blob_connection_string,
-                            container_name=self.test_blob_container_name,
-                            blob_name=blob_name,
-                            queue_size=4,
-                            retry_total=0)
+                              vlen=vlen,
+                              authentication_method="connection_string",
+                              connection_str=self.blob_connection_string,
+                              container_name=self.test_blob_container_name,
+                              blob_name=blob_name,
+                              queue_size=4,
+                              retry_total=0)
 
         self.top_block.connect(op_block, sink)
         self.top_block.run()
@@ -171,9 +173,9 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         public_container_name = os.getenv('PUBLIC_CONTAINER_NAME')
         blob_name = 'test-blob.npy'
         num_samples = 1000000
-        dtype=np.complex64
-        sink=blocks.vector_sink_c()
-        
+        dtype = np.complex64
+        sink = blocks.vector_sink_c()
+
         # set up a vector source with known complex data
         src_data = np.arange(0, num_samples, 1, dtype=dtype)
         # connect to the test blob container and upload our test data
@@ -195,6 +197,7 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         self.top_block.run()
 
         self.assertEqual(src_data.tolist(), sink.data())
+
 
 if __name__ == '__main__':
     gr_unittest.run(IntegrationBlobSource)

@@ -20,8 +20,8 @@ def blob_setup(self):
     self.blob_connection_string = os.getenv(
         'AZURE_STORAGE_CONNECTION_STRING')
     if not self.blob_connection_string:
-            print("Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
-            exit()
+        print("Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
+        exit()
     self.blob_service_client = BlobServiceClient.from_connection_string(
         self.blob_connection_string)
 

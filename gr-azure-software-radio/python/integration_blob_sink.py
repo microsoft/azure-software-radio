@@ -32,10 +32,12 @@ class IntegrationBlobSink(gr_unittest.TestCase):
         Use this to set up a separate blob service client for testing.
         """
 
-        self.blob_connection_string = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+        self.blob_connection_string = os.getenv(
+            'AZURE_STORAGE_CONNECTION_STRING')
 
         if not self.blob_connection_string:
-            print("Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
+            print(
+                "Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
             exit()
 
         self.blob_service_client = BlobServiceClient.from_connection_string(
@@ -92,7 +94,8 @@ class IntegrationBlobSink(gr_unittest.TestCase):
             container=self.test_blob_container_name,
             blob=blob_name)
 
-        result_data = np.frombuffer(blob_client.download_blob().readall(), dtype=dtype)
+        result_data = np.frombuffer(
+            blob_client.download_blob().readall(), dtype=dtype)
         self.assertEqual(src_data.tolist(), result_data.tolist())
 
     def test_round_trip_complex_float_data_through_blob(self):

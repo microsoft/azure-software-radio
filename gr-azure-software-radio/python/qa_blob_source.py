@@ -49,7 +49,7 @@ class qa_BlobSource(gr_unittest.TestCase):
         # really only checking that the init didn't throw an exception above, but adding the check
         # below to keep flake8 happy
         self.assertIsNotNone(instance)
-    
+
     def test_public_blob_instance(self):
         '''
         Ensure we don't throw errors in the constructor when given inputs with valid formats for public blob

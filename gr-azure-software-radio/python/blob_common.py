@@ -50,7 +50,7 @@ def get_blob_service_client(authentication_method: str = "default", connection_s
         default_credential = DefaultAzureCredential()
         blob_service_client = BlobServiceClient(
             account_url=url, credential=default_credential, retry_total=retry_total)
-    
+
     elif authentication_method == "none":
         blob_service_client = BlobServiceClient(
             account_url=url, retry_total=retry_total)
