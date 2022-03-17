@@ -39,7 +39,7 @@ parameters:
   label: Auth Method
   dtype: string
   default: 'default'
-  options: ['connection_string', 'url_with_sas', 'default']
+  options: ['connection_string', 'url_with_sas', 'default', 'none']
 - id: connection_str
   label: Connection String
   dtype: string

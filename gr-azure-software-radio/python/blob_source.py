@@ -34,10 +34,10 @@ class BlobSource(gr.sync_block):
     Output Type: Data type of the sample stream
     Vector Length: Number of items per vector
     Auth Method: Determines how to authenticate to the Azure blob backend. May be one of
-        "connection_string", "url_with_sas", or "default".
+        "connection_string", "url_with_sas", "default", or "none".
     Connection String: Azure storage account connection string used for
         authentication if Auth Method is "connection_string".
-    URL: Storage account URL string. This is required if using "default" or
+    URL: Storage account URL string. This is required if using "default", "none" or
         "url_with_sas" authentication. If using "url_with_sas", the URL must include a SAS
         token to access private blobs. If using a blob in a container with public permissions, the
         SAS token is not necessary.

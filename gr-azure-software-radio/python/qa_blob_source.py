@@ -49,6 +49,23 @@ class qa_BlobSource(gr_unittest.TestCase):
         # really only checking that the init didn't throw an exception above, but adding the check
         # below to keep flake8 happy
         self.assertIsNotNone(instance)
+    
+    def test_public_blob_instance(self):
+        '''
+        Ensure we don't throw errors in the constructor when given inputs with valid formats for public blob
+        '''
+
+        instance = BlobSource(np_dtype=np.complex64,
+                              vlen=1,
+                              authentication_method="none",
+                              url="storage-url",
+                              container_name=self.test_blob_container_name,
+                              blob_name='test-instance',
+                              queue_size=4)
+
+        # really only checking that the init didn't throw an exception above, but adding the check
+        # below to keep flake8 happy
+        self.assertIsNotNone(instance)
 
     def test_chunk_residue(self):
         '''

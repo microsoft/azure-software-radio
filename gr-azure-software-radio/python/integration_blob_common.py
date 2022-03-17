@@ -146,6 +146,22 @@ class IntegrationBlobCommon(gr_unittest.TestCase):
             blob_common.blob_container_info_is_valid(blob_service_client=blob_service_client,
                                                      container_name="does-not-exist")
 
+    def test_none_auth(self):
+        '''
+        Test that authentication to public blob storage works. You must have the
+        AZURE_STORAGE_URL environment variable defined with the URL to a public storage account
+        for this to pass
+        '''
+
+        url = os.getenv('AZURE_PUBLIC_STORAGE_URL')
+
+        blob_service_client = blob_common.get_blob_service_client(
+            authentication_method="none",
+            url=url
+        )
+        
+        self.assertIsNone(blob_service_client.credential)
+        blob_service_client.close()
 
 if __name__ == '__main__':
     gr_unittest.run(IntegrationBlobCommon)
