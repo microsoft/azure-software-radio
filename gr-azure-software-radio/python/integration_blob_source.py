@@ -12,6 +12,7 @@ Integration tests for functions from blob_source.py
 """
 
 import os
+import sys
 import uuid
 
 import azure.core.exceptions as az_exceptions
@@ -40,7 +41,7 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         if not self.blob_connection_string:
             print(
                 "Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
-            exit()
+            sys.exit()
 
         self.blob_service_client = BlobServiceClient.from_connection_string(
             self.blob_connection_string)
@@ -165,8 +166,8 @@ class IntegrationBlobSource(gr_unittest.TestCase):
                                     vlen=vlen)
 
     def test_read_from_public_blob(self):
-        """ 
-        Upload data to public blob using the azure blob API and confirm we can read 
+        """
+        Upload data to public blob using the azure blob API and confirm we can read
         it back in without authenticating
         """
         url = os.getenv('AZURE_PUBLIC_STORAGE_URL')

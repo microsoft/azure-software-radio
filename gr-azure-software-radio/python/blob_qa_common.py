@@ -6,6 +6,7 @@
 #
 
 import os
+import sys
 import uuid
 from gnuradio import gr
 from azure.storage.blob import BlobServiceClient
@@ -21,7 +22,7 @@ def blob_setup(self):
         'AZURE_STORAGE_CONNECTION_STRING')
     if not self.blob_connection_string:
         print("Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
-        exit()
+        sys.exit()
     self.blob_service_client = BlobServiceClient.from_connection_string(
         self.blob_connection_string)
 
