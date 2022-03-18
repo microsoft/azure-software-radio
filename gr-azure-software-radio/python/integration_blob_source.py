@@ -12,6 +12,7 @@ Integration tests for functions from blob_source.py
 """
 
 import os
+import sys
 import uuid
 
 import azure.core.exceptions as az_exceptions
@@ -34,7 +35,14 @@ class IntegrationBlobSource(gr_unittest.TestCase):
 
         Use this to set up a separate blob service client for testing.
         """
-        self.blob_connection_string = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+        self.blob_connection_string = os.getenv(
+            'AZURE_STORAGE_CONNECTION_STRING')
+
+        if not self.blob_connection_string:
+            print(
+                "Please set AZURE_STORAGE_CONNECTION_STRING env var to your storage account connection string")
+            sys.exit()
+
         self.blob_service_client = BlobServiceClient.from_connection_string(
             self.blob_connection_string)
         # Create a unique name for the container
@@ -191,6 +199,41 @@ class IntegrationBlobSource(gr_unittest.TestCase):
 
         repeated_src_data = np.tile(src_data, repeat_N_times) # numpy tile will emulate what we're doing here
         self.assertEqual(repeated_src_data.tolist(), vector_sink.data())
+
+    def test_read_from_public_blob(self):
+        """
+        Upload data to public blob using the azure blob API and confirm we can read
+        it back in without authenticating
+        """
+        url = os.getenv('AZURE_PUBLIC_STORAGE_URL')
+        public_container_name = os.getenv('PUBLIC_CONTAINER_NAME')
+        blob_name = 'test-blob.npy'
+        num_samples = 1000000
+        dtype = np.complex64
+        sink = blocks.vector_sink_c()
+
+        # set up a vector source with known complex data
+        src_data = np.arange(0, num_samples, 1, dtype=dtype)
+        # connect to the test blob container and upload our test data
+        blob_client = self.blob_service_client.get_blob_client(
+            container=public_container_name,
+            blob=blob_name)
+        blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
+
+        op_block = BlobSource(np_dtype=dtype,
+                              vlen=1,
+                              authentication_method="none",
+                              url=url,
+                              container_name=public_container_name,
+                              blob_name=blob_name,
+                              queue_size=4,
+                              retry_total=0)
+
+        self.top_block.connect(op_block, sink)
+        self.top_block.run()
+
+        self.assertEqual(src_data.tolist(), sink.data())
+
 
 if __name__ == '__main__':
     gr_unittest.run(IntegrationBlobSource)

@@ -19,7 +19,7 @@ def get_blob_service_client(authentication_method: str = "default", connection_s
 
     Args:
         authentication_method (str): Determines which method to use to authenticate to the
-            Azure blob backend. May be one of "connection_string", "url_with_sas", or "default".
+            Azure blob backend. May be one of "connection_string", "url_with_sas", "default", or "none".
         connection_str (optional, str): Azure storage account connection string used for
             authentication if authentication_method is "connection_string"
         url (optional, str): Storage account URL. This is required if using "default" or
@@ -50,6 +50,10 @@ def get_blob_service_client(authentication_method: str = "default", connection_s
         default_credential = DefaultAzureCredential()
         blob_service_client = BlobServiceClient(
             account_url=url, credential=default_credential, retry_total=retry_total)
+
+    elif authentication_method == "none":
+        blob_service_client = BlobServiceClient(
+            account_url=url, retry_total=retry_total)
     else:
         raise ValueError("Unsupported authentication method specified")
 
