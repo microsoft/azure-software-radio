@@ -1,4 +1,4 @@
-# Welcome To Azure software radio Github! 
+# Welcome To Azure software radio Github!
 
 Here we are sharing two assets we have developed to-date. Click on either link to dive in further!
 
