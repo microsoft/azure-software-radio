@@ -55,7 +55,7 @@ class BlobSink(gr.sync_block):
         The blobname.sigmf-data will contain the signal, while the blobname.sigmf-meta will contain
         metadata about the signal, provided as additional block params.
     """
-    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
+    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method, too-many-locals, too-many-branches
     def __init__(self, np_dtype: np.dtype, vlen: int = 1, authentication_method: str = "default",
                  connection_str: str = None, url: str = None, container_name: str = None, blob_name: str = None,
                  block_len: int = 500000, queue_size: int = 4, retry_total: int = 10, sigmf: bool = False,
@@ -100,7 +100,7 @@ class BlobSink(gr.sync_block):
                 datatype_str = 'cf32_le'
             elif np_dtype == np.float32:
                 datatype_str = 'rf32_le'
-            elif np_dtype == np.int32: # TODO: Check that our original usage of np.int32 makes sense
+            elif np_dtype == np.int32: # Check that our original usage of np.int32 makes sense
                 datatype_str = 'ci16_le'
             elif np_dtype == np.int16:
                 datatype_str = 'ri16_le'

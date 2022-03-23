@@ -54,7 +54,7 @@ class BlobSource(gr.sync_block):
         used; the datatype is set by the Output Type specified above.  The meta file as a whole is
         printed to console at the beginning of flowgraph execution.
     """
-    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
+    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method, too-many-locals
     def __init__(self, np_dtype: np.dtype, vlen: int = 1, authentication_method: str = "default",
                  connection_str: str = None, url: str = None, container_name: str = None, blob_name: str = None,
                  queue_size: int = 4, retry_total: int = 10, repeat: bool = False, sigmf: bool = False):
