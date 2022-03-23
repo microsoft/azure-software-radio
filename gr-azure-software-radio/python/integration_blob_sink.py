@@ -177,7 +177,7 @@ class IntegrationBlobSink(gr_unittest.TestCase):
         blob_name = 'test-blob.npy' # It should strip off the .npy
         block_len = 500000
 
-        src=blocks.vector_source_c([])
+        src = blocks.vector_source_c([])
         src_data = np.arange(0, 2*block_len, 1, dtype=np.complex64)
         src.set_data(src_data.tolist())
 

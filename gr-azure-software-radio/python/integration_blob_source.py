@@ -221,22 +221,22 @@ class IntegrationBlobSource(gr_unittest.TestCase):
         meta_blob_client = self.blob_service_client.get_blob_client(
             container=self.test_blob_container_name,
             blob=blob_name + '.sigmf-meta')
-        meta_dict = {"global": {
-                            "core:datatype": "cf32_le",
-                            "core:sample_rate": 1000000.0,
-                            "core:version": "1.0.0",
-                            "core:hw": "test hardware info",
-                            "core:author": "Marc",
-                            "core:description": "test description"
-                        },
-                        "captures": [
-                            {
-                            "core:sample_start": 0,
-                            "core:frequency": 2400000000.0
-                            }
-                        ],
-                        "annotations": []
-                    }
+        meta_dict = {
+            "global": {
+            "core:datatype": "cf32_le",
+            "core:sample_rate": 1000000.0,
+            "core:version": "1.0.0",
+            "core:hw": "test hardware info",
+            "core:author": "Marc",
+            "core:description": "test description"
+            },
+        "captures": [
+            {
+            "core:sample_start": 0,
+            "core:frequency": 2400000000.0
+            }
+            ],
+        "annotations": []}
         meta_string = json.dumps(meta_dict, indent=2)
         meta_blob_client.upload_blob(data=meta_string, blob_type='BlockBlob')
 

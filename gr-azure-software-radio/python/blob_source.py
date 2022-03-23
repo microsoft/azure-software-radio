@@ -100,7 +100,7 @@ class BlobSource(gr.sync_block):
             # Stream tags must be written in work() but we will pull out the two values here
             self.sample_rate = meta_dict['global']['core:sample_rate']
             self.center_freq = meta_dict["captures"][0].get("core:frequency", 0.0)
-            
+
             blob_name = blob_name + '.sigmf-data'
 
         self.blob_client = self.blob_service_client.get_blob_client(container=container_name,
@@ -201,15 +201,13 @@ class BlobSource(gr.sync_block):
             if self.sigmf:
                 # Add sample rate and center freq to the first sample as a stream tag
                 self.add_item_tag(0, # Write to output port 0
-                        self.nitems_written(0), # sample 0
-                        pmt.intern("sample_rate"),
-                        pmt.from_float(self.sample_rate)
-                )
+                                  self.nitems_written(0), # sample 0
+                                  pmt.intern("sample_rate"),
+                                  pmt.from_float(self.sample_rate))
                 self.add_item_tag(0, # Write to output port 0
-                        self.nitems_written(0), # sample 0
-                        pmt.intern("center_freq"),
-                        pmt.from_float(self.center_freq)
-                )
+                                  self.nitems_written(0), # sample 0
+                                  pmt.intern("center_freq"),
+                                  pmt.from_float(self.center_freq))
 
         # get a view into the output buffer as a 1D array of bytes, so our code can copy over the data
         # without caring about the actual datatype or vlen in use

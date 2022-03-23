@@ -59,7 +59,8 @@ class BlobSink(gr.sync_block):
     def __init__(self, np_dtype: np.dtype, vlen: int = 1, authentication_method: str = "default",
                  connection_str: str = None, url: str = None, container_name: str = None, blob_name: str = None,
                  block_len: int = 500000, queue_size: int = 4, retry_total: int = 10, sigmf: bool = False,
-                 sample_rate: float = 0, center_freq: float = np.nan, author: str = '', description: str = '', hw_info: str = ''):
+                 sample_rate: float = 0, center_freq: float = np.nan, author: str = '', description: str = '',
+                 hw_info: str = ''):
         """ Initialize the blob_sink block
         """
         # work-around the following deprecation in numpy:
@@ -87,11 +88,11 @@ class BlobSink(gr.sync_block):
         self.buf = np.zeros((self.block_len*self.item_size, ), dtype=np.byte)
         self.num_buf_bytes = 0
         self.log = gr.logger(f"gr_log.{self.symbol_name()}")
-        
+
         # If user accidently left .sigmf-data or meta file extension, strip it off
         if sigmf and '.sigmf' in blob_name:
             blob_name = blob_name.rsplit('.', 1)[0]
-        
+
         if sigmf:
             meta_blob_client = self.blob_service_client.get_blob_client(container=container_name,
                                                                         blob=blob_name + '.sigmf-meta')
@@ -99,7 +100,7 @@ class BlobSink(gr.sync_block):
                 datatype_str = 'cf32_le'
             elif np_dtype == np.float32:
                 datatype_str = 'rf32_le'
-            elif np_dtype == np.int32: # TODO: Check that our original usage of np.int32 makes sense; usually complex int16s (iShorts) are saved as int16s not int32s
+            elif np_dtype == np.int32: # TODO: Check that our original usage of np.int32 makes sense
                 datatype_str = 'ci16_le'
             elif np_dtype == np.int16:
                 datatype_str = 'ri16_le'
@@ -134,7 +135,7 @@ class BlobSink(gr.sync_block):
             meta_blob_client.close()
             self.log.info("Meta file upload complete")
             blob_name = blob_name + '.sigmf-data'
-        
+
         self.blob_client = self.blob_service_client.get_blob_client(container=container_name,
                                                                     blob=blob_name)
 
