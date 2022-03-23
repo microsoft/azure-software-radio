@@ -20,7 +20,13 @@ templates:
                                       ${blob_name},
                                       ${block_len},
                                       ${queue_size},
-                                      ${retry_total})
+                                      ${retry_total},
+                                      ${sigmf},
+                                      ${sample_rate},
+                                      ${center_freq},
+                                      ${author},
+                                      ${description},
+                                      ${hw_info})
 
 parameters:
 - id: type
@@ -72,6 +78,38 @@ parameters:
   label: Retry Total
   dtype: int
   default: 10
+- id: sigmf
+  label: SigMF Recording
+  dtype: enum
+  default: 'False'
+  options: ['True', 'False']
+  option_labels: ['Yes', 'No']
+- id: sample_rate
+  label: Sample Rate
+  dtype: float
+  default: samp_rate
+  hide: ${ 'all' if sigmf == 'False' else 'none'}
+- id: center_freq
+  label: Center Frequency
+  dtype: float
+  options: [np.nan]
+  option_labels: ['None']
+  hide: ${ 'all' if sigmf == 'False' else 'none'}
+- id: author
+  label: Author
+  dtype: string
+  default: ''
+  hide: ${ 'all' if sigmf == 'False' else 'none'}
+- id: description
+  label: Description
+  dtype: string
+  default: ''
+  hide: ${ 'all' if sigmf == 'False' else 'none'}
+- id: hw_info
+  label: Hardware Info
+  dtype: string
+  default: ''
+  hide: ${ 'all' if sigmf == 'False' else 'none'}
 
 inputs:
 - label: in

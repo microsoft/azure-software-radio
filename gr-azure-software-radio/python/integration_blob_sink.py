@@ -12,6 +12,7 @@ Integration tests for functions from blob_sink.py
 import os
 import sys
 import uuid
+import json
 
 import azure.core.exceptions as az_exceptions
 from azure.storage.blob import BlobServiceClient
@@ -20,7 +21,6 @@ from gnuradio import blocks
 import numpy as np
 
 from azure_software_radio import BlobSink
-
 
 class IntegrationBlobSink(gr_unittest.TestCase):
     """ Test case class for running integration tests on blob_sink.py
@@ -170,6 +170,57 @@ class IntegrationBlobSink(gr_unittest.TestCase):
         with self.assertRaises(az_exceptions.HttpResponseError):
             op_block.create_blob()
 
+    def test_round_trip_sigmf_blob(self):
+        """
+        Confirm SigMF mode works
+        """
+        blob_name = 'test-blob.npy' # It should strip off the .npy
+        block_len = 500000
+
+        src=blocks.vector_source_c([])
+        src_data = np.arange(0, 2*block_len, 1, dtype=np.complex64)
+        src.set_data(src_data.tolist())
+
+        op_block = BlobSink(np_dtype=np.complex64,
+                            vlen=1,
+                            authentication_method="connection_string",
+                            connection_str=self.blob_connection_string,
+                            container_name=self.test_blob_container_name,
+                            blob_name=blob_name,
+                            block_len=block_len,
+                            queue_size=4,
+                            retry_total=0,
+                            sigmf=True,
+                            sample_rate=1e6,
+                            center_freq=2.4e9,
+                            author='Marc',
+                            description='test desc',
+                            hw_info='test hw_info')
+
+        self.top_block.connect(src, op_block)
+        self.top_block.run()
+
+        # connect to the test blob container and download the file
+        # compare the file we downloaded against the samples in the vector source
+        blob_client = self.blob_service_client.get_blob_client(
+            container=self.test_blob_container_name,
+            blob=blob_name + '.sigmf-data') # Note the name change here
+
+        result_data = np.frombuffer(
+            blob_client.download_blob().readall(), dtype=np.complex64)
+        self.assertEqual(src_data.tolist(), result_data.tolist())
+
+        # Now test the metafile
+        meta_blob_client = self.blob_service_client.get_blob_client(
+            container=self.test_blob_container_name,
+            blob=blob_name + '.sigmf-meta') # Note the name change here
+        result_meta = meta_blob_client.download_blob().readall()
+        meta_dict = json.loads(result_meta)
+        self.assertEqual(meta_dict['global']['core:datatype'], 'cf32_le')
+        self.assertEqual(meta_dict['global']['core:author'], 'Marc')
+        self.assertEqual(meta_dict['global']['core:description'], 'test desc')
+        self.assertEqual(meta_dict['global']['core:hw'], 'test hw_info')
+        self.assertEqual(meta_dict["captures"][0]["core:frequency"], 2.4e9)
 
 if __name__ == '__main__':
     gr_unittest.run(IntegrationBlobSink)
