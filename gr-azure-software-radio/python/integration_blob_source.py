@@ -230,13 +230,13 @@ class IntegrationBlobSource(gr_unittest.TestCase):
                 "core:author": "Marc",
                 "core:description": "test description"
             },
-        "captures": [
+            "captures": [
             {
                 "core:sample_start": 0,
                 "core:frequency": 2400000000.0
             }
             ],
-        "annotations": []}
+            "annotations": []}
         meta_string = json.dumps(meta_dict, indent=2)
         meta_blob_client.upload_blob(data=meta_string, blob_type='BlockBlob')
 
