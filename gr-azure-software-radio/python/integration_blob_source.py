@@ -14,6 +14,7 @@ Integration tests for functions from blob_source.py
 import os
 import sys
 import uuid
+import json
 
 import azure.core.exceptions as az_exceptions
 from azure.storage.blob import BlobServiceClient
@@ -199,6 +200,68 @@ class IntegrationBlobSource(gr_unittest.TestCase):
 
         repeated_src_data = np.tile(src_data, repeat_N_times) # numpy tile will emulate what we're doing here
         self.assertEqual(repeated_src_data.tolist(), vector_sink.data())
+
+    def test_sigmf(self):
+        """
+        Test the SigMF feature of blob source by looking at the stream tags on the first sample
+        """
+        blob_name = 'test-blob'
+        num_samples = 100000
+
+        # set up a vector source with known complex data
+        src_data = np.arange(0, num_samples, 1, dtype=np.float32)
+
+        # connect to the test blob container and upload our test data
+        blob_client = self.blob_service_client.get_blob_client(
+            container=self.test_blob_container_name,
+            blob=blob_name + '.sigmf-data')
+        blob_client.upload_blob(data=src_data.tobytes(), blob_type='BlockBlob')
+
+        # Also upload a test meta file
+        meta_blob_client = self.blob_service_client.get_blob_client(
+            container=self.test_blob_container_name,
+            blob=blob_name + '.sigmf-meta')
+        meta_dict = {"global": {
+                            "core:datatype": "cf32_le",
+                            "core:sample_rate": 1000000.0,
+                            "core:version": "1.0.0",
+                            "core:hw": "test hardware info",
+                            "core:author": "Marc",
+                            "core:description": "test description"
+                        },
+                        "captures": [
+                            {
+                            "core:sample_start": 0,
+                            "core:frequency": 2400000000.0
+                            }
+                        ],
+                        "annotations": []
+                    }
+        meta_string = json.dumps(meta_dict, indent=2)
+        meta_blob_client.upload_blob(data=meta_string, blob_type='BlockBlob')
+
+        op_block = BlobSource(np_dtype=np.float32,
+                              vlen=1,
+                              authentication_method="connection_string",
+                              connection_str=self.blob_connection_string,
+                              container_name=self.test_blob_container_name,
+                              blob_name=blob_name,
+                              queue_size=4,
+                              retry_total=0,
+                              repeat=False,
+                              sigmf=True) # Note we are enabling the SigMF feature
+        vector_sink = blocks.vector_sink_f()
+        tag_debug = blocks.tag_debug(gr.sizeof_float, '', "")
+        tag_debug.set_display(True)
+        self.top_block.connect(op_block, vector_sink)
+        self.top_block.connect(op_block, tag_debug)
+        self.top_block.run()
+
+        self.assertEqual(src_data.tolist(), vector_sink.data())
+
+        # There does not seem to be a way to retrieve the tags after the flowgraph finished
+        #print(tag_debug.num_tags()) # Returning 0 for some reason, even though the tags definitely showed up
+        #print(tag_debug.current_tags())
 
     def test_read_from_public_blob(self):
         """

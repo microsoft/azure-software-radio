@@ -20,7 +20,8 @@ templates:
                                         ${blob_name},
                                         ${queue_size},
                                         ${retry_total},
-                                        ${repeat})
+                                        ${repeat},
+                                        ${sigmf})
 
 parameters:
 - id: type
@@ -70,6 +71,12 @@ parameters:
   default: 10
 - id: repeat
   label: Repeat
+  dtype: enum
+  default: 'False'
+  options: ['True', 'False']
+  option_labels: ['Yes', 'No']
+- id: sigmf
+  label: SigMF Recording
   dtype: enum
   default: 'False'
   options: ['True', 'False']
