@@ -231,10 +231,10 @@ class IntegrationBlobSource(gr_unittest.TestCase):
                 "core:description": "test description"
             },
             "captures": [
-            {
-                "core:sample_start": 0,
-                "core:frequency": 2400000000.0
-            }
+                {
+                    "core:sample_start": 0,
+                    "core:frequency": 2400000000.0
+                }
             ],
             "annotations": []}
         meta_string = json.dumps(meta_dict, indent=2)
