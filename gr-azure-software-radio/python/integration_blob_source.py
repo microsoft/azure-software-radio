@@ -223,17 +223,17 @@ class IntegrationBlobSource(gr_unittest.TestCase):
             blob=blob_name + '.sigmf-meta')
         meta_dict = {
             "global": {
-            "core:datatype": "cf32_le",
-            "core:sample_rate": 1000000.0,
-            "core:version": "1.0.0",
-            "core:hw": "test hardware info",
-            "core:author": "Marc",
-            "core:description": "test description"
+                "core:datatype": "cf32_le",
+                "core:sample_rate": 1000000.0,
+                "core:version": "1.0.0",
+                "core:hw": "test hardware info",
+                "core:author": "Marc",
+                "core:description": "test description"
             },
         "captures": [
             {
-            "core:sample_start": 0,
-            "core:frequency": 2400000000.0
+                "core:sample_start": 0,
+                "core:frequency": 2400000000.0
             }
             ],
         "annotations": []}
