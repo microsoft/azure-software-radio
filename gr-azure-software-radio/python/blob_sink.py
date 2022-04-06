@@ -27,7 +27,9 @@ class BlobSink(gr.sync_block):
     This block has multiple ways to authenticate to the Azure blob backend. Users can directly
     specify either a connection string, a URL with an embedded SAS token, or use credentials
     supported by the DefaultAzureCredential class, such as environment variables, a
-    managed identity, the az login command, etc.
+    managed identity, the az login command, etc.  
+    
+    "Block blobs" are used, page blobs and append blobs are not supported.
 
     For saving a SigMF recording, set the SigMF param to True and leave off the file extension
     (.sigmf-data and .sigmf-meta will be automatically added).
