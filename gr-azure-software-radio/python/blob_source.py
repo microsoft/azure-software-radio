@@ -30,7 +30,7 @@ class BlobSource(gr.sync_block):
     managed identity, the az login command, etc.
 
     This block currently only supports complex64 inputs and has only been tested with block blobs.
-    Page blobs are not supported.
+    Page blobs and append blobs are not supported.
 
     Args:
     Output Type: Data type of the sample stream
