@@ -49,7 +49,8 @@ GR_PYTHON_INSTALL(
     blob_qa_common.py
     blob_common.py
     eventhub_sink.py
-    eventhub_source.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
+    eventhub_source.py
+    rest_api.py DESTINATION ${GR_PYTHON_DIR}/azure_software_radio
 )
 ########################################################################
 GR_PYTHON_INSTALL(
@@ -75,3 +76,4 @@ GR_ADD_TEST(qa_difi_blocks_cpp ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/
 GR_ADD_TEST(qa_blob_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_blob_source.py)
 GR_ADD_TEST(qa_eventhub_sink ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_eventhub_sink.py)
 GR_ADD_TEST(qa_eventhub_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_eventhub_source.py)
+GR_ADD_TEST(qa_rest_api ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_rest_api.py)

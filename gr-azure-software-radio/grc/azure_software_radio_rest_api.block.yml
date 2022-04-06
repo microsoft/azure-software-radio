@@ -1,0 +1,28 @@
+id: rest_api
+label: Rest API
+category: '[Azure software radio]'
+
+parameters:
+-   id: value
+    dtype: string
+    default: '0'
+    hide: all
+-   id: port
+    dtype: int
+    default: 8000
+-   id: paths
+    dtype: raw
+-   id: readables
+    dtype: raw
+-   id: writeables
+    dtype: raw
+
+value: ${value}
+templates:
+    imports: |-
+      import azure_software_radio
+    var_make: |+
+
+        self.${id} = ${id} = azure_software_radio.RestApi(self,${port})
+
+file_format: 1
