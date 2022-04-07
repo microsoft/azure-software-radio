@@ -102,7 +102,7 @@ class BlobSink(gr.sync_block):
                 datatype_str = 'cf32_le'
             elif np_dtype == np.float32:
                 datatype_str = 'rf32_le'
-            elif np_dtype == np.int32: # Check that our original usage of np.int32 makes sense
+            elif np_dtype == np.int32: # See https://github.com/microsoft/azure-software-radio/issues/67
                 datatype_str = 'ci16_le'
             elif np_dtype == np.int16:
                 datatype_str = 'ri16_le'
