@@ -17,6 +17,7 @@ from gnuradio import gr
 
 import uvicorn
 
+
 class RestApi(gr.basic_block):
 
     """ REST endpoints to configure a top block and get status information.
@@ -84,7 +85,8 @@ class RestApi(gr.basic_block):
                 for name in settings:
                     if name not in write_settings or name not in all_settings:
                         raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST, detail={'Error': f'Setting {name} is not a writeable setting.'})
+                            status_code=status.HTTP_400_BAD_REQUEST, \
+                                detail={'Error': f'Setting {name} is not a writeable setting.'})
                     try:
                         setattr(tbself, name, settings[name])
                         return settings
@@ -93,7 +95,7 @@ class RestApi(gr.basic_block):
                             status_code=status.HTTP_400_BAD_REQUEST)
             else:
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED, detail={'Error':f'Could not access writeable settings.'})
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail={'Error': f'Could not access writeable settings.'})
 
         @app.put("/call")
         def call_by_name(
@@ -107,17 +109,19 @@ class RestApi(gr.basic_block):
                 for name in callbacks:
                     if name not in write_settings:
                         raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST, detail={'Error': f'Function {name} is not a writeable/callable.'})
+                            status_code=status.HTTP_400_BAD_REQUEST, \
+                                detail={'Error': f'Function {name} is not a writeable/callable.'})
                     try:
                         func = getattr(tbself, name)
                         func(callbacks[name])
                     except Exception:
                         raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST, detail={'Error': f'Failed to call function {name}.'})
+                            status_code=status.HTTP_400_BAD_REQUEST, \
+                                detail={'Error': f'Failed to call function {name}.'})
             else:
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED, detail={'Error': f'Could not access callable/writable functions.'})
-
+                    status_code=status.HTTP_401_UNAUTHORIZED, \
+                        detail={'Error': f'Could not access callable/writable functions.'})
 
         self.server_thread = threading.Thread(
             target=uvicorn.run, args=(app,), kwargs={'port': port}, daemon=True)

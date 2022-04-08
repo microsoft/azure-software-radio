@@ -16,6 +16,7 @@ The gr-azure-software-radio Out of Tree (OOT) Module allows users to easily leve
   - [Blob Blocks](#blob-blocks)
   - [Event Hub Blocks](#event-hub-blocks)
   - [DIFI Blocks using the IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard](#difi-blocks-using-the-ieee-isto-std-4900-2021-digital-if-interoperability-standard)
+  - [REST API Block](#rest-api-block)
 - [Frequently Asked Questions](#frequently-asked-questions)
 
 ## Getting Started
