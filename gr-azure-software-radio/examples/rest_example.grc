@@ -76,7 +76,7 @@ blocks:
     port: '8000'
     readable: '[''samp_rate'', ''freq'', ''amplitude'', ''phase'']'
     value: '0'
-    writable: '[''set_freq'', ''amplitude'']'
+    writable: '[''set_freq'', ''set_amplitude'']'
   states:
     bus_sink: false
     bus_source: false
@@ -144,8 +144,8 @@ blocks:
     comment: ''
     note: 'This flowgraph settings can be read and updated using the REST endpoint.
       Read the flowgraph settings using curl -X GET http://<IP>:8000/status. To update
-      the writable settings use curl -X PUT http://<IP>:8000/config -H ''Content-Type:
-      application/json'' -d ''{"amplitude":2}'' '
+      the writable settings use curl -X PUT http://<IP>:8000/call -H ''Content-Type:
+      application/json'' -d ''{"set_amplitude":2, "set_freq":2e3}'' '
   states:
     bus_sink: false
     bus_source: false
