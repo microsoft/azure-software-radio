@@ -168,15 +168,15 @@ The REST API block allows users to get status and configure a running top block 
 
 To get status from a flowgraph, a user can hit the status endpoint as follow
 
-curl -X GET http://<IP>:<port>/status
+``curl -X GET http://<IP>:<port>/status``
 
 To configure or write the exposed variables, the following command
 
-curl -X PUT http://<IP>:<port>/config -H 'Content-Type: application/json' -d '{"<variable>":<value>}
+``curl -X PUT http://<IP>:<port>/config -H 'Content-Type: application/json' -d '{"<variable>":<value>}``
 
 To execute a callback or function within a top block, use the following route
 
-curl -X PUT http://<IP>:<port>/call -H 'Content-Type: application/json' -d '{"<function name>":<parameter>}
+``curl -X PUT http://<IP>:<port>/call -H 'Content-Type: application/json' -d '{"<function name>":<parameter>}``
 
 For a brief tutorial on using this block, see the [REST API Example](./examples/README.md#rest-api-example).
 
