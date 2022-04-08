@@ -10,6 +10,7 @@
 
 import queue
 import uuid
+import json
 
 import azure.core.exceptions as az_exceptions
 from gnuradio import gr
@@ -21,15 +22,17 @@ from azure_software_radio.blob_common import shutdown_blob_service_client
 
 
 class BlobSink(gr.sync_block):
-    """ Write samples out to an Azure Blob.
+    """ Write samples out to an Azure Blob.  Use a Head block to limit the number of samples stored in the file.
 
     This block has multiple ways to authenticate to the Azure blob backend. Users can directly
     specify either a connection string, a URL with an embedded SAS token, or use credentials
     supported by the DefaultAzureCredential class, such as environment variables, a
     managed identity, the az login command, etc.
 
-    This block currently only supports complex64 inputs and only supports block blobs. Page blobs
-    and append blobs are not supported.
+    "Block blobs" are used, page blobs and append blobs are not supported.
+
+    For saving a SigMF recording, set the SigMF param to True and leave off the file extension
+    (.sigmf-data and .sigmf-meta will be automatically added).
 
     Args:
     Input Type: Data type of the sample stream
@@ -50,26 +53,17 @@ class BlobSink(gr.sync_block):
     Retry Total: Total number of Azure API retries to allow before throwing an exception. Higher
         numbers make the block more resilient to intermittent failures, lower numbers help to
         more quickly iteratively debug authentication and permissions issues.
+    SigMF Recording: If True, two files will be created, blobname.sigmf-data and blobname.sigmf-meta.
+        The blobname.sigmf-data will contain the signal, while the blobname.sigmf-meta will contain
+        metadata about the signal, provided as additional block params.
     """
-    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
+    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method, too-many-locals, too-many-branches
     def __init__(self, np_dtype: np.dtype, vlen: int = 1, authentication_method: str = "default",
                  connection_str: str = None, url: str = None, container_name: str = None, blob_name: str = None,
-                 block_len: int = 500000, queue_size: int = 4, retry_total: int = 10):
+                 block_len: int = 500000, queue_size: int = 4, retry_total: int = 10, sigmf: bool = False,
+                 sample_rate: float = 0, center_freq: float = np.nan, author: str = '', description: str = '',
+                 hw_info: str = ''):
         """ Initialize the blob_sink block
-
-        Args:
-            np_dtype (np.dtype class): Numpy data type of each item in the stream
-            vlen (int): Number of items per vector
-            authentication_method (str): See "Auth Method" in class docstring above
-            connection_str (optional, str): See "Connection String" in class docstring above
-            url (optional, str): See "URL" in class docstring above
-            container_name (str): See "Container Name" in class docstring above
-            blob_name (str): See "Blob Name" in class docstring above
-            block_len (int): See "Blob Block Length" in class docstring above
-            queue_size (int, optional): Defaults to 4. How many blocks of data to
-                buffer up before blocking. Larger numbers require more memory overhead
-            retry_total (int, optional): Total number of Azure API retries to allow before throwing
-                an exception
         """
         # work-around the following deprecation in numpy:
         # FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated
@@ -95,6 +89,55 @@ class BlobSink(gr.sync_block):
         self.queue = queue.Queue(maxsize=queue_size)
         self.buf = np.zeros((self.block_len*self.item_size, ), dtype=np.byte)
         self.num_buf_bytes = 0
+        self.log = gr.logger(f"gr_log.{self.symbol_name()}")
+
+        # If user accidently left .sigmf-data or meta file extension, strip it off
+        if sigmf and '.sigmf' in blob_name:
+            blob_name = blob_name.rsplit('.', 1)[0]
+
+        if sigmf:
+            meta_blob_client = self.blob_service_client.get_blob_client(container=container_name,
+                                                                        blob=blob_name + '.sigmf-meta')
+            if np_dtype == np.complex64:
+                datatype_str = 'cf32_le'
+            elif np_dtype == np.float32:
+                datatype_str = 'rf32_le'
+            elif np_dtype == np.int32: # See https://github.com/microsoft/azure-software-radio/issues/67
+                datatype_str = 'ci16_le'
+            elif np_dtype == np.int16:
+                datatype_str = 'ri16_le'
+            elif np_dtype == np.ubyte:
+                datatype_str = 'ru8'
+            else:
+                raise ValueError
+
+            meta_dict = {
+                "global": {
+                    "core:datatype": datatype_str,
+                    "core:sample_rate": float(sample_rate),
+                    "core:version": "1.0.0"  # update me if the time comes
+                },
+                "captures": [
+                    {
+                        "core:sample_start": 0,
+                    }
+                ],
+                "annotations": []
+            }
+            if center_freq is not np.nan:
+                meta_dict["captures"][0]["core:frequency"] = float(center_freq)
+            if hw_info:
+                meta_dict["global"]["core:hw"] = str(hw_info)
+            if author:
+                meta_dict["global"]["core:author"] = str(author)
+            if description:
+                meta_dict["global"]["core:description"] = str(description)
+
+            meta_blob_client.upload_blob(json.dumps(meta_dict, indent=2), overwrite=True)
+            meta_blob_client.close()
+            self.log.info("Meta file upload complete")
+            blob_name = blob_name + '.sigmf-data'
+
         self.blob_client = self.blob_service_client.get_blob_client(container=container_name,
                                                                     blob=blob_name)
 
@@ -102,8 +145,6 @@ class BlobSink(gr.sync_block):
 
         self.first_run = True
         self.blob_is_valid = False
-
-        self.log = gr.logger("log_debug")
 
     def stage_block(self, data: np.array):
         # pylint: disable=fixme

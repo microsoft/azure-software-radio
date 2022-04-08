@@ -10,10 +10,12 @@
 
 
 import queue
+import json
 
 import azure.core.exceptions as az_exceptions
 from gnuradio import gr
 import numpy as np
+import pmt
 
 from azure_software_radio.blob_common import blob_container_info_is_valid, get_blob_service_client
 from azure_software_radio.blob_common import shutdown_blob_service_client
@@ -28,7 +30,7 @@ class BlobSource(gr.sync_block):
     managed identity, the az login command, etc.
 
     This block currently only supports complex64 inputs and has only been tested with block blobs.
-    Page blobs are not supported.
+    Page blobs and append blobs are not supported.
 
     Args:
     Output Type: Data type of the sample stream
@@ -46,27 +48,17 @@ class BlobSource(gr.sync_block):
     Retry Total: Total number of Azure API retries to allow before throwing an exception. Higher
         numbers make the block more resilient to intermittent failures, lower numbers help to
         more quickly iteratively debug authentication and permissions issues.
+    SigMF Recording: Read in a SigMF recording.  The blob name should not include the .sigmf-data extension,
+        the .sigmf-data and .sigmf-meta will get added automatically.  The sample rate and frequency
+        will be added as stream tags to sample 0.  The datatype specified within the meta file is not
+        used; the datatype is set by the Output Type specified above.  The meta file as a whole is
+        printed to console at the beginning of flowgraph execution.
     """
-    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method
+    # pylint: disable=too-many-arguments, too-many-instance-attributes, arguments-differ, abstract-method, too-many-locals
     def __init__(self, np_dtype: np.dtype, vlen: int = 1, authentication_method: str = "default",
                  connection_str: str = None, url: str = None, container_name: str = None, blob_name: str = None,
-                 queue_size: int = 4, retry_total: int = 10, repeat: bool = False):
+                 queue_size: int = 4, retry_total: int = 10, repeat: bool = False, sigmf: bool = False):
         """ Initialize the blob_source block
-
-        Args:
-            np_dtype (np.dtype): Numpy data type of each item in the stream
-            vlen (int): Number of items per vector
-            authentication_method (str): See "Auth Method" in class docstring above
-            connection_str (optional, str): See "Connection String" in class docstring above
-            url (optional, str): See "URL" in class docstring above
-            container_name (str): See "Container Name" in class docstring above
-            blob_name (str): See "Blob Name" in class docstring above
-            queue_size (int, optional): Defaults to 4. How many blocks of data to
-                buffer up before blocking. Larger numbers require more memory overhead
-            retry_total (int, optional): Total number of Azure API retries to allow before throwing
-                an exception
-            repeat (bool): To repeat the file or not.  Currently does not cache locally so repeating
-                will cause additional traffic.
         """
         # work-around the following deprecation in numpy:
         # FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated
@@ -80,17 +72,36 @@ class BlobSource(gr.sync_block):
                                in_sig=None,
                                out_sig=out_sig)
 
-        self.queue = queue.Queue(maxsize=queue_size)
-        self.buf = np.zeros((0, ), dtype=np.byte)
-        self.num_buf_bytes_read = 0
-        self.repeat = repeat
-
         self.blob_service_client = get_blob_service_client(
             authentication_method=authentication_method,
             connection_str=connection_str,
             url=url,
             retry_total=retry_total
         )
+
+        self.queue = queue.Queue(maxsize=queue_size)
+        self.buf = np.zeros((0, ), dtype=np.byte)
+        self.num_buf_bytes_read = 0
+        self.repeat = repeat
+        self.sigmf = sigmf
+        self.log = gr.logger(f"gr_log.{self.symbol_name()}")
+
+        # If user accidently left .sigmf-data or meta file extension, strip it off
+        if sigmf and '.sigmf' in blob_name:
+            blob_name = blob_name.rsplit('.', 1)[0]
+
+        if sigmf:
+            meta_blob_client = self.blob_service_client.get_blob_client(container=container_name,
+                                                                        blob=blob_name + '.sigmf-meta')
+            result_meta = meta_blob_client.download_blob().readall()
+            meta_blob_client.close()
+            self.log.debug(result_meta)
+            meta_dict = json.loads(result_meta)
+            # Stream tags must be written in work() but we will pull out the two values here
+            self.sample_rate = meta_dict['global']['core:sample_rate']
+            self.center_freq = meta_dict["captures"][0].get("core:frequency", 0.0)
+
+            blob_name = blob_name + '.sigmf-data'
 
         self.blob_client = self.blob_service_client.get_blob_client(container=container_name,
                                                                     blob=blob_name)
@@ -103,8 +114,6 @@ class BlobSource(gr.sync_block):
         self.chunk_residue = b''
 
         self.first_run = True
-
-        self.log = gr.logger("log_debug")
 
     def setup_blob_iterator(self):
         ''' get an iterator into the blob object so we can start doing a streaming download
@@ -189,6 +198,16 @@ class BlobSource(gr.sync_block):
             self.blob_auth_and_container_info_is_valid()
             self.blob_iter = self.setup_blob_iterator()
             self.first_run = False
+            if self.sigmf:
+                # Add sample rate and center freq to the first sample as a stream tag
+                self.add_item_tag(0, # Write to output port 0
+                                  self.nitems_written(0), # sample 0
+                                  pmt.intern("sample_rate"),
+                                  pmt.from_float(self.sample_rate))
+                self.add_item_tag(0, # Write to output port 0
+                                  self.nitems_written(0), # sample 0
+                                  pmt.intern("center_freq"),
+                                  pmt.from_float(self.center_freq))
 
         # get a view into the output buffer as a 1D array of bytes, so our code can copy over the data
         # without caring about the actual datatype or vlen in use
