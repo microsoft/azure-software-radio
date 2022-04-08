@@ -10,11 +10,9 @@ parameters:
 -   id: port
     dtype: int
     default: 8000
--   id: paths
+-   id: readable
     dtype: raw
--   id: readables
-    dtype: raw
--   id: writeables
+-   id: writable
     dtype: raw
 
 value: ${value}
@@ -23,6 +21,30 @@ templates:
       import azure_software_radio
     var_make: |+
 
-        self.${id} = ${id} = azure_software_radio.RestApi(self,${port})
+        self.${id} = ${id} = azure_software_radio.RestApi(self,${port},${readable},${writable})
+
+documentation: |
+
+    REST endpoints to configure a top block and get status information.
+
+        The following routes are supported as part of the top block in an unauthenticated mode:
+            - GET http://hostname:<port>/status
+            - GET http://hostname:<port>/config
+            - PUT http://hostname:<port>/config
+            - PUT http://hostname:<port>/call
+
+    Args:
+        Port: The desired server listening port.
+        Read Only Settings: List of allowable read-only settings in the top block.
+        Write Only Settings: List of allowable write-only settings (variables or callbacks) in the top block.
+
+    Example:
+        Port: 8080
+        Read Only Settings: ['samp_rate']
+        Write Only Settings:
+
+        curl -X GET http://<IP>:8080/status
+
+        The above would start a server at port 8080 and expose the sample rate in the top block as a readable status.
 
 file_format: 1

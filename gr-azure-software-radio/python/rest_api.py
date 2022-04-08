@@ -25,7 +25,7 @@ class RestApi(gr.basic_block):
             - GET http://hostname:<port>/status
             - GET http://hostname:<port>/config
             - PUT http://hostname:<port>/config
-            - PATCH http://hostname:<port>/config
+            - PUT http://hostname:<port>/call
 
         Args:
             tbself: This is a reference to the top block self. This gives the rest_api block
@@ -73,18 +73,18 @@ class RestApi(gr.basic_block):
             return config
 
         @app.put("/config")
-        def replace_config_settings(
+        def update_config_settings(
                 settings: dict):
             """
-            Replaces the block's writeable configuration settings
+            Updates the block's writeable configuration settings
             """
             all_settings = dir(tbself)
 
             if write_settings:
                 for name in settings:
-                    if name not in write_settings:
+                    if name not in write_settings or name not in all_settings:
                         raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST)
+                            status_code=status.HTTP_400_BAD_REQUEST, detail={'Error': f'Setting {name} is not a writeable setting.'})
                     try:
                         setattr(tbself, name, settings[name])
                         return settings
@@ -93,7 +93,31 @@ class RestApi(gr.basic_block):
                             status_code=status.HTTP_400_BAD_REQUEST)
             else:
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED)
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail={'Error':f'Could not access writeable settings.'})
+
+        @app.put("/call")
+        def call_by_name(
+                callbacks: dict):
+            """
+            Executes a callable/writable function in the top block
+            """
+            all_settings = dir(tbself)
+
+            if write_settings:
+                for name in callbacks:
+                    if name not in write_settings:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST, detail={'Error': f'Function {name} is not a writeable/callable.'})
+                    try:
+                        func = getattr(tbself, name)
+                        func(callbacks[name])
+                    except Exception:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST, detail={'Error': f'Failed to call function {name}.'})
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail={'Error': f'Could not access callable/writable functions.'})
+
 
         self.server_thread = threading.Thread(
             target=uvicorn.run, args=(app,), kwargs={'port': port}, daemon=True)

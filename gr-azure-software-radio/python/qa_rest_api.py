@@ -30,6 +30,12 @@ class QaRestApi(gr_unittest.TestCase):
         instance = RestApi(self, port)
         self.assertIsNotNone(instance)
 
+    def update_var(self, val):
+        self.val = val
+
+    def update_var1(self, val):
+        self.val1 = val
+
     def test_get_status(self):
         self.check_var1 = 1
         self.check_var2 = '2'
@@ -78,6 +84,21 @@ class QaRestApi(gr_unittest.TestCase):
         res_dict = ast.literal_eval(dict_str)
         self.assertEqual(res_dict['pi_val'], 3.14)
 
+    def test_call_by_name(self):
+        self.val = None
+        port = self.get_free_port()
+        instance = RestApi(self, port, write_settings=['update_var', 'update_var1'])
+        # give server a second to startup
+        time.sleep(1)
+        self.val = 0
+        self.val1 = 0
+        addr_str = 'http://127.0.0.1:' + str(port) + '/call'
+        resp = httpx.Client().put(addr_str, json={"update_var": 3.14, "update_var1": 5.0})
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.val, 3.14)
+        self.assertEqual(self.val1, 5.0)
+
     def test_unauthorized_put_config(self):
         self.pi_val = 0
         port = self.get_free_port()
@@ -104,8 +125,19 @@ class QaRestApi(gr_unittest.TestCase):
             self.assertIsNotNone(resp)
             self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
             dict_str = resp.content.decode("UTF-8")
-            self.assertEqual('fake_val' in dict_str, False)
+            self.assertEqual('Error' in dict_str, True)
 
+    def test_bad_call_by_name(self):
+        self.val = None
+        port = self.get_free_port()
+        instance = RestApi(self, port, write_settings=['update_var'])
+        # give server a second to startup
+        time.sleep(1)
+        self.val = 0
+        addr_str = 'http://127.0.0.1:' + str(port) + '/call'
+        resp = httpx.Client().put(addr_str, json={"update_var2":3.14})
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 if __name__ == '__main__':
     gr_unittest.run(QaRestApi)

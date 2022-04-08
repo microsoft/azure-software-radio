@@ -163,5 +163,23 @@ There are two DIFI blocks (source and sink) as part of this OOT module. The Bit 
 For a brief tutorial on using these blocks, see the [DIFI Examples](./examples/README.md#difi-examples).
 
 
+### REST API Block
+The REST API block allows users to get status and configure a running top block in GNU Radio. It starts a server in the configured port and restricts which settings and variables in a flowgraph are readable, writable or callable.
+
+To get status from a flowgraph, a user can hit the status endpoint as follow
+
+curl -X GET http://<IP>:<port>/status
+
+To configure or write the exposed variables, the following command
+
+curl -X PUT http://<IP>:<port>/config -H 'Content-Type: application/json' -d '{"<variable>":<value>}
+
+To execute a callback or function within a top block, use the following route
+
+curl -X PUT http://<IP>:<port>/call -H 'Content-Type: application/json' -d '{"<function name>":<parameter>}
+
+For a brief tutorial on using this block, see the [REST API Example](./examples/README.md#rest-api-example).
+
+
 ## Frequently Asked Questions
 For a list of common questions, including problems and resolutions, please check our [FAQ](./docs/FAQ.md)
