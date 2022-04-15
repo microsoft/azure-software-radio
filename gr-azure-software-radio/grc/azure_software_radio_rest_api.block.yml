@@ -25,9 +25,9 @@ templates:
 
 documentation: |
 
-    REST endpoints to configure a top block and get status information.
+    Creates REST endpoints to get flowgrpah status, get/set variables, and trigger callbacks.
 
-        The following routes are supported as part of the top block in an unauthenticated mode:
+        The following routes are supported (no authentication is used):
             - GET http://hostname:<port>/status
             - GET http://hostname:<port>/config
             - PUT http://hostname:<port>/config
@@ -35,13 +35,13 @@ documentation: |
 
     Args:
         Port: The desired server listening port.
-        Read Only Settings: List of allowable read-only settings in the top block.
-        Write Only Settings: List of allowable write-only settings (variables or callbacks) in the top block.
+        Read Only Settings: List of allowable read-only settings (variables) in the top block.
+        Write Only Settings: List of allowable write-only settings (variables and/or callbacks) in the top block.
 
     Example:
         Port: 8080
-        Read Only Settings: ['samp_rate']
-        Write Only Settings:
+        Read Only Settings: ['samp_rate', 'freq']
+        Write Only Settings: ['freq']
 
         curl -X GET http://<IP>:8080/status
 

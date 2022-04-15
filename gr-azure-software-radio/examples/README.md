@@ -53,6 +53,6 @@ The Event Hub blocks provide an interface to send and receive events to Azure Ev
 
 
 ## REST API
-The REST API hosts a REST API server which allows getting status from a top block, configuring variables and calling functions as specified in the readable and writable block options in GNU Radio. The following quickstart shows how to use this block.
+The REST API Block hosts a REST API server which allows getting status from a flowgraph, configuring variables, and calling functions as specified in the readable and writable block params. The following quickstart shows how to use this block.
 
 - [Quickstart: Using REST API in GNU Radio](rest_api_quickstart.md)
