@@ -23,8 +23,8 @@ parameters:
 - id: mode
   label: Mode
   dtype: enum
-  options: ['True', 'False']
-  option_labels: ['Paired', 'Standalone']
+  options: ['False', 'True']
+  option_labels: ['Standalone', 'Paired']
 - id: bit_depth
   label: Bit Depth
   dtype: enum
@@ -145,7 +145,7 @@ documentation: |-
      The port number for the socket on the host that the DIFI (VITA) packets will be forwared to
      
      mode:
-     Either standalone or paired. Paired mode is expected to have a DIFI (VITA) source block upstream in the flowgraph, standalone expects no such block, but context packet information must be given
+     Either standalone or paired. Paired mode is expected to have a DIFI (VITA) source block upstream in the flowgraph (on a different port), standalone expects no such block, but context packet information must be given
      
      samples_per_packet:
      The number of samples for DIFI (VITA) data packet (header included) that this block with send out via the udp socket (Cannot exceed the MTU size in bytes)
