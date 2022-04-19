@@ -41,7 +41,7 @@ parameters:
 - id: sample_rate
   label: Sample Rate
   dtype: int
-  default: 100000
+  default: samp_rate
 - id: reference_time_full
   label: Reference Time Full
   dtype: int
