@@ -92,7 +92,7 @@ parameters:
   dtype: enum
   options: ['0', '1', '2']
   option_labels: ['None', 'Manual', 'Min-Max']
-  default: 'Min-Max'
+  default: '2'
 - id: gain
   category: Scaling
   label: Gain
