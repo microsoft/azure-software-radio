@@ -16,6 +16,7 @@ The gr-azure-software-radio Out of Tree (OOT) Module allows users to easily leve
   - [Blob Blocks](#blob-blocks)
   - [Event Hub Blocks](#event-hub-blocks)
   - [DIFI Blocks using the IEEE-ISTO Std 4900-2021: Digital IF Interoperability Standard](#difi-blocks-using-the-ieee-isto-std-4900-2021-digital-if-interoperability-standard)
+  - [REST API Block](#rest-api-block)
 - [Frequently Asked Questions](#frequently-asked-questions)
 
 ## Getting Started
@@ -161,6 +162,24 @@ There are two DIFI blocks (source and sink) as part of this OOT module. The Bit 
 	Note: this block converts from float 32 I and Q down to the specified bit depth for I and Q, which can cause significant quantization error for small signals.
 
 For a brief tutorial on using these blocks, see the [DIFI Examples](./examples/README.md#difi-examples).
+
+
+### REST API Block
+The REST API block allows users to get status and configure a running top block in GNU Radio. It starts a server in the configured port and restricts which settings and variables in a flowgraph are readable, writable or callable.
+
+To get status from a flowgraph, a user can hit the status endpoint as follow
+
+``curl -X GET http://<IP>:<port>/status``
+
+To configure or write the exposed variables, the following command
+
+``curl -X PUT http://<IP>:<port>/config -H 'Content-Type: application/json' -d '{"<variable>":<value>}``
+
+To execute a callback or function within a top block, use the following route
+
+``curl -X PUT http://<IP>:<port>/call -H 'Content-Type: application/json' -d '{"<function name>":<parameter>}``
+
+For a brief tutorial on using this block, see the [REST API Example](./examples/README.md#rest-api-example).
 
 
 ## Frequently Asked Questions
