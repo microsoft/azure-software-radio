@@ -91,32 +91,32 @@ parameters:
   label: Scaling Mode
   dtype: enum
   options: ['0', '1', '2']
-  option_labels: ['None','Manual', 'Min-Max']
-  default: 'None'
+  option_labels: ['None', 'Manual', 'Min-Max']
+  default: 'Min-Max'
 - id: gain
   category: Scaling
   label: Gain
   dtype: real
   default: 1.0
-  hide: ${ ('none' if scaling == 'Manual' else 'all') }
+  hide: ${ ('none' if scaling == '1' else 'all') }
 - id: offset
   category: Scaling
   label: Complex Offset
   dtype: complex
   default: 0
-  hide: ${ ('none' if scaling == 'Manual' else 'all') }
+  hide: ${ ('none' if scaling == '1' else 'all') }
 - id: max_iq
   category: Scaling
   label: Max IQ Value
   dtype: real
   default: 1.0
-  hide: ${ ('none' if scaling == 'Min-Max' else 'all') }
+  hide: ${ ('none' if scaling == '2' else 'all') }
 - id: min_iq
   category: Scaling
   label: Min IQ Value
   dtype: real
   default: -1.0
-  hide: ${ ('none' if scaling == 'Min-Max' else 'all') }
+  hide: ${ ('none' if scaling == '2' else 'all') }
 inputs:
 - label: in
   domain: stream
