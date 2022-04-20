@@ -115,7 +115,7 @@ Now run the flowgraph and you'll see just a single sine wave.  Close the plot, a
 
 <center><img src="images/real_sin.png" width="700"/></center>
 
-As a reference, the completed flowgraph can be found in [flowgraphs/my_first_flowgraph.grc](./flowgraphs/my_first_flowgraph.grc) within this repo.  
+As a reference, the completed flowgraph can be found in [flowgraphs/my_first_flowgraph_complete.grc](./flowgraphs/my_first_flowgraph_complete.grc) within this repo.  
 
 If you would like a more detailed tutorial about creating and operating flowgraphs, please see [this GNU Radio tutorial](https://wiki.gnuradio.org/index.php/Guided_Tutorial_GRC).
 
