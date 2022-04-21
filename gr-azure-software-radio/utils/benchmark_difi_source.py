@@ -1,9 +1,16 @@
-from gnuradio import analog, blocks, gr
-import azure_software_radio
+# Copyright (c) Microsoft Corporation.
+# Licensed under the GNU General Public License v3.0 or later.
+# See License.txt in the project root for license information.
+#
+# pylint: disable=C0301, C0103, C0115
+#
+
 import socket
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+from gnuradio import analog, blocks, gr
+import azure_software_radio
 
 # Params
 samples_per_packet = 4000  # relates to MTU size
@@ -18,7 +25,7 @@ sock_tx.connect(("127.0.0.1", 3334))
 print("Sockets connected")
 
 # DIFI Sink (transmit side) Flowgraph
-class difi_benchmark(gr.top_block):
+class DifiSinkFlowgraph(gr.top_block):
     def __init__(self):
         gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
         samp_rate = 1e5  # mainly just impacts throttle, if there are warnings before the TX portion then this number is too high
@@ -29,7 +36,7 @@ class difi_benchmark(gr.top_block):
         self.connect(self.sig_source, self.throttle)
         self.connect(self.throttle, self.difi_sink)
 
-tb = difi_benchmark()
+tb = DifiSinkFlowgraph()
 
 # Generate and save a bunch of DIFI packets, we start the flowgraph then start recv()'ing
 msgs = []
@@ -48,7 +55,7 @@ sock_rx.close()
 print("Switching to tx")
 
 # DIFI Source (receive side) flowgraph
-class difi_benchmark(gr.top_block):
+class DifiSourceFlowgraph(gr.top_block):
     def __init__(self):
         gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
         self.null_sink = blocks.null_sink(gr.sizeof_gr_complex)
@@ -67,7 +74,7 @@ for trial in range(20):  # monte carlo style
         delay = int((lowest_working_delay - highest_failing_delay)/2)
         # help add some variations between monte carlo runs
         delay += int(np.random.uniform(-100, 100))
-        tb = difi_benchmark()
+        tb = DifiSourceFlowgraph()
 
         # Send DIFI packets
         print("Starting send, delay =", delay)
