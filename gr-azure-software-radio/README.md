@@ -24,12 +24,11 @@ The gr-azure-software-radio Out of Tree (OOT) Module allows users to easily leve
 The following installation instructions will get you up and running with the Azure OOT Module on your local machine.
 
 ### Prerequisites
-This project depends on the GNU Radio 3.9.x runtime and development dependencies. This project does not
-support GNU Radio 3.10 at this time. See the [GNU Radio installation instructions](https://wiki.gnuradio.org/index.php/InstallingGR#From_Binaries) for steps on
+This project depends on the GNU Radio 3.9.x or 3.10.x runtime and development dependencies. See the [GNU Radio installation instructions](https://wiki.gnuradio.org/index.php/InstallingGR#From_Binaries) for steps on
 installing GNU Radio from binaries (note that GNU Radio packaged with Ubuntu 20 is only 3.8). Some package managers do not automatically install all of the development dependencies,
 so you may need to separately install and configure some of them. The Azure software radio OOT module requires the following:
 
-- GnuRadio 3.9.x (not 3.8.x or 3.10.x)
+- GNU Radio 3.9.x or 3.10.x
 - Python 3.8 or greater
 - python3-pip
 - cmake
@@ -67,6 +66,8 @@ make -j4
 sudo make install
 sudo ldconfig
 ```
+
+(If you run into a non-existent path error after `cmake ..`, try recreating your build directory and use `cmake -DCMAKE_FIND_ROOT_PATH=/usr ..` instead)
 
 At this point the OOT module should have been installed, and you should see additional blocks within GNU Radio Companion.
 
