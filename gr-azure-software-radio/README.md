@@ -37,6 +37,9 @@ so you may need to separately install and configure some of them. The Azure soft
 - doxygen
 - pytest
 - pybind11
+- Azure python packages
+- fastapi (REST block)
+- uvicorn (REST block)
 
 See the installation steps below for how to install these dependencies.
 
@@ -52,7 +55,7 @@ resolve the problem.
 
 ```bash
 sudo apt-get install python3-pip cmake liborc-dev doxygen
-sudo pip install pytest pybind11
+sudo pip install pytest pybind11 azure-storage-blob azure-keyvault-secrets azure-identity azure-eventhub fastapi uvicorn
 
 git clone https://github.com/microsoft/azure-software-radio.git
 cd azure-software-radio
