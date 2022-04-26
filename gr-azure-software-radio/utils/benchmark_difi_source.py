@@ -12,11 +12,11 @@
 
 import socket
 import time
+import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 from gnuradio import analog, blocks, gr
 import azure_software_radio
-import argparse
 
 DIFI_HEADER_BYTES = 28 # DIFI packet from our Source block always have 28 overhead bytes (see difi_common.h)
 
@@ -134,4 +134,3 @@ if __name__ == "__main__":
     plt.xlabel("Sample Rate [MHz]")
     plt.ylabel("Samples Received [%]")
     plt.show()
-
