@@ -6,6 +6,7 @@
 #include <gnuradio/io_signature.h>
 #include "difi_sink_cpp_impl.h"
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 namespace gr {
   namespace azure_software_radio {
