@@ -2,7 +2,7 @@
 
 Here we are sharing two assets we have developed to-date. Click on either link to dive in further!
 
-***The Azure software radio Out of Tree Module has moved to the gr-azure project!*** Click below for the new project link.
+***The Azure software radio Out of Tree Module has moved to the [gr-azure](https://github.com/microsoft/gr-azure) project!***
 
 1. [GNU Radio - Azure Out of Tree Module](https://github.com/microsoft/gr-azure)
 2. [Azure software radio Developer Virtual Machine](./pages/devvm.md)
