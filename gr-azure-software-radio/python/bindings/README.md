@@ -1,1 +1,0 @@
-The DIFI source and sink bindings are customized and will not be picked up or work with the gr_mod bind tool. This is due the fact they are templated and the binding from mod tool does not work correclty.
