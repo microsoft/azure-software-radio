@@ -2,19 +2,13 @@
 
 Here we are sharing two assets we have developed to-date. Click on either link to dive in further!
 
+***The Azure software radio Out of Tree Module has moved to the [gr-azure](https://github.com/microsoft/gr-azure) project!***
 
-1. [GNU Radio - Azure Out of Tree Module](./gr-azure-software-radio/README.md)
+1. [GNU Radio - Azure Out of Tree Module](https://github.com/microsoft/gr-azure)
 2. [Azure software radio Developer Virtual Machine](./pages/devvm.md)
 
 We have also prepared a series of [tutorials](./tutorials/README.md) that walk you through setting up and using the Developer VM with the Azure Out of Tree Modules.
 
-## Support  
-
-This project uses [GitHub Issues](https://github.com/microsoft/azure-software-radio/issues) to track bugs and feature requests. Please refer to our [Support Guide](SUPPORT.md#how-to-file-issues-and-get-help) for more details.  
-
-Before filing a new issue, please check our [FAQ](./docs/FAQ.md) for potential solutions to common problems.
-
-Starting with [GNU Radio](https://github.com/gnuradio/gnuradio) maint-3.9, this project will support the same set of [maintenance branches](https://github.com/gnuradio/gnuradio/branches) tracked by GNU Radio.  
 
 ## Contributing
 
